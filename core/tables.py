@@ -1,7 +1,8 @@
 import django_tables2 as tables
-from core.models import rfinv_inv
+from .models import Person
 
-class rfinv_invHTMxTable(tables.Table):
+class PersonTable(tables.Table):
     class Meta:
-        model = rfinv_inv
-        template_name = "tables/bootstrap_htmx.html"
+        model = Person
+        template_name = "django_tables2/bootstrap.html"
+        fields = ("name", )        
