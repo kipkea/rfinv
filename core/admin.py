@@ -2,7 +2,7 @@ from django.contrib import admin
 
 # Register your models here.
 
-from .models import rfinv_loc,rfinv_inv,rfinv_check
+from .models import rfinv_loc,rfinv_inv,rfinv_check,Person
 
 """
 admin.site.register(rfinv_loc)
@@ -26,6 +26,10 @@ class rfinv_invAdmin(admin.ModelAdmin):
 @admin.register(rfinv_check)    
 class rfinv_checkAdmin(admin.ModelAdmin):
     list_display = ('Chk_ID','Inv_ID','Loc_ID','Chk_Time')        
+    
+@admin.register(Person)    
+class PersonAdmin(admin.ModelAdmin):
+    list_display = ('name',)        
     
 """
 @admin.register(tbAccount)
