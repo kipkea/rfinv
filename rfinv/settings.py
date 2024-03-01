@@ -13,9 +13,23 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 from pathlib import Path
 import os
 
+import sys
+from datetime import datetime, timedelta
+import django
+from django.utils.translation import gettext
+django.utils.translation.ugettext = gettext
+
+
+# Initialise environment variables
+import environ
+env = environ.Env()
+environ.Env.read_env()
+
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 CORE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+PROJECT_ROOT = os.path.dirname(__file__)
 #TEMPLATE_DIR = os.path.join(CORE_DIR, "templates")  # ROOT dir for templates
 
 # Quick-start development settings - unsuitable for production
@@ -41,6 +55,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'core',
     'django_tables2',
+    "rest_framework",
 ]
 
 MIDDLEWARE = [
@@ -59,7 +74,8 @@ ROOT_URLCONF = 'rfinv.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')],
+        #'DIRS': [os.path.join(BASE_DIR, 'templates')],
+        'DIRS': [BASE_DIR / 'templates'], # here
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -72,8 +88,11 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'rfinv.wsgi.application'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = '/media/'
 
+WSGI_APPLICATION = 'rfinv.wsgi.application'
+#ASGI_APPLICATION = 'rfinv.asgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
@@ -108,9 +127,11 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+#LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'th-TH'
 
-TIME_ZONE = 'UTC'
+#TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Bangkok'
 
 USE_I18N = True
 
@@ -127,6 +148,22 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-#rfinv
-import os
-STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
+
+REST_FRAMEWORK = {
+    # Use Django's standard `django.contrib.auth` permissions,
+    # or allow read-only access for unauthenticated users.
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
+    ]
+}
+
+# Static files (CSS, JavaScript, Images)
+# https://docs.djangoproject.com/en/5.0/howto/static-files/
+#STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+STATIC_ROOT = os.path.join(PROJECT_ROOT , 'static')
+STATIC_URL = "/static/"
+
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+    #"/var/www/static/",
+]
