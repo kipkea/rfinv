@@ -40,8 +40,8 @@ router.register(r'users', UserViewSet)
 urlpatterns = [
     path('', include(router.urls)),
     path('admin/', admin.site.urls),
-    #path("people/", PersonListView.as_view()),
-    #path('api-auth/', include('rest_framework.urls'),
-    path('api-auth/', include('rest_framework.urls', namespace='rest_framework'))    
+    path('api/', include('rvapi.urls', namespace='rvapi')),
+    path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
+    
 ]
 

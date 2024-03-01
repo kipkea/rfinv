@@ -30,12 +30,16 @@ class rfinv_loc(models.Model):
         return str(self.Loc_ID)  + " : " + str(self.Loc_Name)
     
 class rfinv_inv(models.Model):
-    Inv_ID = models.CharField(max_length=255,primary_key=True, editable=True, unique=True)
-    Loc_ID = models.ForeignKey(rfinv_loc, on_delete=models.CASCADE, related_name='InvLocationID') 
+    Inv_ID = models.AutoField(primary_key=True, auto_created = True,editable=True, unique=True) 
     Inv_Name = models.CharField(max_length=255, blank = True, null = True)
+    Inv_Created = models.DateTimeField(auto_now_add=True)
+    Inv_Modified = models.DateTimeField(auto_now=True)
+    RFCode = models.CharField(max_length=255, blank = True, null = True)
+    
+    #เอาไว้เก็บสถานที่เก็บสุดท้าย
     Inv_Last_Check_Time = models.DateTimeField(auto_now_add=True)
     Inv_Last_Loc = models.CharField(max_length=255, blank = True, null = True)
-    
+   
     class Meta:
         ordering = ('Inv_ID',)
         
@@ -44,8 +48,8 @@ class rfinv_inv(models.Model):
     
 class rfinv_check(models.Model):
     Chk_ID = models.AutoField(primary_key=True, editable=True, auto_created = True, unique=True)
-    Inv_ID = models.ForeignKey(rfinv_inv, on_delete=models.CASCADE, related_name='ChkInventoryID') 
-    Loc_ID = models.ForeignKey(rfinv_loc, on_delete=models.CASCADE, related_name='ChkLocationID') 
+    Inv_ID = models.ForeignKey(rfinv_inv, on_delete=models.CASCADE, related_name='Chk_Inv') 
+    Loc_ID = models.ForeignKey(rfinv_loc, on_delete=models.CASCADE, related_name='Chk_Location') 
     Chk_Time = models.DateTimeField(auto_now_add=True)
     
     class Meta:
@@ -55,5 +59,3 @@ class rfinv_check(models.Model):
         return str(self.Chk_ID)  
             
     
-class Person(models.Model):
-    name = models.CharField(max_length=100, verbose_name="full name")
