@@ -7,16 +7,27 @@ from rest_framework import status
 from .models import rfinv_loc  
 from .serializers import rfinv_locSL
 from django.shortcuts import get_object_or_404  
+from rest_framework.permissions import IsAuthenticated
+from rest_framework_api_key.permissions import HasAPIKey
 
 # Create your views here.  
-  
+class rfinv_locViewAll(APIView):  
+    permission_classes = [ HasAPIKey | IsAuthenticated ]
+
+    def get(self, request):    
+        result = rfinv_loc.objects.all()  
+        serializers = rfinv_locSL(result, many=True)  
+        return Response({'status': 'success', "items":serializers.data}, status=200)  
+      
 class rfinv_locView(APIView):  
-    def get(self, request, id):  
-        result = rfinv_loc.objects.get(Loc_ID=id)  
+    permission_classes = [ HasAPIKey | IsAuthenticated ]
+
+    def get(self, request, id):    
+        result = rfinv_loc.objects.get(Loc_ID=id)        
         if id:  
             serializers = rfinv_locSL(result)  
             return Response({'success': 'success', "items":serializers.data}, status=200)  
-  
+        
         result = rfinv_loc.objects.all()  
         serializers = rfinv_locSL(result, many=True)  
         return Response({'status': 'success', "items":serializers.data}, status=200)  

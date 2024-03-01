@@ -57,6 +57,7 @@ INSTALLED_APPS = [
     #'django_tables2',
     "rest_framework",
     'rvapi',
+    'rest_framework_api_key',
 ]
 
 MIDDLEWARE = [
@@ -151,6 +152,7 @@ REST_FRAMEWORK = {
         #'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly',
         #'rest_framework.permissions.DjangoModelPermissions',
         'rest_framework.permissions.IsAuthenticated',
+        'rest_framework_api_key.permissions.HasAPIKey',
     ]
 }
 
@@ -172,3 +174,5 @@ MEDIA_URL = '/media/'
 STATICFILES_DIRS = [
     BASE_DIR / "mystatic",
 ]
+
+API_KEY_CUSTOM_HEADER = "HTTP_X_API_KEY"
