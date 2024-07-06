@@ -37,11 +37,21 @@ class UserViewSet(viewsets.ModelViewSet):
 router = routers.DefaultRouter()
 router.register(r'users', UserViewSet)
 
+
+
+from rest_framework_swagger.views import get_swagger_view
+from rest_framework.documentation import include_docs_urls
+
+schema_view = get_swagger_view(title="RFInv API")
+
+
+
 urlpatterns = [
     path('', include(router.urls)),
     path('admin/', admin.site.urls),
     path('api/', include('rvapi.urls', namespace='rvapi')),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
-    
+    path(r"swagger-docs/", schema_view),
+    path(r"docs/", include_docs_urls(title="RFInv API")),    
 ]
 

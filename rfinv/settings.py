@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     "rest_framework",
     'rvapi',
     'rest_framework_api_key',
+    'rest_framework_swagger',
 ]
 
 MIDDLEWARE = [
@@ -153,15 +154,17 @@ REST_FRAMEWORK = {
         #'rest_framework.permissions.DjangoModelPermissions',
         'rest_framework.permissions.IsAuthenticated',
         'rest_framework_api_key.permissions.HasAPIKey',
-    ]
+    ],
+    'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',
 }
+
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 #STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 #dev
-STATIC_ROOT = os.path.join(BASE_DIR , 'static')
+STATIC_ROOT = os.path.join(BASE_DIR , 'mystatic')
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 #aws
@@ -172,7 +175,18 @@ STATIC_URL = "/static/"
 MEDIA_URL = '/media/'
 
 STATICFILES_DIRS = [
-    BASE_DIR / "mystatic",
+    BASE_DIR / "static",
+    #"/var/www/static/",   #aws
 ]
 
 API_KEY_CUSTOM_HEADER = "HTTP_X_API_KEY"
+
+
+TEMPLATE_CONTEXT_PROCESSORS = (
+    'django.contrib.auth.context_processors.auth',
+    'django.core.context_processors.debug',
+    'django.core.context_processors.i18n', # this one
+    'django.core.context_processors.request',
+    'django.core.context_processors.static',
+    'django.contrib.messages.context_processors.messages',  
+)
