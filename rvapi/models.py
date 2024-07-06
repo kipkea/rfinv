@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 # Create your models here.
 
@@ -19,43 +20,51 @@ class Product(models.Model):
         return self.name
 '''
 
-class rfinv_loc(models.Model):
-    Loc_ID = models.CharField(max_length=255,primary_key=True, editable=True, unique=True)
-    Loc_Name = models.CharField(max_length=255, blank = True, null = True)
+
+          
     
-    class Meta:
-        ordering = ('Loc_ID',)
-        
+class RFIDTag(models.Model):
+    RFID = models.CharField(max_length=100, unique=True)
+    is_location = models.BooleanField(default=False)
+
+    recorded_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    recorded_at = models.DateTimeField(auto_now_add=True)
+
     def __str__(self):
-        return str(self.Loc_ID)  + " : " + str(self.Loc_Name)
+        return self.RFID
+
+class Location(models.Model):
+    rfid_tag = models.OneToOneField(RFIDTag, on_delete=models.CASCADE)
+    name = models.CharField(max_length=255, blank = True, null = True)
+    recorded_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    recorded_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ('rfid_tag',)
+
+    def __str__(self):
+        return self.name
     
-class rfinv_inv(models.Model):
-    Inv_ID = models.AutoField(primary_key=True, auto_created = True,editable=True, unique=True) 
-    Inv_Name = models.CharField(max_length=255, blank = True, null = True)
-    Inv_Created = models.DateTimeField(auto_now_add=True)
-    Inv_Modified = models.DateTimeField(auto_now=True)
-    RFCode = models.CharField(max_length=255, blank = True, null = True)
-    
+class Inventory(models.Model):
+    rfid_tag = models.OneToOneField(RFIDTag, on_delete=models.CASCADE)
+    name = models.CharField(max_length=255)
+    recorded_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    recorded_at = models.DateTimeField(auto_now_add=True)
+
     #เอาไว้เก็บสถานที่เก็บสุดท้าย
-    Inv_Last_Check_Time = models.DateTimeField(auto_now_add=True)
-    Inv_Last_Loc = models.CharField(max_length=255, blank = True, null = True)
-   
-    class Meta:
-        ordering = ('Inv_ID',)
-        
+    Inv_Last_Check_Time = models.DateTimeField(auto_now_add=True, blank = True, null = True)
+    Inv_Last_Loc = models.ForeignKey(Location, on_delete=models.SET_NULL, null=True, blank = True,)
+
     def __str__(self):
-        return str(self.Inv_ID)  + " : " + str(self.Inv_Name)
-    
-class rfinv_check(models.Model):
-    Chk_ID = models.AutoField(primary_key=True, editable=True, auto_created = True, unique=True)
-    Inv_ID = models.ForeignKey(rfinv_inv, on_delete=models.CASCADE, related_name='Chk_Inv') 
-    Loc_ID = models.ForeignKey(rfinv_loc, on_delete=models.CASCADE, related_name='Chk_Location') 
-    Chk_Time = models.DateTimeField(auto_now_add=True)
-    
-    class Meta:
-        ordering = ('Chk_ID',)
-        
-    def __str__(self):
-        return str(self.Chk_ID)  
-            
-    
+        return self.name
+
+class Inspection(models.Model):
+    rfid_tags = models.ManyToManyField(RFIDTag)
+    inspected_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    inspected_at = models.DateTimeField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        location_count = self.rfid_tags.filter(is_location=True).count()
+        if location_count > 1:
+            raise ValueError("Multiple locations in one inspection are not allowed.")
+        super().save(*args, **kwargs)

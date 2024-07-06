@@ -163,21 +163,25 @@ REST_FRAMEWORK = {
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 #STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
+#static_root ที่ตั้ง file static ใน server 
 #dev
-STATIC_ROOT = os.path.join(BASE_DIR , 'mystatic')
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+STATIC_ROOT = os.path.join(BASE_DIR , 'root_static')
+MEDIA_ROOT = os.path.join(BASE_DIR, 'root_media')
 
 #aws
 #STATIC_ROOT = '/var/www/static'
 #MEDIA_ROOT = '/var/www/media'
 
+#เป็น folder ที่เก็บ custom file ---> static_root
+STATICFILES_DIRS = [
+    BASE_DIR / "assets",        #custom
+    #BASE_DIR / "root_static",   #dev
+    #"/var/www/static/",        #aws
+]
+
+#global url อ้างอิงได้จาก tags {% load static %}
 STATIC_URL = "/static/"
 MEDIA_URL = '/media/'
-
-STATICFILES_DIRS = [
-    BASE_DIR / "static",
-    #"/var/www/static/",   #aws
-]
 
 API_KEY_CUSTOM_HEADER = "HTTP_X_API_KEY"
 

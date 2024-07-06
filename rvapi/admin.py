@@ -2,16 +2,16 @@ from django.contrib import admin
 
 # Register your models here.
 
-from .models import rfinv_loc,rfinv_inv,rfinv_check
+from .models import RFIDTag, Location, Inventory, Inspection
 
 """
 admin.site.register(rfinv_loc)
 admin.site.register(rfinv_inv)
 admin.site.register(rfinv_check)
 """
-@admin.register(rfinv_loc)
-class rfinv_locAdmin(admin.ModelAdmin):
-    list_display = ('Loc_ID','Loc_Name')
+@admin.register(RFIDTag)
+class RFIDTagAdmin(admin.ModelAdmin):
+    list_display = ('RFID','is_location')
     #list_filter = ('accType')
     #search_fields = ('accCode','accName')
     #prepopulated_fields = {'accName':('accCode')}
@@ -19,15 +19,16 @@ class rfinv_locAdmin(admin.ModelAdmin):
     #date_hierarchy = ('CreateDate')
     #ordering = ('accCode')
 
-@admin.register(rfinv_inv)
-class rfinv_invAdmin(admin.ModelAdmin):
-    list_display = ('Inv_ID','Inv_Name','Inv_Created','Inv_Modified','Inv_Last_Check_Time','Inv_Last_Loc')
+@admin.register(Location)
+class LocationAdmin(admin.ModelAdmin):
+    list_display = ('rfid_tag','name','recorded_by','recorded_at',)
     
-@admin.register(rfinv_check)    
-class rfinv_checkAdmin(admin.ModelAdmin):
-    list_display = ('Chk_ID','Inv_ID','Loc_ID','Chk_Time')        
+@admin.register(Inventory)    
+class InventoryAdmin(admin.ModelAdmin):
+    list_display = ('rfid_tag','name','recorded_by','recorded_at','Inv_Last_Check_Time','Inv_Last_Loc',)
     
-        
+admin.site.register(Inspection)
+
 """
 class rfinv_loc(models.Model):
     Loc_ID = models.CharField(max_length=255,primary_key=True, editable=True, unique=True)

@@ -3,10 +3,10 @@ import requests
 
 #dev
 url="http://localhost:8000/api/basic/"
-key = "VfixmvGp.qqBqOzM6WKT0tFXYNF3RKMATK6WqeX8I"
+key = "vaGkQQur.OkotzgLTEDFuXwzZrUA1oMUH7iKWDugW"
 
 #BeeComp
-#key = "KvXlXwDg.YdXZI2D9YNomiTN84qqNQ3eEpVvrgmhg"
+#key = "lR95LKJ5.bY6X3kf2sIgBIklwLnZ18l7RbwTNllBF"
 
 #aws
 #url="http://ec2-52-20-131-209.compute-1.amazonaws.com/api/basic/"

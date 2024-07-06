@@ -1,5 +1,6 @@
 from rest_framework import serializers  
-from .models import rfinv_loc, rfinv_inv ,rfinv_check  
+#from .models import rfinv_loc, rfinv_inv ,rfinv_check  
+from .models import RFIDTag, Location, Inventory, Inspection
   
 '''
 class StudentSerializer(serializers.ModelSerializer):  
@@ -18,13 +19,35 @@ class StudentSerializer(serializers.ModelSerializer):
     Loc_ID = models.CharField(max_length=255,primary_key=True, editable=True, unique=True)
     Loc_Name = models.CharField(max_length=255, blank = True, null = True)
 '''
-class rfinv_locSL(serializers.ModelSerializer):
-    Loc_ID = serializers.CharField(max_length=255, required=True)
-    Loc_Name= serializers.CharField(max_length=255)
+class RFIDTag_SL(serializers.ModelSerializer):
+    RFID = serializers.CharField(max_length=255, required=True)
+    is_location = serializers.BooleanField(default=False)
 
     class Meta:
-        model = rfinv_loc
+        model = RFIDTag
         fields = ('__all__')
+
+
+class Location_SL(serializers.ModelSerializer):
+    rfid_tag = RFIDTag_SL()
+
+    class Meta:
+        model = Location
+        fields = '__all__'
+
+class Inventory_SL(serializers.ModelSerializer):
+    rfid_tag = RFIDTag_SL()
+
+    class Meta:
+        model = Inventory
+        fields = '__all__'
+
+class Inspection_SL(serializers.ModelSerializer):
+    rfid_tags = RFIDTag_SL(many=True)
+
+    class Meta:
+        model = Inspection
+        fields = '__all__'
 
 '''
     def create(self, validated_data):  
