@@ -59,16 +59,19 @@ INSTALLED_APPS = [
     'rvapi',
     'rest_framework_api_key',
     'rest_framework_swagger',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    
 ]
 
 ROOT_URLCONF = 'rfinv.urls'
@@ -92,6 +95,11 @@ TEMPLATES = [
 ]
 
 
+#CORS_ORIGIN_WHITELIST
+CORS_ORIGIN_WHITELIST = (
+    'http://localhost:8000',
+    
+)
 
 WSGI_APPLICATION = 'rfinv.wsgi.application'
 #ASGI_APPLICATION = 'rfinv.asgi.application'
