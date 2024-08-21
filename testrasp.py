@@ -8,6 +8,8 @@ import requests
 #dev
 url="http://localhost:8000/api/basic/"
 key = "vaGkQQur.OkotzgLTEDFuXwzZrUA1oMUH7iKWDugW"
+#API key for keaCom is: swQuMMgt.vh1nQPMnHmNtClcTQM5DOcpjhHv4X0RA
+key = "swQuMMgt.vh1nQPMnHmNtClcTQM5DOcpjhHv4X0RA"
 
 #BeeComp
 #key = "lR95LKJ5.bY6X3kf2sIgBIklwLnZ18l7RbwTNllBF"
