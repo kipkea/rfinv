@@ -2,7 +2,7 @@ from django.contrib import admin
 
 # Register your models here.
 
-from .models import RFIDTag, Location, Inventory, Inspection, InspectionTag
+from .models import RFIDTag, Location, Inventory, Inspection
 
 """
 admin.site.register(rfinv_loc)
@@ -27,14 +27,19 @@ class LocationAdmin(admin.ModelAdmin):
 @admin.register(Inventory)    
 class InventoryAdmin(admin.ModelAdmin):
     list_display = ('rfid_tag','name','recorded_by','recorded_at','Inv_Last_Check_Time','Inv_Last_Loc',)
-    
-@admin.site.register(Inspection)
-class InventoryAdmin(admin.ModelAdmin):
+
+
+@admin.register(Inspection)
+class InspectionAdmin(admin.ModelAdmin):
       #list_display = '__ALL__'
-                      
-@admin.site.register(InspectionTag)
+      list_display = ('inspected_at','inspected_by',)
+'''                      
+@admin.register(InspectionTag)
 class InventoryAdmin(admin.ModelAdmin):
       list_display = '__ALL__'
+      
+'''    
+      
 """
 class rfinv_loc(models.Model):
     Loc_ID = models.CharField(max_length=255,primary_key=True, editable=True, unique=True)

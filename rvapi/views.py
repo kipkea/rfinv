@@ -40,6 +40,7 @@ class ProductViewSet(viewsets.ModelViewSet):
     queryset = Inventory.objects.all()
     serializer_class = Inventory_SL
 
+
 class InspectionViewSet(viewsets.ModelViewSet):
     permission_classes = [ HasAPIKey | IsAuthenticated ]
     
@@ -55,6 +56,7 @@ class InspectionViewSet(viewsets.ModelViewSet):
         ).distinct()
         serializer = Inventory_SL(missing_items, many=True)
         return Response(serializer.data)
+     
          
 '''
 class LocationView(APIView):  

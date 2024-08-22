@@ -31,7 +31,8 @@ class RFIDTag(models.Model):
     recorded_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        db_table = "RFIDTag"
+        #db_table = "RFIDTag"
+        ordering = ('RFID',)        
         
     def __str__(self):
         return self.RFID
@@ -43,7 +44,7 @@ class Location(models.Model):
     recorded_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        db_table = "Location"
+        #db_table = "Location"
         ordering = ('rfid_tag',)        
 
     def __str__(self):
@@ -60,11 +61,13 @@ class Inventory(models.Model):
     Inv_Last_Loc = models.ForeignKey(Location, on_delete=models.SET_NULL, null=True, blank = True,)
 
     class Meta:
-        db_table = ('Inventory',)
+        #db_table = ('Inventory',)
+        ordering = ('rfid_tag',)        
 
     def __str__(self):
         return self.name
 
+'''
 class InspectionTag(models.Model):
     inspection = models.ForeignKey('Inspection', on_delete=models.CASCADE)
     rfid_tag = models.ForeignKey(RFIDTag, on_delete=models.CASCADE)
@@ -76,23 +79,24 @@ class InspectionTag(models.Model):
 
     def __str__(self):
         return f"{self.rfid_tag.rfid} - {self.inspected_at}"
-    
+'''   
+
 class Inspection(models.Model):
-    #rfid_tags = models.ManyToManyField(RFIDTag)
-    rfid_tags = models.ManyToManyField(RFIDTag, through='InspectionTag')
+    rfid_tags = models.ManyToManyField(RFIDTag)
+    #rfid_tags = models.ManyToManyField(RFIDTag, through='InspectionTag')
     inspected_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     inspected_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        db_table = ('Inspection',)
+        #db_table = ('Inspection',)
+        ordering = ('inspected_at',)   
         
     def save(self, *args, **kwargs):
         location_count = self.rfid_tags.filter(is_location=True).count()
         if location_count > 1:
             raise ValueError("Multiple locations in one inspection are not allowed.")
-        super().save(*args, **kwargs)
+        super(Inspection,self).save(*args, **kwargs)
         
     def __str__(self):
         return f"Inspection on {self.inspected_at} by {self.inspected_by}"    
 
-      

@@ -182,9 +182,9 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'root_media')
 
 #เป็น folder ที่เก็บ custom file ---> static_root
 STATICFILES_DIRS = [
-    BASE_DIR / "assets",        #custom
-    #BASE_DIR / "root_static",   #dev
-    #"/var/www/static/",        #aws
+    BASE_DIR / "assets"        #custom
+    #BASE_DIR / "root_static"   #dev
+    #"/var/www/static/"       #aws
 ]
 
 #global url อ้างอิงได้จาก tags {% load static %}

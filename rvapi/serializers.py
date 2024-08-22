@@ -1,7 +1,6 @@
 from rest_framework import serializers  
 #from .models import rfinv_loc, rfinv_inv ,rfinv_check  
 from .models import RFIDTag, Location, Inventory, Inspection
-  
 '''
 class StudentSerializer(serializers.ModelSerializer):  
     first_name = serializers.CharField(max_length=200, required=True)  
@@ -42,12 +41,14 @@ class Inventory_SL(serializers.ModelSerializer):
         model = Inventory
         fields = '__all__'
 
+
 class Inspection_SL(serializers.ModelSerializer):
     rfid_tags = RFIDTag_SL(many=True)
 
     class Meta:
         model = Inspection
         fields = '__all__'
+       
 
 '''
     def create(self, validated_data):  
