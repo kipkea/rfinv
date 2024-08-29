@@ -33,12 +33,9 @@ class InventoryAdmin(admin.ModelAdmin):
 class InspectionAdmin(admin.ModelAdmin):
       #list_display = '__ALL__'
       list_display = ('inspected_at','inspected_by',)
-'''                      
-@admin.register(InspectionTag)
-class InventoryAdmin(admin.ModelAdmin):
-      list_display = '__ALL__'
       
-'''    
+
+
       
 """
 class rfinv_loc(models.Model):

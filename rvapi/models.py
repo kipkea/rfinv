@@ -50,7 +50,7 @@ class Location(models.Model):
     def __str__(self):
         return self.name
     
-class Inventory(models.Model):
+class Inventory(models.Model): #res
     rfid_tag = models.OneToOneField(RFIDTag, on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
     recorded_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
@@ -66,24 +66,11 @@ class Inventory(models.Model):
 
     def __str__(self):
         return self.name
+ 
 
-'''
-class InspectionTag(models.Model):
-    inspection = models.ForeignKey('Inspection', on_delete=models.CASCADE)
-    rfid_tag = models.ForeignKey(RFIDTag, on_delete=models.CASCADE)
-    inspected_at = models.DateTimeField(auto_now_add=True)
-    note = models.TextField(blank=True, null=True)
-
-    class Meta:
-        db_table = ('InspectionTag',)
-
-    def __str__(self):
-        return f"{self.rfid_tag.rfid} - {self.inspected_at}"
-'''   
-
-class Inspection(models.Model):
-    rfid_tags = models.ManyToManyField(RFIDTag)
-    #rfid_tags = models.ManyToManyField(RFIDTag, through='InspectionTag')
+class Inspection(models.Model):  #staff
+    #rfid_tags = models.ManyToManyField(RFIDTag)
+    Ins_invs = models.ManyToManyField(Inventory, related_name='InvTags')
     inspected_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     inspected_at = models.DateTimeField(auto_now_add=True)
 
@@ -92,7 +79,7 @@ class Inspection(models.Model):
         ordering = ('inspected_at',)   
         
     def save(self, *args, **kwargs):
-        location_count = self.rfid_tags.filter(is_location=True).count()
+        location_count = self.Ins_invs.Inventory.rfid_tag.filter(is_location=True).count()
         if location_count > 1:
             raise ValueError("Multiple locations in one inspection are not allowed.")
         super(Inspection,self).save(*args, **kwargs)
