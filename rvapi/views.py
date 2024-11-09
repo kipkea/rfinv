@@ -50,6 +50,7 @@ class InspectionViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'])
     def missing_items(self, request):
         threshold_date = timezone.now() - timezone.timedelta(days=30)
+        #print(threshold_date)
         missing_items = Inventory.objects.filter(
             Q(rfid_tag__is_location=False) & 
             ~Q(rfid_tag__inspection__inspected_at__gte=threshold_date)
