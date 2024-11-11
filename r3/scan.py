@@ -58,21 +58,22 @@ ROW_4 = 16
 COL_PINS = [5, 22, 27, 17] # BCM numbering
 ROW_PINS = [23, 24, 25, 16] # BCM numbering
 
-items = []
+global Items 
 
 def sys_cmd(CMD):
     ser.write(CMD)
     time.sleep(0.1)     
 
 def run_cmd(CMD):
+    global Items
     print("Send command : ",CMD)
     ser.write(CMD)
     time.sleep(0.1)     
     while ser.inWaiting() > 0:
         x = ser.readline().strip()
-        if x not in items and len(x)>10:
-            items.append(x)
-            print("items ",len(items),' is ',x)
+        if x not in Items and len(x)>10:
+            Items.append(x)
+            print("Items ",len(Items),' is ',x)
 
 def run_cmd2(CMD):
     print("Send command : ",CMD)
@@ -81,11 +82,12 @@ def run_cmd2(CMD):
         time.sleep(0.1)     
         while ser.inWaiting() > 0:
             x = ser.readline().strip()
-            if x not in items and len(x)>10:
-                items.append(x)
-                print("items ",len(items),' is ',x)
+            if x not in Items and len(x)>10:
+                Items.append(x)
+                print("Items ",len(Items),' is ',x)
 
 def print_key(key):
+    global Items
     print(f"Received key from interrupt:: {key}")
     match key:
         case 13:
@@ -99,10 +101,10 @@ def print_key(key):
         case 6:#อ่านเป็นชุด
             run_cmd(cmd_MQ_EPC)  
         case 15:#reset items
-            items = []
+            Items = []
             print("Reset items")
         case 11:#List items
-            print(len(items),' items = ',items)
+            print(len(Items),' items = ',Items)
         case 16:
             exit()
         case _:
@@ -111,6 +113,7 @@ def print_key(key):
 
 try:
     #init cmd
+    Items=[]
     sys_cmd(cmd_Reader_Power_Max)
 
     factory = rpi_gpio.KeypadFactory()
