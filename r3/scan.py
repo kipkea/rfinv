@@ -6,6 +6,8 @@ import serial
 import os, json
 import requests
 
+clear = lambda: os.system('clear')
+
 RFID_EN_PIN = 4
 
 GPIO.setwarnings(False)
@@ -18,19 +20,26 @@ GPIO.output(RFID_EN_PIN, GPIO.HIGH)
 
 #port = '/dev/ttyAMA0'
 port = '/dev/ttyS0'
-ser = serial.Serial(port,38400,8)
+buadrate = 38400
+#buadrate = 57600
+#buadrate = 115200
+
+ser = serial.Serial(port,buadrate,8)
 ser.port = port
-ser.baudrate = 38400
+ser.baudrate = buadrate
 time.sleep(0.2)
 
-cmd_fw_version = b'\x0A\x56\x0D'
-cmd_reader_id = b'\x0A\x53\x0D'
-cmd_Q_EPC = b'\x0A\x51\x0D'
-cmd_MQ_EPC = b'\x0A\x55\x0D'
+cmd_fw_version = b'\x0A\x56\x0D'    #<LF>V<CR>
+cmd_reader_id = b'\x0A\x53\x0D'     #<LF>S<CR>
+cmd_Q_EPC = b'\x0A\x51\x0D'         #<LF>Q<CR>
+cmd_MQ_EPC = b'\x0A\x55\x0D'        #<LF>U<CR>
 #read power 00 - 1B 27 level -2 to 25 db
-#0A 4E 30 2C 30 30 0D -- -2
-#0A 4E 30 2C 31 42 0D -- -2
+#0A 4E 30 2C 30 30 0D -- -2         #<LF>N0,00<CR>
+#0A 4E 30 2C 31 42 0D -- 25         #<LF>N0,1B<CR>
+
 cmd_Reader_Power_Max = b'\x0A\x4E\x30\x2C\x31\x42\x0D'
+cmd_Reader_Power_Mid = b'\x0A\x4E\x30\x2C\x30\x0F\x0D'
+cmd_Reader_Power_Min = b'\x0A\x4E\x30\x2C\x30\x30\x0D'
 
 KEYPAD = [
     [1, 2, 3, 4],
@@ -60,25 +69,19 @@ COL_PINS = [5, 22, 27, 17] # BCM numbering
 ROW_PINS = [23, 24, 25, 16] # BCM numbering
 
 global Items 
+global INV
 
-#API key for KeaPC is: 8yArxdsF.E4viD1uo4yLSibw0QqI5Vno4KPJ6b8hO
-#API key for keaCom is: swQuMMgt.vh1nQPMnHmNtClcTQM5DOcpjhHv4X0RA
- 
+
 #dev
-url="http://10.35.117.143:8000/api/basic/"
-key = "vaGkQQur.OkotzgLTEDFuXwzZrUA1oMUH7iKWDugW"
-#API key for keaCom is: swQuMMgt.vh1nQPMnHmNtClcTQM5DOcpjhHv4X0RA
-key = "swQuMMgt.vh1nQPMnHmNtClcTQM5DOcpjhHv4X0RA"
-#API Key for PI3
+APISERVER = "192.168.1.5:8000"
 key = "TM4fc8ew.yIeDMRVam9qvQvyGr68n3EpXirAdwv5h"
 
 #aws
-#url="http://ec2-52-20-131-209.compute-1.amazonaws.com/api/basic/"
-#key = "fS6yn9J2.V0nZcnDAG5Jf6uZHafXQa3R1a2aqSJbe"
+#APISERVER = "ec2-52-20-131-209.compute-1.amazonaws.com"
+#key = "cW0QbZy6.mQyu31pBYPbsQomB8GKQwGuVBqnGs0aP"
 
-#APISERVER = "192.168.1.5:8000"
-APISERVER = "ec2-52-20-131-209.compute-1.amazonaws.com"
 
+#Get call
 def Api_Call(URL):
     cmd="curl -s -k -H Authorization: Api-Key " + key + " " + URL
     print (URL)
@@ -98,6 +101,7 @@ def Api_Call(URL):
     else:
         print(f"Error: {resp.status_code}")
 
+#Post Call
 def Api_Call_POST(URL,data):
     cmd="curl -s -k -H Authorization: Api-Key " + key + " " + URL
     print (URL)
@@ -113,42 +117,168 @@ def Api_Call_POST(URL,data):
     else:
         print(f"Error: {resp.status_code}")
  
+#only setting 
 def sys_cmd(CMD):
     ser.write(CMD)
-    time.sleep(1)     
-
-def run_cmd1(CMD):
-    global Items
-    print("Send command : ",CMD)
-    ser.write(CMD)
-    time.sleep(1)     
-    while ser.inWaiting() > 0:
-        print(ser.readline().strip())
+    #time.sleep(2)     
     ser.reset_input_buffer()
 
-def run_cmd(CMD):
-    global Items
+#only display result
+def run_cmd1(CMD):
+    ser.reset_output_buffer()
     print("Send command : ",CMD)
     ser.write(CMD)
-    time.sleep(1)     
+    time.sleep(0.1)     
     while ser.inWaiting() > 0:
-        x = ser.readline().rstrip()
-        if x not in Items and len(x)>10:
+        print(ser.readline().strip().decode("utf-8"))
+        #print(ser.readline())
+    ser.reset_input_buffer()
+
+#Collect 1 Item
+def Get_One_Item():
+    global Items
+    ser.reset_output_buffer()
+    print("Send command : ",cmd_Q_EPC)
+    ser.write(cmd_Q_EPC)
+    #time.sleep(0.1)     
+    while ser.inWaiting() > 0:
+        x = ser.readline().strip().decode("utf-8")
+        #x = ser.readline()
+        print(x)
+        if x not in Items and len(x)>=33 and x.startswith("300",1,4):
             Items.append(x)
             print("Items ",len(Items),' is ',x)
+            #print("Item added")
     ser.reset_input_buffer()
 
-def run_cmd2(CMD):
-    print("Send command : ",CMD)
+
+#Collect Items
+def Get_N_Items(N):
+    global Items
+    ser.reset_output_buffer()
+    print("Send command : ",cmd_MQ_EPC)
+    timeout = time.time() + 10
     while True:
-        ser.write(CMD)
-        time.sleep(0.1)     
+        ser.write(cmd_MQ_EPC)
+        #time.sleep(0.1)     
         while ser.inWaiting() > 0:
-            x = ser.readline().rstrip()
-            if x not in Items and len(x)>10:
+            x = ser.readline().strip().decode("utf-8")
+            #x = ser.readline()
+            print(x)
+            if x not in Items and len(x)>=33 and x.startswith("300",1,4):
                 Items.append(x)
                 print("Items ",len(Items),' is ',x)
+                #print("Item added")
+        if len(Items)>=N or time.time() > timeout:
+            ser.reset_input_buffer()
+            break
+        
+#display remain inv
+def List_remain_INV():
+    global INV
+    clear()
+    for item in INV:
+        print(item['name'],'-',item['rfid_tag']['RFID'])
 
+#Check all INV
+def Check_All_INV():
+    global INV
+
+    ser.reset_output_buffer()
+
+    url="http://"+APISERVER+"/api/inventorys/"
+    headers = {'x-api-key':key}
+    #print(headers)
+
+    resp = requests.get(url,headers=headers)
+    if resp.status_code == 200:
+        INV = resp.json()
+    else:
+        print(f"Error: {resp.status_code}")    
+
+    List_remain_INV()
+
+    start_time = time.time()
+    timeout = time.time() + 15  #15 second
+    while True:
+        ser.write(cmd_MQ_EPC)
+        #time.sleep(0.5)     
+        while ser.inWaiting() > 0:
+            #x = ser.readline().strip().decode("utf-8")
+            x = ser.readline()
+            item = x.strip().decode("utf-8")
+            #item = x
+            #print(item,'-',len(item))
+            
+            if len(item)>=33 and item.startswith("300",1,4):
+                #fix bug
+                item = "Q" + item[1:]
+                #print("Remove ",item)
+                for inv in INV:
+                    if inv['rfid_tag']['RFID'] == item:
+                        INV.remove(inv)
+                        List_remain_INV()
+
+        if len(INV)==0 or time.time() > timeout:
+            print("Usage time ",time.time()-start_time," seconds")
+            if len(INV)>0:
+                print("Time over 15 seconds")
+            else:
+                print("All asset OK")
+            break
+        ser.reset_input_buffer()
+   
+
+
+#Check INV & Collect Items
+def Chk_INV():
+    global Items
+    ser.reset_output_buffer()
+    start_time = time.time()
+    timeout = time.time() + 15  #15 second
+    while True:
+        ser.write(cmd_MQ_EPC)
+        #time.sleep(0.5)     
+        while ser.inWaiting() > 0:
+            #x = ser.readline().strip().decode("utf-8")
+            x = ser.readline()
+            item = x.strip().decode("utf-8")
+            #item = x
+            if item not in Items and len(item)>=33 and item.startswith("300",1,4):
+                Items.append(item)
+                print("Items add -> ",len(Items),' is ',item)
+                #print("Item added")
+        if len(Items)>=21 or time.time() > timeout:
+            print("Usage time ",time.time()-start_time," seconds")
+            if len(Items)<21:
+                print("Time over 15 seconds")
+            else:
+                print("All asset OK")
+            break
+        ser.reset_input_buffer()
+
+#find info
+def Find_INV():
+    #read tag
+    ser.reset_output_buffer()
+    tag_found = 0
+    while tag_found == 0:
+        ser.write(cmd_Q_EPC)
+        #time.sleep(1)     
+        while ser.inWaiting() > 0:
+            x = ser.readline()
+            item = x.strip().decode("utf-8")
+            
+            if len(item)>=33 and item.startswith("300",1,4):            
+                tag_found += 1
+                #call api
+                url = "http://"+APISERVER+"/api/inv/"+item
+                Api_Call(url)
+
+    ser.reset_input_buffer()
+        
+
+#interupt call
 def print_key(key):
     global Items
     print(f"Received key from interrupt:: {key}")
@@ -164,15 +294,11 @@ def print_key(key):
         case 5:
             #อ่าน 1 รายการ
             print("Read 1 item")
-            run_cmd(cmd_Q_EPC)
+            Get_One_Item()
         case 1:
-            #อ่านเป็นชุด loop
-            print("Read Multi Items <inf loop>")
-            run_cmd2(cmd_MQ_EPC)
-        case 6:
             #อ่านเป็นชุด
             print("Read Multi Items")
-            run_cmd(cmd_MQ_EPC)  
+            Get_N_Items(10) 
         case 15:
             #reset items
             Items = []
@@ -182,6 +308,7 @@ def print_key(key):
             print(len(Items),' items = ',Items)
         case 16:
             print("exit program")
+            keypad.cleanup()
             sys.exit(0)
         case 12:
             print("List ALL RFID")
@@ -198,7 +325,15 @@ def print_key(key):
             for item in Items:
                 data = {"RFID": item, "is_location": False, "recorded_by":1}
                 Api_Call_POST(url,data=data)
-
+        case 8:
+            print("Search TAG")
+            Find_INV()
+        case 3:
+            print("Check INV")
+            Chk_INV()
+        case 4:
+            print("Check INV")
+            Check_All_INV()
         case _:
             print("No Command")
 
@@ -207,6 +342,8 @@ try:
     #init cmd
     Items=[]
     sys_cmd(cmd_Reader_Power_Max)
+    #sys_cmd(cmd_Reader_Power_Min)
+    #sys_cmd(cmd_Reader_Power_Mid)
 
     factory = rpi_gpio.KeypadFactory()
     keypad = factory.create_keypad(keypad=KEYPAD,row_pins=ROW_PINS, col_pins=COL_PINS) # makes assumptions about keypad layout and GPIO pin numbers

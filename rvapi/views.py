@@ -21,7 +21,15 @@ class RFIDTagViewAll(APIView):
         result = RFIDTag.objects.all()  
         serializers = RFIDTag_SL(result, many=True)  
         return Response({'status': 'success', "items":serializers.data}, status=200)  
-     
+
+class INV_Info(APIView):     
+    permission_classes = [ HasAPIKey | IsAuthenticated ]
+
+    def get(self, request, tagNo):    
+        result = Inventory.objects.filter(rfid_tag__RFID=tagNo)
+        serializers = Inventory_SL(result, many=True)  
+        return Response({'status': 'success', "items":serializers.data}, status=200)  
+
 class RFIDTagViewSet(viewsets.ModelViewSet):
     permission_classes = [ HasAPIKey | IsAuthenticated ]
 
