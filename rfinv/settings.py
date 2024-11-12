@@ -98,8 +98,10 @@ TEMPLATES = [
 #CORS_ORIGIN_WHITELIST
 CORS_ORIGIN_WHITELIST = (
     'http://localhost:8000',
-    
+   
 )
+
+
 
 WSGI_APPLICATION = 'rfinv.wsgi.application'
 #ASGI_APPLICATION = 'rfinv.asgi.application'

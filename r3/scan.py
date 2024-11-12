@@ -1,9 +1,10 @@
-
 from pad4pi import rpi_gpio
 import time
 import RPi.GPIO as GPIO
 import sys
 import serial
+import os, json
+import requests
 
 RFID_EN_PIN = 4
 
@@ -60,20 +61,82 @@ ROW_PINS = [23, 24, 25, 16] # BCM numbering
 
 global Items 
 
+#API key for KeaPC is: 8yArxdsF.E4viD1uo4yLSibw0QqI5Vno4KPJ6b8hO
+#API key for keaCom is: swQuMMgt.vh1nQPMnHmNtClcTQM5DOcpjhHv4X0RA
+ 
+#dev
+url="http://10.35.117.143:8000/api/basic/"
+key = "vaGkQQur.OkotzgLTEDFuXwzZrUA1oMUH7iKWDugW"
+#API key for keaCom is: swQuMMgt.vh1nQPMnHmNtClcTQM5DOcpjhHv4X0RA
+key = "swQuMMgt.vh1nQPMnHmNtClcTQM5DOcpjhHv4X0RA"
+#API Key for PI3
+key = "TM4fc8ew.yIeDMRVam9qvQvyGr68n3EpXirAdwv5h"
+
+#aws
+#url="http://ec2-52-20-131-209.compute-1.amazonaws.com/api/basic/"
+#key = "fS6yn9J2.V0nZcnDAG5Jf6uZHafXQa3R1a2aqSJbe"
+
+#APISERVER = "192.168.1.5:8000"
+APISERVER = "ec2-52-20-131-209.compute-1.amazonaws.com"
+
+def Api_Call(URL):
+    cmd="curl -s -k -H Authorization: Api-Key " + key + " " + URL
+    print (URL)
+
+    headers = {'x-api-key':key}
+    #print(headers)
+
+    resp = requests.get(URL,headers=headers)
+    #print(resp.status_code)
+    #print(resp.text)
+    if resp.status_code == 200:
+        jData = resp.json()
+        #print(jData)
+        print(json.dumps(jData, indent=4, sort_keys=True))
+        for item in jData:
+            print(item) 
+    else:
+        print(f"Error: {resp.status_code}")
+
+def Api_Call_POST(URL,data):
+    cmd="curl -s -k -H Authorization: Api-Key " + key + " " + URL
+    print (URL)
+    print(data)
+
+    headers = {'x-api-key':key}
+
+    #resp = requests.post(URL, json=data)
+    resp = requests.post(URL, data=data, headers=headers)
+
+    if resp.status_code == 201:
+        print("POST successfully")
+    else:
+        print(f"Error: {resp.status_code}")
+ 
 def sys_cmd(CMD):
     ser.write(CMD)
-    time.sleep(0.1)     
+    time.sleep(1)     
+
+def run_cmd1(CMD):
+    global Items
+    print("Send command : ",CMD)
+    ser.write(CMD)
+    time.sleep(1)     
+    while ser.inWaiting() > 0:
+        print(ser.readline().strip())
+    ser.reset_input_buffer()
 
 def run_cmd(CMD):
     global Items
     print("Send command : ",CMD)
     ser.write(CMD)
-    time.sleep(0.1)     
+    time.sleep(1)     
     while ser.inWaiting() > 0:
-        x = ser.readline().strip()
+        x = ser.readline().rstrip()
         if x not in Items and len(x)>10:
             Items.append(x)
             print("Items ",len(Items),' is ',x)
+    ser.reset_input_buffer()
 
 def run_cmd2(CMD):
     print("Send command : ",CMD)
@@ -81,7 +144,7 @@ def run_cmd2(CMD):
         ser.write(CMD)
         time.sleep(0.1)     
         while ser.inWaiting() > 0:
-            x = ser.readline().strip()
+            x = ser.readline().rstrip()
             if x not in Items and len(x)>10:
                 Items.append(x)
                 print("Items ",len(Items),' is ',x)
@@ -91,22 +154,51 @@ def print_key(key):
     print(f"Received key from interrupt:: {key}")
     match key:
         case 13:
-            run_cmd(cmd_fw_version)
+            #หมายเลข firmware
+            print("FW Version?")
+            run_cmd1(cmd_fw_version)
         case 9:
-            run_cmd(cmd_reader_id)
+            #หมายเลขเครื่องอ่าน
+            print("Reader ID?")
+            run_cmd1(cmd_reader_id)
         case 5:
+            #อ่าน 1 รายการ
+            print("Read 1 item")
             run_cmd(cmd_Q_EPC)
-        case 1:#อ่านเป็นชุด loop
+        case 1:
+            #อ่านเป็นชุด loop
+            print("Read Multi Items <inf loop>")
             run_cmd2(cmd_MQ_EPC)
-        case 6:#อ่านเป็นชุด
+        case 6:
+            #อ่านเป็นชุด
+            print("Read Multi Items")
             run_cmd(cmd_MQ_EPC)  
-        case 15:#reset items
+        case 15:
+            #reset items
             Items = []
             print("Reset items")
-        case 11:#List items
+        case 11:
+            #List items
             print(len(Items),' items = ',Items)
         case 16:
-            exit()
+            print("exit program")
+            sys.exit(0)
+        case 12:
+            print("List ALL RFID")
+            url="http://"+APISERVER+"/api/basic/"
+            Api_Call(url)
+        case 14:
+            print("List ALL Asset")
+            url="http://"+APISERVER+"/api/inventorys/"
+            Api_Call(url)          
+        case 7:
+            print("Add New RFID")
+            url = "http://"+APISERVER+"/api/rfidtags/"
+            #Loop Items
+            for item in Items:
+                data = {"RFID": item, "is_location": False, "recorded_by":1}
+                Api_Call_POST(url,data=data)
+
         case _:
             print("No Command")
 
