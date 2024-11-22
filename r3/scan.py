@@ -6,6 +6,10 @@ import serial
 import os, json
 import requests
 
+import telepot
+from telepot.loop import MessageLoop
+
+
 clear = lambda: os.system('clear')
 
 RFID_EN_PIN = 4
@@ -73,13 +77,16 @@ global INV
 
 
 #dev
-APISERVER = "192.168.1.5:8000"
+APISERVER = "192.168.1.4:8000"
 key = "TM4fc8ew.yIeDMRVam9qvQvyGr68n3EpXirAdwv5h"
 
 #aws
 #APISERVER = "ec2-52-20-131-209.compute-1.amazonaws.com"
 #key = "cW0QbZy6.mQyu31pBYPbsQomB8GKQwGuVBqnGs0aP"
 
+#telegram 
+bot_token = '7896527649:AAHEKeT7XblXaeT5o1dBAK11ERYfiHK9BM0'
+bot_id = '5595830319'
 
 #Get call
 def Api_Call(URL):
@@ -286,6 +293,7 @@ def print_key(key):
         case 13:
             #หมายเลข firmware
             print("FW Version?")
+            sendmessage("FW Version")
             run_cmd1(cmd_fw_version)
         case 9:
             #หมายเลขเครื่องอ่าน
@@ -337,6 +345,31 @@ def print_key(key):
         case _:
             print("No Command")
 
+def sendmessage(text):
+    url = "https://api.telegram.org/bot" + bot_token + "/sendMessage?chat_id=" + bot_id + "&text=" + text    
+    response = requests.get(url) 
+    print(url,' ',response)
+'''
+    start = 0
+    sendmessage("Starting conversation") 
+    while(True):
+        url = "https://api.telegram.org/bot" + token + "/getUpdates?offset=" + last
+        response = requests.get(url) 
+        dict = response.json() 
+        result = dict['result'] 
+        nummessages = len(result)
+
+        if (nummessages>=1):
+            message = result[nummessages -1]['message'] last = result[nummessages -1]['update_id'] text = message['text']
+            print(text)
+
+            if ((text==”exit”)and(start>0)): 
+                sendmessage(“See you later”) 
+                break
+        else:
+            start = 1
+            last = str(last +1)
+'''    
 
 try:
     #init cmd
