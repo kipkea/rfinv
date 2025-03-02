@@ -58,7 +58,7 @@ INSTALLED_APPS = [
     "rest_framework",
     'rvapi',
     'rest_framework_api_key',
-    'rest_framework_swagger',
+    #'rest_framework_swagger',
     'corsheaders',
 ]
 
@@ -96,11 +96,14 @@ TEMPLATES = [
 
 
 #CORS_ORIGIN_WHITELIST
+
 CORS_ORIGIN_WHITELIST = (
     'http://localhost:8000',
    
 )
 
+
+CORS_ALLOW_ALL_ORIGINS = True # ไม่แนะนำสำหรับ Production!
 
 
 WSGI_APPLICATION = 'rfinv.wsgi.application'
@@ -162,8 +165,9 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         #'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly',
         #'rest_framework.permissions.DjangoModelPermissions',
-        'rest_framework.permissions.IsAuthenticated',
-        'rest_framework_api_key.permissions.HasAPIKey',
+        
+        ##'rest_framework.permissions.IsAuthenticated',
+        'rest_framework_api_key.permissions.HasAPIKey',        
     ],
     'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',
 }
@@ -193,7 +197,7 @@ STATICFILES_DIRS = [
 STATIC_URL = "/static/"
 MEDIA_URL = '/media/'
 
-API_KEY_CUSTOM_HEADER = "HTTP_X_API_KEY"
+#API_KEY_CUSTOM_HEADER = "HTTP_X_API_KEY"
 
 
 TEMPLATE_CONTEXT_PROCESSORS = (
