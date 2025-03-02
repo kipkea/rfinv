@@ -58,8 +58,9 @@ INSTALLED_APPS = [
     "rest_framework",
     'rvapi',
     'rest_framework_api_key',
-    #'rest_framework_swagger',
+    'rest_framework_swagger',
     'corsheaders',
+    #'rest_framework.authtoken',
 ]
 
 MIDDLEWARE = [
@@ -100,11 +101,12 @@ TEMPLATES = [
 CORS_ORIGIN_WHITELIST = (
     'http://localhost:8000',
     'http://127.0.0.1:8000',
+    #'http://localhost:34175',
    
 )
 
 
-CORS_ALLOW_ALL_ORIGINS = True # ไม่แนะนำสำหรับ Production!
+CORS_ALLOW_ALL_ORIGINS = False # ไม่แนะนำสำหรับ Production!
 
 
 WSGI_APPLICATION = 'rfinv.wsgi.application'

@@ -14,16 +14,18 @@ from rest_framework.decorators import action
 from django.utils import timezone
 from django.db.models import Q
 
+
 class RFIDTagViewAll(APIView):  
     permission_classes = [ HasAPIKey | IsAuthenticated]
 
     def get(self, request):    
+        print("Request Headers:", request.headers) 
         result = RFIDTag.objects.all()  
         serializers = RFIDTag_SL(result, many=True)  
         return Response({'status': 'success', "items":serializers.data}, status=200)  
 
 class INV_Info(APIView):     
-    permission_classes = [ HasAPIKey | IsAuthenticated]
+    permission_classes = [ HasAPIKey | IsAuthenticated ]
 
     def get(self, request, tagNo):    
         result = Inventory.objects.filter(rfid_tag__RFID=tagNo)
