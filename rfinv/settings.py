@@ -105,8 +105,15 @@ CORS_ORIGIN_WHITELIST = (
    
 )
 
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:8000',  # Your Django server
+    'http://127.0.0.1:8000',
+    'http://10.35.116.11:8000', #Allow access from the device on your network
+]
 
-CORS_ALLOW_ALL_ORIGINS = False # ไม่แนะนำสำหรับ Production!
+
+
+CORS_ALLOW_ALL_ORIGINS = True # ไม่แนะนำสำหรับ Production!
 
 
 WSGI_APPLICATION = 'rfinv.wsgi.application'

@@ -7,7 +7,7 @@ from rest_framework import status
 from .models import RFIDTag, Location, Inventory, Inspection
 from .serializers import RFIDTag_SL, Location_SL, Inventory_SL , Inspection_SL
 from django.shortcuts import get_object_or_404  
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework_api_key.permissions import HasAPIKey
 from rest_framework import viewsets, generics
 from rest_framework.decorators import action
@@ -16,7 +16,7 @@ from django.db.models import Q
 
 
 class RFIDTagViewAll(APIView):  
-    permission_classes = [ HasAPIKey | IsAuthenticated]
+    permission_classes = [ HasAPIKey | IsAuthenticatedOrReadOnly]
 
     def get(self, request):    
         print("Request Headers:", request.headers) 
@@ -25,7 +25,7 @@ class RFIDTagViewAll(APIView):
         return Response({'status': 'success', "items":serializers.data}, status=200)  
 
 class INV_Info(APIView):     
-    permission_classes = [ HasAPIKey | IsAuthenticated ]
+    permission_classes = [ HasAPIKey | IsAuthenticatedOrReadOnly ]
 
     def get(self, request, tagNo):    
         result = Inventory.objects.filter(rfid_tag__RFID=tagNo)
@@ -33,26 +33,26 @@ class INV_Info(APIView):
         return Response({'status': 'success', "items":serializers.data}, status=200)  
 
 class RFIDTagViewSet(viewsets.ModelViewSet):
-    permission_classes = [ HasAPIKey | IsAuthenticated ]
+    permission_classes = [ HasAPIKey | IsAuthenticatedOrReadOnly ]
 
     queryset = RFIDTag.objects.all()
     serializer_class = RFIDTag_SL
 
 class LocationViewSet(viewsets.ModelViewSet):
-    permission_classes = [ HasAPIKey | IsAuthenticated ]
+    permission_classes = [ HasAPIKey | IsAuthenticatedOrReadOnly ]
 
     queryset = Location.objects.all()
     serializer_class = Location_SL
 
 class ProductViewSet(viewsets.ModelViewSet):
-    permission_classes = [ HasAPIKey | IsAuthenticated ]
+    permission_classes = [ HasAPIKey | IsAuthenticatedOrReadOnly ]
 
     queryset = Inventory.objects.all()
     serializer_class = Inventory_SL
 
 
 class InspectionViewSet(viewsets.ModelViewSet):
-    permission_classes = [ HasAPIKey | IsAuthenticated ]
+    permission_classes = [ HasAPIKey | IsAuthenticatedOrReadOnly ]
     
     queryset = Inspection.objects.all()
     serializer_class = Inspection_SL
