@@ -15,7 +15,7 @@ from django.utils import timezone
 from django.db.models import Q
 
 class RFIDTagViewAll(APIView):  
-    permission_classes = [ HasAPIKey]
+    permission_classes = [ HasAPIKey | IsAuthenticated]
 
     def get(self, request):    
         result = RFIDTag.objects.all()  
@@ -23,7 +23,7 @@ class RFIDTagViewAll(APIView):
         return Response({'status': 'success', "items":serializers.data}, status=200)  
 
 class INV_Info(APIView):     
-    permission_classes = [ HasAPIKey]
+    permission_classes = [ HasAPIKey | IsAuthenticated]
 
     def get(self, request, tagNo):    
         result = Inventory.objects.filter(rfid_tag__RFID=tagNo)
@@ -31,26 +31,26 @@ class INV_Info(APIView):
         return Response({'status': 'success', "items":serializers.data}, status=200)  
 
 class RFIDTagViewSet(viewsets.ModelViewSet):
-    permission_classes = [ HasAPIKey]
+    permission_classes = [ HasAPIKey | IsAuthenticated ]
 
     queryset = RFIDTag.objects.all()
     serializer_class = RFIDTag_SL
 
 class LocationViewSet(viewsets.ModelViewSet):
-    permission_classes = [ HasAPIKey ]
+    permission_classes = [ HasAPIKey | IsAuthenticated ]
 
     queryset = Location.objects.all()
     serializer_class = Location_SL
 
 class ProductViewSet(viewsets.ModelViewSet):
-    permission_classes = [ HasAPIKey ]
+    permission_classes = [ HasAPIKey | IsAuthenticated ]
 
     queryset = Inventory.objects.all()
     serializer_class = Inventory_SL
 
 
 class InspectionViewSet(viewsets.ModelViewSet):
-    permission_classes = [ HasAPIKey ]
+    permission_classes = [ HasAPIKey | IsAuthenticated ]
     
     queryset = Inspection.objects.all()
     serializer_class = Inspection_SL
