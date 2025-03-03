@@ -60,6 +60,7 @@ INSTALLED_APPS = [
     'rest_framework_api_key',
     'rest_framework_swagger',
     'corsheaders',
+    #'rest_framework.authtoken',
 ]
 
 MIDDLEWARE = [
@@ -96,11 +97,23 @@ TEMPLATES = [
 
 
 #CORS_ORIGIN_WHITELIST
+
 CORS_ORIGIN_WHITELIST = (
     'http://localhost:8000',
+    'http://127.0.0.1:8000',
+    #'http://localhost:34175',
    
 )
 
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:8000',  # Your Django server
+    'http://127.0.0.1:8000',
+    'http://10.35.116.11:8000', #Allow access from the device on your network
+]
+
+
+
+CORS_ALLOW_ALL_ORIGINS = True # ไม่แนะนำสำหรับ Production!
 
 
 WSGI_APPLICATION = 'rfinv.wsgi.application'
@@ -162,8 +175,9 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         #'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly',
         #'rest_framework.permissions.DjangoModelPermissions',
+        
         'rest_framework.permissions.IsAuthenticated',
-        'rest_framework_api_key.permissions.HasAPIKey',
+        'rest_framework_api_key.permissions.HasAPIKey',        
     ],
     'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',
 }

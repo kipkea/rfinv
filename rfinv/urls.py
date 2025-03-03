@@ -51,6 +51,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('rvapi.urls', namespace='rvapi')),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
+    #path('api-token-auth/', obtain_auth_token, name='api_token_auth'),
     path(r"swagger-docs/", schema_view),
     path(r"docs/", include_docs_urls(title="RFInv API")),    
 ]
