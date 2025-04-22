@@ -12,7 +12,7 @@ from telepot.loop import MessageLoop
 
 clear = lambda: os.system('clear')
 
-RFID_EN_PIN = 18
+RFID_EN_PIN = 4
 
 GPIO.setwarnings(False)
 

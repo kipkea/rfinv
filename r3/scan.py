@@ -77,7 +77,7 @@ global INV
 
 
 #dev
-APISERVER = "192.168.1.4:8000"
+APISERVER = "192.168.1.7:8000"
 key = "TM4fc8ew.yIeDMRVam9qvQvyGr68n3EpXirAdwv5h"
 
 #aws
