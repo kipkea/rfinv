@@ -240,7 +240,7 @@ class GalleryScreen(Screen):
             img = AsyncImage(source=path, size_hint_y=None, height=180)
             layout = BoxLayout(orientation='vertical', size_hint_y=None, height=260, padding=5, spacing=5)
             layout.add_widget(img)
-            label = Label(text=caption, size_hint_y=None, height=40, halign='center', valign='middle',font_name='THSarabun')
+            label = Label(text=caption, size_hint_y=None, height=40, halign='center', valign='middle',font_size='20sp',font_name='THSarabun')
             label.text_size = label.size
             layout.add_widget(label)
 
@@ -252,14 +252,22 @@ class GalleryScreen(Screen):
 
     def confirm_delete(self, path):
         content = BoxLayout(orientation='vertical', spacing=10)
-        content.add_widget(Label(text='ต้องการลบภาพนี้หรือไม่?',font_name='THSarabun'))
+
+        lbl = Label(
+            text='คุณต้องการลบภาพนี้หรือไม่?',
+            font_name='THSarabun',
+            font_size='50sp'
+        )
+        content.add_widget(lbl)
+        #content.add_widget(Label(text='ต้องการลบภาพนี้หรือไม่?'))
         btns = BoxLayout(spacing=10, size_hint_y=None, height=40)
-        btn_yes = Button(text='ใช่',font_name='THSarabun')
-        btn_no = Button(text='ไม่',font_name='THSarabun')
+        btn_yes = Button(text='ใช่',font_size='50sp',font_name='THSarabun')
+        btn_no = Button(text='ไม่',font_size='50sp',font_name='THSarabun')
         btns.add_widget(btn_yes)
         btns.add_widget(btn_no)
         content.add_widget(btns)
-        popup = Popup(title='ยืนยันการลบ', content=content, size_hint=(.6, .4),font_name='THSarabun')
+
+        popup = Popup(title='ยืนยันการลบ', content=content, size_hint=(.6, .4))
         btn_yes.bind(on_release=lambda x: self.delete_image(path, popup))
         btn_no.bind(on_release=popup.dismiss)
         popup.open()

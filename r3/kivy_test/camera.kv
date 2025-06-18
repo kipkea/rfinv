@@ -1,5 +1,73 @@
 #:kivy 2.3.1
 
+<HoverTouchButton>:
+    background_normal: ''
+    background_color: (1, 0.4, 0.4, 1) if self.pressed else (0.4, 0.6, 1, 1) if self.hovered else (0.3, 0.3, 0.3, 1)
+    color: 1, 1, 1, 1
+    font_name: './assets/THSarabunNew.ttf'
+    font_size: 48
+
+<CameraSelectScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        padding: 20
+        spacing: 20
+
+        Label:
+            font_name: './assets/THSarabunNew.ttf'
+            text: 'เลือกกล้องที่ต้องการใช้งาน'
+            font_size: 50
+            size_hint_y: None
+            height: 60
+
+        HoverTouchButton:
+            text: 'กล้อง USB'
+            on_release: root.select_usb()
+
+        HoverTouchButton:
+            text: 'กล้อง Pi Camera'
+            on_release: root.select_pi()
+
+<LiveScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        padding: 10
+        spacing: 10
+
+        Image:
+            id: camera_image
+            allow_stretch: True
+            keep_ratio: True
+            size_hint_y: 0.75
+
+        BoxLayout:
+            size_hint_y: 0.15
+            spacing: 10
+
+            HoverTouchButton:
+                text: '📷 ถ่ายภาพ'
+                on_release: root.capture_image()
+
+            HoverTouchButton:
+                id: record_btn
+                text: '🎥 เริ่มบันทึก'
+                on_release: root.toggle_recording()
+
+            HoverTouchButton:
+                text: '🔄 สลับกล้อง'
+                on_release: root.switch_camera()
+
+            HoverTouchButton:
+                text: '🖼 ดูภาพ'
+                on_release: app.root.current = 'gallery'
+
+        Label:
+            font_name: './assets/THSarabunNew.ttf'
+            id: info_label
+            size_hint_y: 0.1
+            text: ''
+            font_size: 50
+
 <GalleryScreen>:
     BoxLayout:
         orientation: 'vertical'
@@ -19,89 +87,10 @@
             height: '50dp'
             spacing: 10
 
-            Button:
-                font_name: './assets/THSarabunNew.ttf'
+            HoverTouchButton:
                 text: 'ลบภาพทั้งหมด'
                 on_release: root.confirm_delete_all()
 
-            Button:
-                font_name: './assets/THSarabunNew.ttf'
+            HoverTouchButton:
                 text: 'กลับ'
                 on_release: app.root.current = 'live'
-
-<LiveScreen>:
-    BoxLayout:
-        orientation: 'vertical'
-        padding: 10
-        spacing: 10
-
-        Image:
-            id: camera_image
-            allow_stretch: True
-            keep_ratio: True
-            size_hint_y: 0.75
-
-        BoxLayout:
-            size_hint_y: 0.15
-            spacing: 10
-
-            Button:
-                font_name: './assets/THSarabunNew.ttf'
-                text: '📷 ถ่ายภาพ'
-                font_size: 50
-                on_release: root.capture_image()
-
-            Button:
-                font_name: './assets/THSarabunNew.ttf'
-                id: record_btn
-                text: '🎥 เริ่มบันทึก'
-                font_size: 50
-                on_release: root.toggle_recording()
-
-            Button:
-                font_name: './assets/THSarabunNew.ttf'
-                text: '🔄 สลับกล้อง'
-                font_size: 50
-                on_release: root.switch_camera()
-
-            Button:
-                font_name: './assets/THSarabunNew.ttf'
-                text: '🖼 ดูภาพ'
-                font_size: 50
-                on_release: app.root.current = 'gallery'
-
-        Label:
-            font_name: './assets/THSarabunNew.ttf'
-            id: info_label
-            size_hint_y: 0.1
-            text: ''
-            font_size: 50
-
-<CameraSelectScreen>:
-    BoxLayout:
-        orientation: 'vertical'
-        padding: 20
-        spacing: 20
-        Label:
-            font_name: './assets/THSarabunNew.ttf'
-            id: info_label
-            text: 'เลือกกล้องที่ต้องการใช้งาน'
-            font_size: 50
-            size_hint_y: None
-            height: 60
-
-        Button:
-            font_name: './assets/THSarabunNew.ttf'
-            text: 'กล้อง USB'
-            font_size: 50
-            size_hint_y: None
-            height: 80
-            on_release: root.select_usb()
-
-        Button:
-            font_name: './assets/THSarabunNew.ttf'
-            text: 'กล้อง Pi Camera'
-            font_size: 50
-            size_hint_y: None
-            height: 80
-            on_release: root.select_pi()
