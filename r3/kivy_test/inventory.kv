@@ -1,0 +1,223 @@
+# inventory.kv
+
+<MenuScreen>:
+    name: 'menu_screen'
+    BoxLayout:
+        orientation: 'vertical'
+        padding: dp(20)
+        spacing: dp(10)
+
+        Label:
+            text: 'ระบบจัดการคลังสินค้า'
+            font_size: dp(40)
+            size_hint_y: 0.2
+
+        GridLayout:
+            cols: 2
+            spacing: dp(10)
+            padding: dp(10)
+
+            Button:
+                text: 'ตรวจสอบสินค้า (RFID)'
+                font_size: dp(25)
+                on_release: app.root.current = 'scan_rfid_screen'
+            Button:
+                text: 'เพิ่ม/แก้ไขสินค้า'
+                font_size: dp(25)
+                on_release: app.root.current = 'manage_product_screen'
+            Button:
+                text: 'ดูรายการสินค้า'
+                font_size: dp(25)
+                on_release: app.root.current = 'product_list_screen'
+            Button:
+                text: 'รายงาน'
+                font_size: dp(25)
+                on_release: print('ไปหน้าดูรายงาน') # Placeholder
+
+<ScanRFIDScreen>:
+    name: 'scan_rfid_screen'
+    BoxLayout:
+        orientation: 'vertical'
+        padding: dp(20)
+        spacing: dp(10)
+
+        Label:
+            text: 'สแกน RFID Tag'
+            font_size: dp(30)
+            size_hint_y: 0.15
+
+        BoxLayout:
+            orientation: 'horizontal'
+            size_hint_y: 0.1
+            Label:
+                text: 'RFID Tag:'
+                font_size: dp(20)
+                size_hint_x: 0.3
+            TextInput:
+                id: rfid_input
+                multiline: False
+                font_size: dp(25)
+                size_hint_x: 0.7
+                on_text_validate: root.search_product() # เมื่อกด Enter
+
+        Button:
+            text: 'เริ่มสแกน RFID'
+            font_size: dp(25)
+            size_hint_y: 0.1
+            on_release: root.start_rfid_scan()
+
+        Label:
+            id: status_label
+            text: 'รอการสแกน...'
+            font_size: dp(20)
+            size_hint_y: 0.1
+
+        BoxLayout: # แสดงผลลัพธ์สินค้า
+            orientation: 'vertical'
+            size_hint_y: 0.5
+            padding: dp(10)
+            spacing: dp(5)
+
+            Label:
+                text: 'ข้อมูลสินค้า:'
+                font_size: dp(20)
+                halign: 'left'
+                text_size: self.width, None
+                size_hint_y: None
+                height: self.texture_size[1]
+            Label:
+                id: product_info_label
+                text: ''
+                font_size: dp(20)
+                halign: 'left'
+                text_size: self.width, None
+                size_hint_y: None
+                height: self.texture_size[1] + dp(50) # เผื่อพื้นที่
+            Image:
+                id: product_image
+                source: '' # รูปภาพสินค้า
+                size_hint_y: None
+                height: dp(200) if self.source else 0 # ซ่อนถ้าไม่มีรูป
+                allow_stretch: True
+                keep_ratio: True
+
+
+        Button:
+            text: 'กลับหน้าหลัก'
+            font_size: dp(25)
+            size_hint_y: 0.1
+            on_release: app.root.current = 'menu_screen'
+
+<ManageProductScreen>:
+    name: 'manage_product_screen'
+    BoxLayout:
+        orientation: 'vertical'
+        padding: dp(20)
+        spacing: dp(10)
+
+        Label:
+            text: 'เพิ่ม/แก้ไขสินค้า'
+            font_size: dp(30)
+            size_hint_y: 0.1
+
+        GridLayout:
+            cols: 2
+            spacing: dp(10)
+            size_hint_y: 0.7
+
+            Label:
+                text: 'RFID Tag:'
+                font_size: dp(20)
+            TextInput:
+                id: rfid_tag_input
+                multiline: False
+                font_size: dp(20)
+
+            Label:
+                text: 'ชื่อสินค้า:'
+                font_size: dp(20)
+            TextInput:
+                id: product_name_input
+                multiline: False
+                font_size: dp(20)
+
+            Label:
+                text: 'จำนวน:'
+                font_size: dp(20)
+            TextInput:
+                id: quantity_input
+                multiline: False
+                input_type: 'number'
+                font_size: dp(20)
+
+            Label:
+                text: 'รายละเอียด:'
+                font_size: dp(20)
+            TextInput:
+                id: description_input
+                multiline: True
+                font_size: dp(20)
+
+            Label:
+                text: 'รูปภาพ:'
+                font_size: dp(20)
+            BoxLayout: # สำหรับปุ่มถ่ายรูปและแสดงรูป
+                orientation: 'vertical'
+                spacing: dp(5)
+                Button:
+                    text: 'ถ่ายรูป'
+                    font_size: dp(20)
+                    on_release: root.capture_photo()
+                Image:
+                    id: captured_image
+                    source: '' # รูปที่ถ่ายได้
+                    size_hint_y: None
+                    height: dp(150) if self.source else 0
+                    allow_stretch: True
+                    keep_ratio: True
+
+        Button:
+            text: 'บันทึกข้อมูล'
+            font_size: dp(25)
+            size_hint_y: 0.1
+            on_release: root.save_product()
+
+        Button:
+            text: 'กลับหน้าหลัก'
+            font_size: dp(25)
+            size_hint_y: 0.1
+            on_release: app.root.current = 'menu_screen'
+
+<ProductListScreen>:
+    name: 'product_list_screen'
+    BoxLayout:
+        orientation: 'vertical'
+        padding: dp(20)
+        spacing: dp(10)
+
+        Label:
+            text: 'รายการสินค้าทั้งหมด'
+            font_size: dp(30)
+            size_hint_y: 0.1
+
+        # ตัวอย่างการแสดงรายการสินค้า (ควรใช้ RecycleView สำหรับรายการจำนวนมาก)
+        ScrollView:
+            size_hint_y: 0.8
+            GridLayout:
+                id: product_list_grid
+                cols: 1
+                spacing: dp(5)
+                size_hint_y: None
+                height: self.minimum_height
+
+        Button:
+            text: 'โหลดรายการสินค้า'
+            font_size: dp(25)
+            size_hint_y: 0.05
+            on_release: root.load_products()
+
+        Button:
+            text: 'กลับหน้าหลัก'
+            font_size: dp(25)
+            size_hint_y: 0.05
+            on_release: app.root.current = 'menu_screen'
