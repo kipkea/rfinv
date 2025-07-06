@@ -1,4 +1,3 @@
-from pad4pi import rpi_gpio
 import time
 import RPi.GPIO as GPIO
 import sys
@@ -6,9 +5,21 @@ import serial
 import os, json
 import requests
 
+from dotenv import load_dotenv
+
 import telepot
 from telepot.loop import MessageLoop
 
+
+# โหลดค่า environment จากไฟล์ .env
+load_dotenv()
+
+APISERVER = os.getenv("APISERVER")
+key = os.getenv("key")
+
+#telegram 
+bot_token = os.getenv("bot_token")
+bot_id = os.getenv("bot_id")
 
 clear = lambda: os.system('clear')
 
@@ -22,8 +33,9 @@ GPIO.setmode(GPIO.BCM)
 GPIO.setup(RFID_EN_PIN, GPIO.OUT)
 GPIO.output(RFID_EN_PIN, GPIO.HIGH)
 
-#port = '/dev/ttyAMA0'
-port = '/dev/ttyS0'
+port = '/dev/ttyAMA0'
+#port = '/dev/ttyS0'
+
 buadrate = 38400
 #buadrate = 57600
 #buadrate = 115200
@@ -45,48 +57,15 @@ cmd_Reader_Power_Max = b'\x0A\x4E\x30\x2C\x31\x42\x0D'
 cmd_Reader_Power_Mid = b'\x0A\x4E\x30\x2C\x30\x0F\x0D'
 cmd_Reader_Power_Min = b'\x0A\x4E\x30\x2C\x30\x30\x0D'
 
-KEYPAD = [
-    [1, 2, 3, 4],
-    [5, 6, 7, 8],
-    [9, 10, 11, 12],
-    [13,14, 15, 16]
-]
-
-'''
-# Set the Column Pins
-COL_1 = 17
-COL_2 = 27
-COL_3 = 22
-COL_4 = 5
-
-# Set the ROW Pins
-ROW_1 = 23
-ROW_2 = 24
-ROW_3 = 25
-ROW_4 = 16
-'''
-
-#ROW_PINS = [17, 27, 22, 5] # BCM numbering
-#COL_PINS = [23, 24, 25, 16] # BCM numbering
-
-COL_PINS = [5, 22, 27, 17] # BCM numbering
-ROW_PINS = [23, 24, 25, 16] # BCM numbering
-
 global Items 
 global INV
 
 
-#dev
-APISERVER = "192.168.1.4:8000"
-key = "TM4fc8ew.yIeDMRVam9qvQvyGr68n3EpXirAdwv5h"
+def sendmessage(text):
+    url = "https://api.telegram.org/bot" + bot_token + "/sendMessage?chat_id=" + bot_id + "&text=" + text    
+    response = requests.get(url) 
+    print(url,' ',response)
 
-#aws
-#APISERVER = "ec2-52-20-131-209.compute-1.amazonaws.com"
-#key = "cW0QbZy6.mQyu31pBYPbsQomB8GKQwGuVBqnGs0aP"
-
-#telegram 
-bot_token = '7896527649:AAHEKeT7XblXaeT5o1dBAK11ERYfiHK9BM0'
-bot_id = '5595830319'
 
 #Get call
 def Api_Call(URL):
@@ -164,7 +143,7 @@ def Get_N_Items(N):
     global Items
     ser.reset_output_buffer()
     print("Send command : ",cmd_MQ_EPC)
-    timeout = time.time() + 10
+    timeout = time.time() + 5
     while True:
         ser.write(cmd_MQ_EPC)
         #time.sleep(0.1)     
@@ -285,91 +264,6 @@ def Find_INV():
     ser.reset_input_buffer()
         
 
-#interupt call
-def print_key(key):
-    global Items
-    print(f"Received key from interrupt:: {key}")
-    match key:
-        case 13:
-            #หมายเลข firmware
-            print("FW Version?")
-            sendmessage("FW Version")
-            run_cmd1(cmd_fw_version)
-        case 9:
-            #หมายเลขเครื่องอ่าน
-            print("Reader ID?")
-            run_cmd1(cmd_reader_id)
-        case 5:
-            #อ่าน 1 รายการ
-            print("Read 1 item")
-            Get_One_Item()
-        case 1:
-            #อ่านเป็นชุด
-            print("Read Multi Items")
-            Get_N_Items(10) 
-        case 15:
-            #reset items
-            Items = []
-            print("Reset items")
-        case 11:
-            #List items
-            print(len(Items),' items = ',Items)
-        case 16:
-            print("exit program")
-            keypad.cleanup()
-            sys.exit(0)
-        case 12:
-            print("List ALL RFID")
-            url="http://"+APISERVER+"/api/basic/"
-            Api_Call(url)
-        case 14:
-            print("List ALL Asset")
-            url="http://"+APISERVER+"/api/inventorys/"
-            Api_Call(url)          
-        case 7:
-            print("Add New RFID")
-            url = "http://"+APISERVER+"/api/rfidtags/"
-            #Loop Items
-            for item in Items:
-                data = {"RFID": item, "is_location": False, "recorded_by":1}
-                Api_Call_POST(url,data=data)
-        case 8:
-            print("Search TAG")
-            Find_INV()
-        case 3:
-            print("Check INV")
-            Chk_INV()
-        case 4:
-            print("Check INV")
-            Check_All_INV()
-        case _:
-            print("No Command")
-
-def sendmessage(text):
-    url = "https://api.telegram.org/bot" + bot_token + "/sendMessage?chat_id=" + bot_id + "&text=" + text    
-    response = requests.get(url) 
-    print(url,' ',response)
-'''
-    start = 0
-    sendmessage("Starting conversation") 
-    while(True):
-        url = "https://api.telegram.org/bot" + token + "/getUpdates?offset=" + last
-        response = requests.get(url) 
-        dict = response.json() 
-        result = dict['result'] 
-        nummessages = len(result)
-
-        if (nummessages>=1):
-            message = result[nummessages -1]['message'] last = result[nummessages -1]['update_id'] text = message['text']
-            print(text)
-
-            if ((text==”exit”)and(start>0)): 
-                sendmessage(“See you later”) 
-                break
-        else:
-            start = 1
-            last = str(last +1)
-'''    
 
 try:
     #init cmd
@@ -379,16 +273,21 @@ try:
     #sys_cmd(cmd_Reader_Power_Min)
     #sys_cmd(cmd_Reader_Power_Mid)
 
-    factory = rpi_gpio.KeypadFactory()
-    keypad = factory.create_keypad(keypad=KEYPAD,row_pins=ROW_PINS, col_pins=COL_PINS) # makes assumptions about keypad layout and GPIO pin numbers
+    run_cmd1(cmd_fw_version)
+    run_cmd1(cmd_reader_id)
 
-    keypad.registerKeyPressHandler(print_key)
+    #Get_One_Item()
+    Get_N_Items(10) 
+    print(len(Items),' items = ',Items)
 
     ser.reset_input_buffer()
+
+    '''
     print("Press buttons on your keypad. Ctrl+C to exit.")
     while True:
         time.sleep(1)
+    '''        
 except KeyboardInterrupt:
     print("Goodbye")
 finally:
-    keypad.cleanup()
+    print("Finally")

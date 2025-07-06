@@ -22,8 +22,9 @@ GPIO.setmode(GPIO.BCM)
 GPIO.setup(RFID_EN_PIN, GPIO.OUT)
 GPIO.output(RFID_EN_PIN, GPIO.HIGH)
 
-#port = '/dev/ttyAMA0'
-port = '/dev/ttyS0'
+port = '/dev/ttyAMA0'   #r5
+#port = '/dev/ttyS0'    #r3
+
 buadrate = 38400
 #buadrate = 57600
 #buadrate = 115200

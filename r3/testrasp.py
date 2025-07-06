@@ -1,19 +1,9 @@
 import os, json
 import requests
 
-
-#API key for KeaPC is: 8yArxdsF.E4viD1uo4yLSibw0QqI5Vno4KPJ6b8hO
-#API key for keaCom is: swQuMMgt.vh1nQPMnHmNtClcTQM5DOcpjhHv4X0RA
- 
 #dev
-url="http://192.168.1.33:8000/api/basic/"
-key = "vaGkQQur.OkotzgLTEDFuXwzZrUA1oMUH7iKWDugW"
-#API key for keaCom is: swQuMMgt.vh1nQPMnHmNtClcTQM5DOcpjhHv4X0RA
-key = "swQuMMgt.vh1nQPMnHmNtClcTQM5DOcpjhHv4X0RA"
-#API Key for PI3
-key = "TM4fc8ew.yIeDMRVam9qvQvyGr68n3EpXirAdwv5h"
-#BeeComp
-#key = "lR95LKJ5.bY6X3kf2sIgBIklwLnZ18l7RbwTNllBF"
+url = "http://192.168.1.2:8000/api/basic/"
+key = "MXW1DmQw.YxfqID7PHCo1rdfWCCbiKqH4MV1kd8Cu"
 
 #aws
 #url="http://ec2-52-20-131-209.compute-1.amazonaws.com/api/basic/"
