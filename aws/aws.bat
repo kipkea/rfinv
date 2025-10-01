@@ -1,0 +1,1 @@
+ssh -i "rfINV.pem" ubuntu@ec2-52-20-131-209.compute-1.amazonaws.com
