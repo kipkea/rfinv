@@ -152,11 +152,11 @@ def Get_N_Items(N):
             x = ser.readline().strip().decode("utf-8")
             #x = ser.readline()
             #EPC GEN2 ขึ้นต้นด้วย E2
-            print(x)
+            #print(x)
             idx = x.find('E2')
             if idx != -1 and len(x)>28:
                 x = x[-8:]
-                print(x)
+                #print(x)
                 #if x not in Items and len(x)>=33 and x.startswith("300",1,4):
                 #เก็บเฉพาะ 8 หลักสุดท้ายเพื่อประหยัดพื้นที่
                 if x not in Items and len(x)==8:
@@ -285,8 +285,12 @@ try:
     run_cmd1(cmd_reader_id)
 
     #Get_One_Item()
-    Get_N_Items(90) 
+    Get_N_Items(100) 
     print(len(Items),' items = ',Items)
+
+    with open("output.txt", "w", encoding="utf-8") as file:
+        for item in Items:
+            file.write(item + "\n")
 
     ser.reset_input_buffer()
 

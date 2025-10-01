@@ -2,7 +2,7 @@ import os, json
 import requests
 
 #dev
-url = "http://192.168.1.2:8000/api/basic/"
+url = "http://192.168.1.99:8000/api/basic/"
 key = "MXW1DmQw.YxfqID7PHCo1rdfWCCbiKqH4MV1kd8Cu"
 
 #aws
