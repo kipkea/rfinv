@@ -1,0 +1,132 @@
+sudo apt update
+sudo apt install python3-venv python3-dev libpq-dev postgresql postgresql-contrib nginx curl
+
+mkdir ~/rfinv
+cd ~/rfinv
+
+python3 -m venv isenv
+
+source isenv/bin/activate
+
+pip install django gunicorn psycopg2-binary
+
+
+git clone https://github.com/kipkea/rfinv.git
+
+python ~/rfinv/rfinv/manage.py makemigrations
+python ~/rfinv/rfinv/manage.py migrate
+python ~/rfinv/rfinv/manage.py createsuperuser
+
+python ~/rfinv/rfinv/manage.py collectstatic
+
+python ~/rfinv/rfinv/manage.py runserver 0.0.0.0:8000
+
+cd ~/rfinv/rfinv
+gunicorn --bind 0.0.0.0:8000 rfinv.wsgi
+
+deactivate
+
+sudo nano /etc/systemd/system/gunicorn.socket
+
+[Unit]
+Description=gunicorn socket
+
+[Socket]
+ListenStream=/run/gunicorn.sock
+
+[Install]
+WantedBy=sockets.target
+
+
+
+sudo nano /etc/systemd/system/gunicorn.service
+
+
+[Unit]
+Description=gunicorn daemon
+Requires=gunicorn.socket
+After=network.target
+
+[Service]
+User=ubuntu
+Group=www-data
+WorkingDirectory=/home/ubuntu/rfinv/rfinv
+ExecStart=/home/ubuntu/rfinv/isenv/bin/gunicorn \
+          --access-logfile - \
+          --workers 3 \
+          --bind unix:/run/gunicorn.sock \
+          rfinv.wsgi:application
+
+[Install]
+WantedBy=multi-user.target
+
+
+
+chown -R www-data:www-data .
+
+
+
+sudo systemctl start gunicorn.socket
+sudo systemctl enable gunicorn.socket
+
+sudo systemctl status gunicorn.socket
+file /run/gunicorn.sock
+
+sudo journalctl -u gunicorn.socket
+
+sudo systemctl status gunicorn
+
+curl --unix-socket /run/gunicorn.sock localhost
+
+sudo systemctl status gunicorn
+
+sudo journalctl -u gunicorn
+
+
+sudo systemctl daemon-reload
+sudo systemctl restart gunicorn
+
+
+
+
+sudo nano /etc/nginx/sites-available/rfinv
+
+
+
+server {
+    listen 80;
+    server_name ec2-52-20-131-209.compute-1.amazonaws.com;
+
+    location = /favicon.ico { access_log off; log_not_found off; }
+    location /static/ {
+        root /home/ubuntu/rfinv/rfinv;
+    }
+
+    location / {
+        include proxy_params;
+        proxy_pass http://unix:/run/gunicorn.sock;
+    }
+}
+
+
+sudo ln -s /etc/nginx/sites-available/rfinv /etc/nginx/sites-enabled
+sudo nginx -t
+sudo systemctl restart nginx
+
+
+sudo tail -F /var/log/nginx/error.log
+
+
+
+
+
+
+sudo systemctl daemon-reload
+sudo systemctl restart gunicorn
+sudo systemctl restart nginx
+
+
+
+http://ec2-52-20-131-209.compute-1.amazonaws.com/
+
+
