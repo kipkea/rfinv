@@ -6,8 +6,17 @@ import requests
 from datetime import datetime
 from kivy.uix.button import Button
 
+
+Myport = '/dev/ttyAMA0'   #r5
+#port = '/dev/ttyS0'    #r3
+
+Mybuadrate = 38400
+#buadrate = 57600
+#buadrate = 115200
+
+
 class RFIDScanner:
-    def __init__(self, port='/dev/ttyUSB0', baudrate=9600):
+    def __init__(self, port=Myport, baudrate=Mybuadrate):
         self.ser = serial.Serial(port, baudrate, timeout=1)
         self.running = False
         self.collected_data = []
@@ -29,7 +38,8 @@ class RFIDScanner:
                 print(f'เก็บข้อมูล: {tag}, รูปภาพ: {image_path}')
 
     def capture_image(self, tag):
-        cam = cv2.VideoCapture(0)
+        #cam = cv2.VideoCapture(0)
+        cam = cv2.VideoCapture(10)
         ret, frame = cam.read()
         filename = f"rfid_{tag}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.jpg"
         path = os.path.join('/home/pi/pictures/', filename)
