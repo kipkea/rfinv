@@ -1,0 +1,140 @@
+# rpicam_gui.kv
+
+<CameraControl>:
+    hflip_active: hflip_switch.active
+    vflip_active: vflip_switch.active
+    rotation_value: rotation_input.text
+    contrast_value: contrast_input.text
+    saturation_value: saturation_input.text
+    width_value: width_input.text
+    height_value: height_input.text
+    orientation: 'vertical'
+    padding: 10
+    spacing: 10
+    
+    # ------------------------------------
+    # ส่วนที่ 1: การตั้งค่าภาพ (การกลับด้าน/หมุน)
+    # ------------------------------------
+    BoxLayout:
+        size_hint_y: None
+        height: 50
+        Label:
+            text: 'การกลับด้าน/หมุนภาพ'
+            size_hint_x: 0.3
+        
+        BoxLayout:
+            spacing: 10
+            Label:
+                text: 'H-Flip'
+            Switch:
+                id: hflip_switch
+                active: root.hflip_active
+            
+            Label:
+                text: 'V-Flip'
+            Switch:
+                id: vflip_switch
+                active: root.vflip_active
+                
+            Label:
+                text: 'หมุน (0/90/180/270)'
+            TextInput:
+                id: rotation_input
+                text: root.rotation_value
+                size_hint_x: 0.2
+                input_type: 'number'
+                multiline: False
+
+    # ------------------------------------
+    # ส่วนที่ 2: การปรับสี/ความคมชัด
+    # ------------------------------------
+    BoxLayout:
+        size_hint_y: None
+        height: 50
+        Label:
+            text: 'สี/ความคมชัด'
+            size_hint_x: 0.3
+            
+        Label:
+            text: 'Contrast (0.0-10.0)'
+        TextInput:
+            id: contrast_input
+            text: root.contrast_value
+            input_type: 'number'
+            multiline: False
+            
+        Label:
+            text: 'Saturation (0.0-10.0)'
+        TextInput:
+            id: saturation_input
+            text: root.saturation_value
+            input_type: 'number'
+            multiline: False
+
+    # ------------------------------------
+    # ส่วนที่ 3: ขนาดภาพ
+    # ------------------------------------
+    BoxLayout:
+        size_hint_y: None
+        height: 50
+        Label:
+            text: 'ขนาดภาพนิ่ง (Pixel)'
+            size_hint_x: 0.3
+            
+        Label:
+            text: 'ความกว้าง'
+        TextInput:
+            id: width_input
+            text: root.width_value
+            input_type: 'number'
+            multiline: False
+            
+        Label:
+            text: 'ความสูง'
+        TextInput:
+            id: height_input
+            text: root.height_value
+            input_type: 'number'
+            multiline: False
+
+    # ------------------------------------
+    # ส่วนที่ 4: การควบคุมกล้อง
+    # ------------------------------------
+    BoxLayout:
+        size_hint_y: None
+        height: 80
+        spacing: 10
+        Button:
+            text: 'เริ่ม Preview (rpicam-hello)'
+            on_press: root.start_preview()
+        Button:
+            text: 'หยุด Preview'
+            on_press: root.stop_preview()
+        Button:
+            text: 'ถ่ายภาพนิ่ง (libcamera-still)'
+            background_color: 0.2, 0.8, 0.2, 1
+            on_press: root.capture_image()
+            
+    # ------------------------------------
+    # ส่วนที่ 5: การจัดการ Config
+    # ------------------------------------
+    BoxLayout:
+        size_hint_y: None
+        height: 50
+        Button:
+            text: 'บันทึก Config เป็น JSON'
+            on_press: root.save_config()
+        Button:
+            text: 'โหลด Config จาก JSON'
+            on_press: root.load_config()
+
+    # ------------------------------------
+    # ส่วนที่ 6: สถานะ
+    # ------------------------------------
+    Label:
+        size_hint_y: None
+        height: 30
+        text: root.status_text
+        text_size: self.size
+        halign: 'left'
+        valign: 'middle'

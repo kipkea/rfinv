@@ -1,0 +1,195 @@
+# Kivy Language File for RPiCamControlApp
+
+<CameraControlLayout>:
+    orientation: 'vertical'
+    padding: 10
+    spacing: 10
+
+    # --- Section A: Camera Controls (Sliders) ---
+    ScrollView:
+        size_hint_y: 0.8
+        GridLayout:
+            cols: 2
+            size_hint_y: None
+            height: self.minimum_height
+            row_default_height: 40
+            row_force_default: True
+            spacing: 5
+            padding: 5
+
+            Label:
+                text: 'Sharpness (0.0 - 2.0):'
+                halign: 'right'
+            BoxLayout:
+                orientation: 'horizontal'
+                Slider:
+                    id: sharpness_slider
+                    min: 0.0
+                    max: 2.0
+                    step: 0.1
+                    value: root.settings['sharpness']
+                    on_value: root.settings['sharpness'] = self.value
+                Label:
+                    text: f"{sharpness_slider.value:.1f}"
+                    size_hint_x: 0.2
+
+            Label:
+                text: 'Contrast (0.0 - 2.0):'
+                halign: 'right'
+            BoxLayout:
+                orientation: 'horizontal'
+                Slider:
+                    id: contrast_slider
+                    min: 0.0
+                    max: 2.0
+                    step: 0.1
+                    value: root.settings['contrast']
+                    on_value: root.settings['contrast'] = self.value
+                Label:
+                    text: f"{contrast_slider.value:.1f}"
+                    size_hint_x: 0.2
+
+            Label:
+                text: 'Brightness (-1.0 - 1.0):'
+                halign: 'right'
+            BoxLayout:
+                orientation: 'horizontal'
+                Slider:
+                    id: brightness_slider
+                    min: -1.0
+                    max: 1.0
+                    step: 0.1
+                    value: root.settings['brightness']
+                    on_value: root.settings['brightness'] = self.value
+                Label:
+                    text: f"{brightness_slider.value:.1f}"
+                    size_hint_x: 0.2
+
+            Label:
+                text: 'Saturation (0.0 - 2.0):'
+                halign: 'right'
+            BoxLayout:
+                orientation: 'horizontal'
+                Slider:
+                    id: saturation_slider
+                    min: 0.0
+                    max: 2.0
+                    step: 0.1
+                    value: root.settings['saturation']
+                    on_value: root.settings['saturation'] = self.value
+                Label:
+                    text: f"{saturation_slider.value:.1f}"
+                    size_hint_x: 0.2
+
+            Label:
+                text: 'EV Compensation (-10.0 - 10.0):'
+                halign: 'right'
+            BoxLayout:
+                orientation: 'horizontal'
+                Slider:
+                    id: ev_slider
+                    min: -10.0
+                    max: 10.0
+                    step: 0.5
+                    value: root.settings['ev']
+                    on_value: root.settings['ev'] = self.value
+                Label:
+                    text: f"{ev_slider.value:.1f}"
+                    size_hint_x: 0.2
+
+            Label:
+                text: 'AWB Mode:'
+                halign: 'right'
+            Spinner:
+                id: awb_spinner
+                text: root.settings['awb']
+                values: app.AWB_MODES
+                on_text: root.settings['awb'] = self.text
+
+            # --- Section B: Resolution and Transformation ---
+            Label:
+                text: 'Width:'
+            Spinner:
+                id: width_spinner
+                text: str(root.settings['width'])
+                values: [str(r[0]) for r in app.RESOLUTIONS]
+                on_text: root.settings['width'] = int(self.text)
+
+            Label:
+                text: 'Height:'
+            Spinner:
+                id: height_spinner
+                text: str(root.settings['height'])
+                values: [str(r[1]) for r in app.RESOLUTIONS]
+                on_text: root.settings['height'] = int(self.text)
+
+            Label:
+                text: 'H-Flip:'
+            Switch:
+                id: hflip_switch
+                active: root.settings['hflip']
+                on_active: root.settings['hflip'] = self.active
+
+            Label:
+                text: 'V-Flip:'
+            Switch:
+                id: vflip_switch
+                active: root.settings['vflip']
+                on_active: root.settings['vflip'] = self.active
+
+            Label:
+                text: 'Rotation:'
+            Spinner:
+                id: rotation_spinner
+                text: str(root.settings['rotation'])
+                values: [str(r) for r in app.ROTATION_MODES]
+                on_text: root.settings['rotation'] = int(self.text)
+
+    # --- Section C: Actions and Status ---
+    BoxLayout:
+        orientation: 'vertical'
+        size_hint_y: 0.2
+        spacing: 10
+        padding: 5
+
+        BoxLayout:
+            orientation: 'horizontal'
+            size_hint_y: None
+            height: 40
+            spacing: 10
+
+            Button:
+                text: 'Start Preview' if not root.preview_running else 'Stop Preview'
+                on_release: root.start_preview() if not root.preview_running else root.stop_preview()
+                background_color: (0, 0.6, 0, 1) if not root.preview_running else (0.6, 0, 0, 1)
+
+            Button:
+                text: 'Capture Image'
+                on_release: root.capture_image()
+                background_color: (0, 0, 0.6, 1)
+
+        BoxLayout:
+            orientation: 'horizontal'
+            size_hint_y: None
+            height: 40
+            spacing: 10
+
+            Button:
+                text: 'Save Config'
+                on_release: root.save_config()
+                background_color: (0.6, 0.6, 0, 1)
+
+            Button:
+                text: 'Load Config'
+                on_release: root.load_config()
+                background_color: (0.6, 0.6, 0, 1)
+
+        Label:
+            id: status_label
+            text: root.status_text
+            size_hint_y: 1.0
+            font_size: '14sp'
+            color: (1, 1, 1, 1)
+            text_size: self.size
+            valign: 'middle'
+            halign: 'center'
