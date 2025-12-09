@@ -25,9 +25,9 @@ class CameraService:
         
         # Image Processing Parameters
         self.processing_params = {
-            'brightness': 1.0,  # Multiplier (0.0 to 2.0)
-            'contrast': 1.0,    # Multiplier (0.0 to 2.0)
-            'sharpness': 0,     # 0=None, 1=Mild, 2=Strong (Simulated)
+            'brightness': 0,  # Multiplier (0.0 to 2.0)
+            'contrast': 0,    # Multiplier (0.0 to 2.0)
+            'sharpness': 1,     # 0=None, 1=Mild, 2=Strong (Simulated)
             'color_mode': 'BGR', # 'BGR', 'GRAY', 'HSV'
             'filter': 'None',   # 'None', 'Sobel', 'Canny'
             'resize_factor': 1.0 # Multiplier (0.5 to 2.0)
