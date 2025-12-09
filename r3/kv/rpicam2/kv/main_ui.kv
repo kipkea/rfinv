@@ -1,0 +1,390 @@
+# rpi_camera_controller_opencv/kv/main_ui.kv
+
+<MainScreen>:
+    # MainScreen is the root widget for the single-screen application
+    name: 'main'
+    
+    BoxLayout:
+        orientation: 'vertical'
+        padding: 10
+        spacing: 10
+        
+        # 1. Camera Preview Area (70% of height)
+        Image:
+            id: camera_preview
+            size_hint_y: 0.7
+            allow_stretch: True
+            keep_ratio: True
+            source: 'assets/placeholder_preview.png' # Placeholder image
+            
+        # 2. Control Panel (20% of height)
+        GridLayout:
+            size_hint_y: 0.2
+            cols: 5
+            spacing: 10
+            
+            # Capture Button
+            Button:
+                text: '📸 ถ่ายภาพ'
+                font_size: 24
+                on_release: root.show_tagging_popup('image')
+                
+            # Record Button
+            Button:
+                id: record_btn
+                text: '🔴 บันทึก'
+                font_size: 24
+                background_color: (0.8, 0.2, 0.2, 1) if self.text == '🔴 บันทึก' else (0.2, 0.8, 0.2, 1)
+                on_release: root.toggle_recording()
+                
+            # Settings Button
+            Button:
+                text: '🖼️ ปรับภาพ'
+                font_size: 24
+                on_release: root.show_image_processing_popup()
+                
+            Button:
+                text: '⚙️ ตั้งค่า'
+                font_size: 24
+                on_release: root.show_settings_popup()
+                
+                # History Button (Disabled in Local Version)
+            Button:
+                text: '📂 ประวัติ'
+                font_size: 24
+                disabled: True
+                on_release: root.show_history_popup()
+                
+            # Share Button (Disabled in Local Version)
+            Button:
+                id: share_btn
+                text: '📤 แชร์'
+                font_size: 24
+                disabled: True
+                on_release: root.share_last_capture()
+
+        # 3. Status Bar (10% of height)
+        Label:
+            id: status_bar
+            size_hint_y: 0.1
+            text: 'สถานะ: พร้อมใช้งาน'
+            font_size: 18
+            color: (0.8, 0.8, 0.8, 1)
+            text_size: self.size
+            halign: 'left'
+            valign: 'middle'
+
+# --- Popups (Defined here for simplicity, but can be in separate files) ---
+
+<TaggingPopup>:
+    title: 'ตั้งชื่อไฟล์และใส่ Tag'
+    size_hint: 0.8, 0.6
+    auto_dismiss: False
+    
+    BoxLayout:
+        orientation: 'vertical'
+        padding: 20
+        spacing: 15
+        
+        Label:
+            text: 'ชื่อไฟล์ (ไม่บังคับ):'
+            size_hint_y: None
+            height: 30
+            font_size: 18
+            
+        TextInput:
+            id: user_filename_input
+            hint_text: 'เช่น My_Vacation_Photo'
+            multiline: False
+            font_size: 24
+            size_hint_y: None
+            height: 50
+            
+        Label:
+            text: 'Tags (คั่นด้วยจุลภาค):'
+            size_hint_y: None
+            height: 30
+            font_size: 18
+            
+        TextInput:
+            id: user_tags_input
+            hint_text: 'เช่น family, beach, sunset'
+            multiline: False
+            font_size: 24
+            size_hint_y: None
+            height: 50
+            
+        BoxLayout:
+            size_hint_y: None
+            height: 60
+            spacing: 10
+            
+            Button:
+                text: 'ยกเลิก'
+                font_size: 24
+                on_release: root.dismiss()
+                
+            Button:
+                text: 'บันทึกไฟล์'
+                font_size: 24
+                on_release: root.save_and_upload(user_filename_input.text, user_tags_input.text)
+
+<ImageProcessingPopup>:
+    title: 'ปรับแต่งภาพ Real-time'
+    size_hint: 0.9, 0.8
+    auto_dismiss: False
+    
+    BoxLayout:
+        orientation: 'vertical'
+        padding: 20
+        spacing: 15
+        
+        ScrollView:
+            BoxLayout:
+                orientation: 'vertical'
+                size_hint_y: None
+                height: self.minimum_height
+                spacing: 15
+                
+                # Brightness
+                Label:
+                    text: 'ความสว่าง (Brightness)'
+                    size_hint_y: None
+                    height: 30
+                    font_size: 18
+                BoxLayout:
+                    size_hint_y: None
+                    height: 40
+                    Label:
+                        text: '0.0'
+                        size_hint_x: 0.1
+                    Slider:
+                        id: brightness_slider
+                        min: 0.0
+                        max: 2.0
+                        step: 0.05
+                        value: 1.0
+                        on_value: root.set_param('brightness', self.value)
+                    Label:
+                        text: '2.0'
+                        size_hint_x: 0.1
+                        
+                # Contrast
+                Label:
+                    text: 'ความคมชัด (Contrast)'
+                    size_hint_y: None
+                    height: 30
+                    font_size: 18
+                BoxLayout:
+                    size_hint_y: None
+                    height: 40
+                    Label:
+                        text: '0.0'
+                        size_hint_x: 0.1
+                    Slider:
+                        id: contrast_slider
+                        min: 0.0
+                        max: 2.0
+                        step: 0.05
+                        value: 1.0
+                        on_value: root.set_param('contrast', self.value)
+                    Label:
+                        text: '2.0'
+                        size_hint_x: 0.1
+                        
+                # Sharpness (Simulated)
+                Label:
+                    text: 'ความคม (Sharpness)'
+                    size_hint_y: None
+                    height: 30
+                    font_size: 18
+                BoxLayout:
+                    size_hint_y: None
+                    height: 40
+                    Label:
+                        text: '0'
+                        size_hint_x: 0.1
+                    Slider:
+                        id: sharpness_slider
+                        min: 0
+                        max: 2
+                        step: 1
+                        value: 0
+                        on_value: root.set_param('sharpness', self.value)
+                    Label:
+                        text: '2'
+                        size_hint_x: 0.1
+                        
+                # Resize Factor
+                Label:
+                    text: 'ขนาดภาพ (Resize Factor)'
+                    size_hint_y: None
+                    height: 30
+                    font_size: 18
+                BoxLayout:
+                    size_hint_y: None
+                    height: 40
+                    Label:
+                        text: '0.5'
+                        size_hint_x: 0.1
+                    Slider:
+                        id: resize_slider
+                        min: 0.5
+                        max: 2.0
+                        step: 0.1
+                        value: 1.0
+                        on_value: root.set_param('resize_factor', self.value)
+                    Label:
+                        text: '2.0'
+                        size_hint_x: 0.1
+                        
+                # Color Mode
+                Label:
+                    text: 'โหมดสี (Color Mode)'
+                    size_hint_y: None
+                    height: 30
+                    font_size: 18
+                BoxLayout:
+                    size_hint_y: None
+                    height: 60
+                    Button:
+                        id: color_mode_btn
+                        text: 'BGR'
+                        font_size: 24
+                        on_release: dropdown.open(self)
+                        
+                    DropDown:
+                        id: color_mode_dropdown
+                        on_select: root.set_color_mode(args[1])
+                        Button:
+                            text: 'BGR'
+                            size_hint_y: None
+                            height: 44
+                            on_release: color_mode_dropdown.select('BGR')
+                        Button:
+                            text: 'GRAY'
+                            size_hint_y: None
+                            height: 44
+                            on_release: color_mode_dropdown.select('GRAY')
+                        Button:
+                            text: 'HSV'
+                            size_hint_y: None
+                            height: 44
+                            on_release: color_mode_dropdown.select('HSV')
+                            
+                # Filter
+                Label:
+                    text: 'ฟิลเตอร์ (Filter)'
+                    size_hint_y: None
+                    height: 30
+                    font_size: 18
+                BoxLayout:
+                    size_hint_y: None
+                    height: 60
+                    Button:
+                        id: filter_btn
+                        text: 'None'
+                        font_size: 24
+                        on_release: filter_dropdown.open(self)
+                        
+                    DropDown:
+                        id: filter_dropdown
+                        on_select: root.set_filter(args[1])
+                        Button:
+                            text: 'None'
+                            size_hint_y: None
+                            height: 44
+                            on_release: filter_dropdown.select('None')
+                        Button:
+                            text: 'Sobel'
+                            size_hint_y: None
+                            height: 44
+                            on_release: filter_dropdown.select('Sobel')
+                        Button:
+                            text: 'Canny'
+                            size_hint_y: None
+                            height: 44
+                            on_release: filter_dropdown.select('Canny')
+                            
+        BoxLayout:
+            size_hint_y: None
+            height: 60
+            spacing: 10
+            
+            Button:
+                text: 'ปิด'
+                font_size: 24
+                on_release: root.dismiss()
+
+<SettingsPopup>:
+    title: 'ตั้งค่า Network'
+    size_hint: 0.9, 0.8
+    auto_dismiss: False
+    
+    BoxLayout:
+        orientation: 'vertical'
+        padding: 20
+        spacing: 15
+        
+        ScrollView:
+            BoxLayout:
+                orientation: 'vertical'
+                size_hint_y: None
+                height: self.minimum_height
+                spacing: 15
+                
+                Label:
+                    text: 'Network Configuration (Simulated)'
+                    size_hint_y: None
+                    height: 40
+                    font_size: 24
+                    color: (0.2, 0.8, 0.2, 1)
+                    
+                Label:
+                    text: 'Wi-Fi SSID:'
+                    size_hint_y: None
+                    height: 30
+                    font_size: 18
+                TextInput:
+                    id: wifi_ssid
+                    multiline: False
+                    font_size: 20
+                    size_hint_y: None
+                    height: 40
+                    
+                Label:
+                    text: 'Wi-Fi Password:'
+                    size_hint_y: None
+                    height: 30
+                    font_size: 18
+                TextInput:
+                    id: wifi_password
+                    multiline: False
+                    font_size: 20
+                    size_hint_y: None
+                    height: 40
+                    password: True
+                    
+                Button:
+                    text: 'เชื่อมต่อ Wi-Fi (Simulated)'
+                    font_size: 24
+                    size_hint_y: None
+                    height: 60
+                    on_release: root.connect_wifi(wifi_ssid.text, wifi_password.text)
+        
+        BoxLayout:
+            size_hint_y: None
+            height: 60
+            spacing: 10
+            
+            Button:
+                text: 'ยกเลิก'
+                font_size: 24
+                on_release: root.dismiss()
+                
+            Button:
+                text: 'บันทึกการตั้งค่า'
+                font_size: 24
+                on_release: root.save_settings()
+
+

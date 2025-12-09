@@ -1,0 +1,267 @@
+# rpi_camera_controller_opencv/kv/main_ui.kv
+
+<MainScreen>:
+    # MainScreen is the root widget for the single-screen application
+    name: 'main'
+    
+    BoxLayout:
+        orientation: 'vertical'
+        padding: 10
+        spacing: 10
+        
+        # 1. Camera Preview Area (70% of height)
+        Image:
+            id: camera_preview
+            size_hint_y: 0.7
+            allow_stretch: True
+            keep_ratio: True
+            source: 'assets/placeholder_preview.png' # Placeholder image
+            
+        # 2. Control Panel (20% of height)
+        GridLayout:
+            size_hint_y: 0.2
+            cols: 5
+            spacing: 10
+            
+            # Capture Button
+            Button:
+                text: '📸 ถ่ายภาพ'
+                font_size: 24
+                on_release: root.show_tagging_popup('image')
+                
+            # Record Button
+            Button:
+                id: record_btn
+                text: '🔴 บันทึก'
+                font_size: 24
+                background_color: (0.8, 0.2, 0.2, 1) if self.text == '🔴 บันทึก' else (0.2, 0.8, 0.2, 1)
+                on_release: root.toggle_recording()
+                
+            # Settings Button
+            Button:
+                text: '⚙️ ตั้งค่า'
+                font_size: 24
+                on_release: root.show_settings_popup()
+                
+            # History Button
+            Button:
+                text: '📂 ประวัติ'
+                font_size: 24
+                on_release: root.show_history_popup()
+                
+            # Share Button (Only visible after capture/record)
+            Button:
+                id: share_btn
+                text: '📤 แชร์'
+                font_size: 24
+                disabled: True
+                on_release: root.share_last_capture()
+
+        # 3. Status Bar (10% of height)
+        Label:
+            id: status_bar
+            size_hint_y: 0.1
+            text: 'สถานะ: พร้อมใช้งาน'
+            font_size: 18
+            color: (0.8, 0.8, 0.8, 1)
+            text_size: self.size
+            halign: 'left'
+            valign: 'middle'
+
+# --- Popups (Defined here for simplicity, but can be in separate files) ---
+
+<TaggingPopup>:
+    title: 'ตั้งชื่อไฟล์และใส่ Tag'
+    size_hint: 0.8, 0.6
+    auto_dismiss: False
+    
+    BoxLayout:
+        orientation: 'vertical'
+        padding: 20
+        spacing: 15
+        
+        Label:
+            text: 'ชื่อไฟล์ (ไม่บังคับ):'
+            size_hint_y: None
+            height: 30
+            font_size: 18
+            
+        TextInput:
+            id: user_filename_input
+            hint_text: 'เช่น My_Vacation_Photo'
+            multiline: False
+            font_size: 24
+            size_hint_y: None
+            height: 50
+            
+        Label:
+            text: 'Tags (คั่นด้วยจุลภาค):'
+            size_hint_y: None
+            height: 30
+            font_size: 18
+            
+        TextInput:
+            id: user_tags_input
+            hint_text: 'เช่น family, beach, sunset'
+            multiline: False
+            font_size: 24
+            size_hint_y: None
+            height: 50
+            
+        BoxLayout:
+            size_hint_y: None
+            height: 60
+            spacing: 10
+            
+            Button:
+                text: 'ยกเลิก'
+                font_size: 24
+                on_release: root.dismiss()
+                
+            Button:
+                text: 'บันทึกและอัปโหลด'
+                font_size: 24
+                on_release: root.save_and_upload(user_filename_input.text, user_tags_input.text)
+
+<SettingsPopup>:
+    title: 'ตั้งค่า AWS และ Network'
+    size_hint: 0.9, 0.8
+    auto_dismiss: False
+    
+    BoxLayout:
+        orientation: 'vertical'
+        padding: 20
+        spacing: 15
+        
+        ScrollView:
+            BoxLayout:
+                orientation: 'vertical'
+                size_hint_y: None
+                height: self.minimum_height
+                spacing: 15
+                
+                Label:
+                    text: 'AWS S3 Configuration'
+                    size_hint_y: None
+                    height: 40
+                    font_size: 24
+                    color: (0.2, 0.8, 0.2, 1)
+                
+                Label:
+                    text: 'Access Key ID:'
+                    size_hint_y: None
+                    height: 30
+                    font_size: 18
+                TextInput:
+                    id: aws_key_id
+                    multiline: False
+                    font_size: 20
+                    size_hint_y: None
+                    height: 40
+                    
+                Label:
+                    text: 'Secret Access Key:'
+                    size_hint_y: None
+                    height: 30
+                    font_size: 18
+                TextInput:
+                    id: aws_secret_key
+                    multiline: False
+                    font_size: 20
+                    size_hint_y: None
+                    height: 40
+                    password: True
+                    
+                Label:
+                    text: 'S3 Bucket Name:'
+                    size_hint_y: None
+                    height: 30
+                    font_size: 18
+                TextInput:
+                    id: aws_bucket_name
+                    multiline: False
+                    font_size: 20
+                    size_hint_y: None
+                    height: 40
+                    
+                Label:
+                    text: 'Network Configuration (Simulated)'
+                    size_hint_y: None
+                    height: 40
+                    font_size: 24
+                    color: (0.2, 0.8, 0.2, 1)
+                    
+                Label:
+                    text: 'Wi-Fi SSID:'
+                    size_hint_y: None
+                    height: 30
+                    font_size: 18
+                TextInput:
+                    id: wifi_ssid
+                    multiline: False
+                    font_size: 20
+                    size_hint_y: None
+                    height: 40
+                    
+                Label:
+                    text: 'Wi-Fi Password:'
+                    size_hint_y: None
+                    height: 30
+                    font_size: 18
+                TextInput:
+                    id: wifi_password
+                    multiline: False
+                    font_size: 20
+                    size_hint_y: None
+                    height: 40
+                    password: True
+                    
+                Button:
+                    text: 'เชื่อมต่อ Wi-Fi (Simulated)'
+                    font_size: 24
+                    size_hint_y: None
+                    height: 60
+                    on_release: root.connect_wifi(wifi_ssid.text, wifi_password.text)
+        
+        BoxLayout:
+            size_hint_y: None
+            height: 60
+            spacing: 10
+            
+            Button:
+                text: 'ยกเลิก'
+                font_size: 24
+                on_release: root.dismiss()
+                
+            Button:
+                text: 'บันทึกการตั้งค่า'
+                font_size: 24
+                on_release: root.save_settings(aws_key_id.text, aws_secret_key.text, aws_bucket_name.text)
+
+<HistoryPopup>:
+    title: 'ประวัติการอัปโหลด (AWS S3)'
+    size_hint: 0.9, 0.8
+    auto_dismiss: False
+    
+    BoxLayout:
+        orientation: 'vertical'
+        padding: 10
+        spacing: 10
+        
+        ScrollView:
+            id: history_scroll
+            
+            # This will be populated dynamically by the MainScreen class
+            BoxLayout:
+                id: history_list
+                orientation: 'vertical'
+                size_hint_y: None
+                height: self.minimum_height
+                spacing: 5
+                
+        Button:
+            text: 'ปิด'
+            font_size: 24
+            size_hint_y: None
+            height: 60
+            on_release: root.dismiss()
