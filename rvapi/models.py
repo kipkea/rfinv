@@ -1,6 +1,10 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
+from django.contrib.auth import get_user_model
+
+# ใช้ get_user_model() เพื่ออ้างถึง User Model ของ Django
+User = get_user_model()
 
 # Create your models here.
 
@@ -21,23 +25,25 @@ class Product(models.Model):
         return self.name
 '''
 
-
-          
+           
     
 class RFIDTag(models.Model):
     RFID = models.CharField(max_length=100, unique=True)
     is_location = models.BooleanField(default=False)
 
+   
     recorded_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     recorded_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         #db_table = "RFIDTag"
-        ordering = ('RFID',)        
+        ordering = ('RFID',)     
+     
         
     def __str__(self):
         return self.RFID
 
+    
 class Location(models.Model):
     rfid_tag = models.OneToOneField(RFIDTag, on_delete=models.CASCADE)
     name = models.CharField(max_length=255, blank = True, null = True)

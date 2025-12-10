@@ -190,6 +190,7 @@ REST_FRAMEWORK = {
 #static_root ที่ตั้ง file static ใน server 
 #dev
 STATIC_ROOT = os.path.join(BASE_DIR , 'root_static')
+#MEDIA_ROOT = BASE_DIR / 'root_media' 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'root_media')
 
 #aws
@@ -206,6 +207,9 @@ STATICFILES_DIRS = [
 #global url อ้างอิงได้จาก tags {% load static %}
 STATIC_URL = "/static/"
 MEDIA_URL = '/media/'
+
+
+
 
 API_KEY_CUSTOM_HEADER = "HTTP_X_API_KEY"
 
