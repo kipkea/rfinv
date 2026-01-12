@@ -6,12 +6,16 @@ from kivy.uix.label import Label
 class MySimpleApp(App):
     def build(self):
         layout = BoxLayout(orientation='vertical')
+        #layout = BoxLayout(orientation='horizontal')  
         label = Label(text='Hello, Kivy!')
+        label2 = Label(text='Apichart')
         button = Button(text='Click Me')
         button.bind(on_press=self.on_button_press)
         
         layout.add_widget(label)
+           
         layout.add_widget(button)
+        layout.add_widget(label2)
         
         return layout
 
