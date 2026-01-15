@@ -361,7 +361,7 @@ class MainLayout(TabbedPanel):
         found_indices = set()
         
         # ตรวจสอบกล้องโดยลองใช้ API หลายแบบเพื่อให้ครอบคลุมมากขึ้น
-        for i in range(10): # ตรวจสอบ 10 index แรก
+        for i in range(30): # ตรวจสอบ 10 index แรก
             # วิธีที่ 1: ลองใช้ DirectShow (CAP_DSHOW) ก่อน ซึ่งมักจะเข้ากันได้ดีกับกล้อง USB บน Windows
             cap = cv2.VideoCapture(i, cv2.CAP_DSHOW)
             if cap.isOpened():

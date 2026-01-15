@@ -143,7 +143,7 @@ def Get_N_Items(N):
     global Items
     ser.reset_output_buffer()
     print("Send command : ",cmd_MQ_EPC)
-    timeout = time.time() + 50
+    timeout = time.time() + 50      #timeout 50 second
     while True:
         ser.write(cmd_MQ_EPC)
         #time.sleep(0.1)     
@@ -152,7 +152,7 @@ def Get_N_Items(N):
             x = ser.readline().strip().decode("utf-8")
             #x = ser.readline()
             #EPC GEN2 ขึ้นต้นด้วย E2
-            #print(x)
+            print(x)
             idx = x.find('E2')
             if idx != -1 and len(x)>28:
                 x = x[-8:]

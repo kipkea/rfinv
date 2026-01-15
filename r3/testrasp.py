@@ -2,13 +2,8 @@ import os, json
 import requests
 
 #dev
-<<<<<<< HEAD
 url = "http://192.168.1.99:8000/api/basic/"
 key = "MXW1DmQw.YxfqID7PHCo1rdfWCCbiKqH4MV1kd8Cu"
-=======
-#url = "http://192.168.1.2:8000/api/basic/"
-#key = "MXW1DmQw.YxfqID7PHCo1rdfWCCbiKqH4MV1kd8Cu"
->>>>>>> e636ad4cb6055e05d41f212e094352e908743631
 
 #aws
 url="http://ec2-52-20-131-209.compute-1.amazonaws.com/api/basic/"
