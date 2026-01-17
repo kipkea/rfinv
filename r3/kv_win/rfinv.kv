@@ -1,0 +1,302 @@
+# --- Custom Widget: เส้นแบ่งแนวตั้ง ---
+<VerticalSeparator@Widget>:
+    size_hint_x: None
+    width: dp(1)
+    canvas:
+        Color:
+            rgba: 0.5, 0.5, 0.5, 1  # สีเทาของเส้นแบ่ง
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+<ProductRow@BoxLayout>:
+    orientation: 'horizontal'
+    size_hint_y: None
+    height: '60dp'
+    padding: 5
+    spacing: 5
+    canvas.before:
+        Color:
+            rgba: 0.9, 0.9, 0.9, 1
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+    Label:
+        text: root.index
+        color: 0,0,0,1
+        size_hint_x: 0.1
+    Label:
+        text: root.code
+        color: 0,0,0,1
+        size_hint_x: 0.2
+    Label:
+        text: root.desc
+        color: 0,0,0,1
+        size_hint_x: 0.3
+        text_size: self.size
+        halign: 'left'
+        valign: 'middle'
+        shorten: True
+    Label:
+        text: root.location
+        color: 0,0,0,1
+        size_hint_x: 0.15
+    Label:
+        text: root.date
+        color: 0,0,0,1
+        size_hint_x: 0.15
+    AsyncImage:
+        source: root.img_url
+        size_hint_x: 0.1
+        allow_stretch: True
+
+<GalleryRow@BoxLayout>:
+    orientation: 'horizontal'
+    size_hint_y: None
+    height: '120dp'
+    padding: 5
+    spacing: 10
+    canvas.before:
+        Color:
+            rgba: 0.95, 0.95, 0.95, 1
+        Rectangle:
+            pos: self.pos
+            size: self.size
+    AsyncImage:
+        source: root.image_url
+        size_hint_x: 0.2
+        allow_stretch: True
+    BoxLayout:
+        orientation: 'vertical'
+        size_hint_x: 0.8
+        Label:
+            text: f"File: {root.filename}"
+            text_size: self.width, None
+            halign: 'left'
+            color: 0,0,0,1
+        Label:
+            text: f"Date: {root.timestamp}"
+            halign: 'left'
+            color: 0,0,0,1
+        Label:
+            text: f"User: {root.user} | Dimensions: {root.dimensions}"
+            halign: 'left'
+            color: 0,0,0,1
+
+<HeaderButton@Button>:
+    background_normal: ''
+    background_color: 0.3, 0.5, 0.7, 1
+    bold: True
+
+# --- AppTabs (ชื่อเดิม MainLayout) ส่วนเนื้อหาหลัก ---
+<AppTabs>:
+    do_default_tab: False
+    
+    # --- Tab 1: Command Runner ---
+    TabbedPanelItem:
+        text: 'Command Runner'
+        BoxLayout:
+            orientation: 'vertical'
+            padding: 10
+            spacing: 10
+            BoxLayout:
+                size_hint_y: None
+                height: '40dp'
+                TextInput:
+                    id: cmd_input
+                    hint_text: 'Enter command...'
+                    multiline: False
+                    on_text_validate: root.run_command()
+                Button:
+                    text: 'Run'
+                    size_hint_x: 0.2
+                    on_press: root.run_command()
+            TextInput:
+                id: output_text
+                text: 'Ready...'
+                readonly: True
+
+    # --- Tab 2: Product List (API) ---
+    TabbedPanelItem:
+        text: 'Products (API)'
+        BoxLayout:
+            orientation: 'vertical'
+            padding: 5
+            spacing: 5
+            
+            Button:
+                text: 'Load Data from API'
+                size_hint_y: None
+                height: '40dp'
+                on_release: root.fetch_data()
+
+            BoxLayout:
+                size_hint_y: None
+                height: '40dp'
+                spacing: 2
+                HeaderButton:
+                    text: 'No.'
+                    size_hint_x: 0.1
+                    on_release: root.sort_data('index')
+                HeaderButton:
+                    text: 'Code'
+                    size_hint_x: 0.2
+                    on_release: root.sort_data('code')
+                HeaderButton:
+                    text: 'Description'
+                    size_hint_x: 0.3
+                    on_release: root.sort_data('desc')
+                HeaderButton:
+                    text: 'Location'
+                    size_hint_x: 0.15
+                    on_release: root.sort_data('location')
+                HeaderButton:
+                    text: 'Date'
+                    size_hint_x: 0.15
+                    on_release: root.sort_data('date')
+                Label:
+                    text: 'Image'
+                    size_hint_x: 0.1
+                    color: 0,0,0,1
+                    canvas.before:
+                        Color:
+                            rgba: 0.8,0.8,0.8,1
+                        Rectangle:
+                            pos: self.pos
+                            size: self.size
+
+            RecycleView:
+                id: rv_products
+                viewclass: 'ProductRow'
+                RecycleBoxLayout:
+                    default_size: None, dp(60)
+                    default_size_hint: 1, None
+                    size_hint_y: None
+                    height: self.minimum_height
+                    orientation: 'vertical'
+                    spacing: 2
+
+    # --- Tab 3: Camera ---
+    TabbedPanelItem:
+        text: 'Camera'
+        BoxLayout:
+            orientation: 'vertical'
+            padding: 10
+            spacing: 10
+            Image:
+                id: camera_view
+                size_hint_y: 0.7
+            
+            # ย้าย Status Camera ไปไว้ที่ Global Status Bar แทน หรือซ่อนไว้
+            # แต่ถ้ายังอยากโชว์เฉพาะหน้าจอนี้ ก็ปล่อยไว้ได้
+            Label:
+                id: camera_local_status
+                text: "Camera Ready"
+                size_hint_y: None
+                height: '20dp'
+                color: 0.5, 0.5, 0.5, 1
+
+            BoxLayout:
+                size_hint_y: None
+                height: '40dp'
+                spacing: 5
+                Spinner:
+                    id: camera_spinner
+                    text: 'Select Camera'
+                    on_text: root.switch_camera(self.text)
+                Button:
+                    id: capture_btn
+                    text: 'Capture'
+                    on_press: root.capture_image()
+            BoxLayout:
+                size_hint_y: 0.3
+                Image:
+                    id: capture_preview
+                    source: 'placeholder.png'
+                Button:
+                    id: save_btn
+                    text: 'Save to API'
+                    disabled: True
+                    on_press: root.save_image_api()
+
+    # --- Tab 4: Gallery ---
+    TabbedPanelItem:
+        text: 'Gallery'
+        BoxLayout:
+            orientation: 'vertical'
+            padding: 5
+            spacing: 5
+            Button:
+                text: 'Refresh'
+                size_hint_y: None
+                height: '40dp'
+                on_release: root.fetch_gallery()
+            RecycleView:
+                id: rv_gallery
+                viewclass: 'GalleryRow'
+                RecycleBoxLayout:
+                    default_size: None, dp(120)
+                    default_size_hint: 1, None
+                    size_hint_y: None
+                    height: self.minimum_height
+                    orientation: 'vertical'
+                    spacing: 2
+
+# --- MainLayout (Root) ---
+<MainLayout>:
+    orientation: 'vertical'
+
+    # ส่วนเนื้อหา (Tabs) เต็มพื้นที่
+    AppTabs:
+        id: app_tabs
+        size_hint_y: 1
+
+    # ส่วน Status Bar (Footer)
+    BoxLayout:
+        size_hint_y: None
+        height: '30dp'
+        padding: [5, 2] # ซ้ายขวา 5, บนล่าง 2
+        canvas.before:
+            Color:
+                rgba: 0.2, 0.2, 0.2, 1  # พื้นหลังสีเทาเข้ม
+            Rectangle:
+                pos: self.pos
+                size: self.size
+
+        # ส่วนที่ 1: ซ้าย (เช่น สถานะการเชื่อมต่อ)
+        Label:
+            id: status_left
+            text: 'System: Ready'
+            color: 0.9, 0.9, 0.9, 1
+            font_size: '12sp'
+            halign: 'left'
+            valign: 'middle'
+            text_size: self.size
+            size_hint_x: 0.4  # ให้พื้นที่ 40%
+
+        VerticalSeparator:
+
+        # ส่วนที่ 2: กลาง (เช่น การทำงานปัจจุบัน)
+        Label:
+            id: status_center
+            text: 'Idle'
+            color: 1, 1, 0, 1  # สีเหลือง
+            font_size: '12sp'
+            halign: 'center'
+            valign: 'middle'
+            text_size: self.size
+            size_hint_x: 0.4 # ให้พื้นที่ 40%
+
+        VerticalSeparator:
+
+        # ส่วนที่ 3: ขวา (เช่น เวอร์ชัน หรือ เวลา)
+        Label:
+            id: status_right
+            text: 'v1.0'
+            color: 0.7, 0.7, 0.7, 1
+            font_size: '12sp'
+            halign: 'right'
+            valign: 'middle'
+            text_size: self.size
+            size_hint_x: 0.2 # ให้พื้นที่ 20%
