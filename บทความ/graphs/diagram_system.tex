@@ -1,0 +1,67 @@
+% ไฟล์นี้เก็บเฉพาะโค้ดแผนภาพระบบ
+\begin{figure*}[htbp] % ใช้ figure* เพื่อให้รูปขยายเต็มความกว้างสองคอลัมน์ (ถ้าเป็น format 2 คอลัมน์)
+\centering
+% เริ่มวาดรูป TikZ
+\begin{tikzpicture}[node distance=2cm and 2.5cm] % ปรับระยะห่างระหว่างโหนด (แนวตั้ง and แนวนอน)
+
+    % --- Zone 1: Warehouse Edge ---
+    \node [hardware] (tags) {RFID Tags\\(ติดที่สินค้า)};
+    \node [hardware, right=of tags] (reader) {UHF RFID\\Reader Module};
+
+    % Raspberry Pi 5 (กล่องใหญ่ที่บรรจุ Logic ภายใน)
+    \node [rpiblock, right=of reader, minimum width=3.5cm, minimum height=3cm] (rpi5) {};
+    % หัวข้อ RPi5
+    \node [above=0.1cm of rpi5.north, font=\bfseries] {Raspberry Pi 5 (Edge Gateway)};
+    % Logic ภายใน RPi5
+    \node [basicblock, fill=white, minimum width=3cm, below=0.5cm of rpi5.north, font=\scriptsize] (pyfilter) {Python Script\\(Data Filtering \& Debouncing)};
+    \node [basicblock, fill=white, minimum width=3cm, above=0.5cm of rpi5.south, font=\scriptsize] (httpclient) {HTTP Client (requests)};
+
+    % --- Zone Central: Internet ---
+    \node [cloudshape, right=3cm of rpi5] (internet) {INTERNET};
+
+    % --- Zone 2: AWS Cloud ---
+    % AWS EC2 (กล่องใหญ่บรรจุ Django)
+    \node [awsblock, right=3cm of internet, minimum width=3.5cm, minimum height=3cm] (ec2) {};
+     % หัวข้อ EC2
+    \node [above=0.1cm of ec2.north, font=\bfseries] {AWS EC2 (App Server)};
+    % Logic ภายใน EC2
+    \node [basicblock, fill=white, minimum width=3cm, minimum height=2cm] at (ec2.center) (django) {\textbf{Django REST Framework}\\(API Endpoint \& Logic)};
+
+    % AWS RDS Database
+    \node [database, below=1.5cm of ec2] (rds) {\textbf{Amazon RDS}\\(Database)};
+
+    % --- Zone 3: Users ---
+    \node [basicblock, below=2cm of internet] (users) {User Devices\\(Web/Mobile Dashboard)};
+
+
+    % --- การเชื่อมต่อ (Connections) ---
+    % Edge Zone connections
+    \draw [dashedline] (tags) -- node[protoolabel] {คลื่นวิทยุ UHF} (reader);
+    \draw [line, double] (reader) -- node[protoolabel] {USB / UART} (rpi5);
+    % Internal RPi connections
+    \draw [line, ->] (pyfilter) -- (httpclient);
+
+    % API Connections to Cloud
+    \draw [apiline] (rpi5.east) -- node[protoolabel] {HTTPS POST\\(JSON Data)} (internet.west);
+    \draw [apiline] (internet.east) -- (ec2.west);
+
+    % Database connection
+    \draw [line, <->, thick] (django.south) -- node[protoolabel] {SQL Queries} (rds.north);
+
+    % User connection
+    \draw [dashedline, <->] (users.north) -- node[protoolabel] {HTTPS GET\\(เรียกดูข้อมูล)} (internet.south);
+
+
+    % --- วาดกรอบแบ่งโซน (Background Layers) ---
+    \begin{pgfonlayer}{background}
+        % กรอบโซนคลังสินค้า
+        \node [draw=gray!50, dashed, fill=gray!5, fit=(tags) (rpi5) (reader), label={[anchor=north west, font=\bfseries\small, xshift=0.5cm, yshift=-0.5cm]north west:Zone 1: Warehouse Edge (หน้างาน)}, inner sep=0.8cm, rounded corners] (zone1) {};
+
+        % กรอบโซนคลาวด์
+        \node [draw=orange!50, dashed, fill=orange!5, fit=(ec2) (rds), label={[anchor=north east, font=\bfseries\small, xshift=-0.5cm, yshift=-0.5cm]north east:Zone 2: AWS Cloud (คลาวด์)}, inner sep=0.8cm, rounded corners] (zone2) {};
+    \end{pgfonlayer}
+
+\end{tikzpicture}
+\caption{แผนภาพสถาปัตยกรรมระบบ แสดงการเชื่อมโยงจาก Raspberry Pi 5 ผ่านอินเทอร์เน็ตไปยัง Django API บน AWS Cloud}
+\label{fig:system_architecture_tikz}
+\end{figure*}

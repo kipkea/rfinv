@@ -1,0 +1,9 @@
+Symbol LS2208
+https://www.zebra.com/content/dam/support-dam/en/documentation/unrestricted/guide/product/MN000753A04ENa_ls2208-qsg-en.pdf
+
+
+
+24.4172/4.9839=4.8992
+
+36.033996/3.68226=9.79
+

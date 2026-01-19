@@ -1,0 +1,146 @@
+%!TEX TS-program = xelatex
+\documentclass[conference, a4paper]{IEEEtran}
+
+% -----------------------------------------------------------
+% 1. การตั้งค่าภาษาไทยและฟอนต์
+% -----------------------------------------------------------
+\usepackage{fontspec}
+\usepackage{polyglossia}
+\setdefaultlanguage{thai}
+
+% ตั้งค่าฟอนต์หลัก (ภาษาอังกฤษ/ตัวเลข)
+\setmainfont{THSarabun.ttf}[
+    BoldFont = THSarabun Bold.ttf,
+    ItalicFont = THSarabun Italic.ttf,
+    BoldItalicFont = THSarabun BoldItalic.ttf
+]
+
+% ตั้งค่าฟอนต์สำหรับภาษาไทย (Polyglossia ต้องการตัวนี้)
+\newfontfamily\thaifont{THSarabun.ttf}[
+    BoldFont = THSarabun Bold.ttf,
+    ItalicFont = THSarabun Italic.ttf,
+    BoldItalicFont = THSarabun BoldItalic.ttf
+]
+
+\XeTeXlinebreaklocale "th"
+\XeTeXlinebreakskip = 0pt plus 1pt
+
+% -----------------------------------------------------------
+% 2. เรียกใช้ Package และตั้งค่ารูปภาพ
+% -----------------------------------------------------------
+\usepackage{cite}
+\usepackage{amsmath}
+\usepackage{booktabs}
+\usepackage{float}
+
+\usepackage{graphicx}
+% บอกให้ไปหารูปในโฟลเดอร์ picture ด้วย
+\graphicspath{ {./pictures/} } 
+
+% -----------------------------------------------------------
+% 3. เริ่มต้นเอกสาร
+% -----------------------------------------------------------
+\begin{document}
+% --- ชื่อบทความ ---
+\title{การศึกษาเปรียบเทียบประสิทธิภาพความเร็วในการอ่านข้อมูล\\ระหว่างระบบ RFID และ Barcode ในงานคลังสินค้า}
+
+% --- รายชื่อผู้เขียน ---
+\author{
+    \IEEEauthorblockN{ชื่อ-นามสกุล นักศึกษา}
+    \IEEEauthorblockA{\textit{สาขาวิชาวิศวกรรมคอมพิวเตอร์} \\
+    \textit{คณะวิศวกรรมศาสตร์ มหาวิทยาลัย...}\\
+    จังหวัด, ประเทศไทย \\
+    อีเมล: student@example.com}
+    \and
+    \IEEEauthorblockN{ชื่อ-นามสกุล อาจารย์ที่ปรึกษา}
+    \IEEEauthorblockA{\textit{สาขาวิชาวิศวกรรมคอมพิวเตอร์} \\
+    \textit{คณะวิศวกรรมศาสตร์ มหาวิทยาลัย...}\\
+    จังหวัด, ประเทศไทย \\
+    อีเมล: advisor@example.com}
+}
+
+\maketitle
+
+% --- บทคัดย่อ (Abstract) ---
+\begin{abstract}
+งานวิจัยนี้มีวัตถุประสงค์เพื่อศึกษาและเปรียบเทียบประสิทธิภาพการทำงานระหว่างเทคโนโลยีระบบระบุตัวตนด้วยคลื่นวิทยุ (RFID) ย่านความถี่ UHF และระบบรหัสแท่ง (Barcode) โดยมุ่งเน้นที่ตัวแปรด้านความเร็วในการอ่านข้อมูล (Reading Speed) และความแม่นยำ
+
+ผลการทดลองพบว่าระบบ RFID สามารถอ่านข้อมูลสินค้าจำนวน 500 ชิ้นได้ในเวลาเฉลี่ย 15 วินาที ในขณะที่ระบบ Barcode ใช้เวลาเฉลี่ย 25 นาที เนื่องจากข้อจำกัดที่ต้องสแกนในระยะสายตา ผลการวิจัยสรุปได้ว่า เทคโนโลยี RFID มีประสิทธิภาพสูงกว่า Barcode อย่างมีนัยสำคัญทางสถิติ และเหมาะสมสำหรับการนำไปประยุกต์ใช้ในระบบบริหารจัดการสินค้าคงคลังสมัยใหม่
+\end{abstract}
+
+% --- คำสำคัญ (Keywords) ---
+\begin{IEEEkeywords}
+RFID, Barcode, Warehouse Management, Efficiency, Speed Test
+\end{IEEEkeywords}
+
+% -----------------------------------------------------------
+% เนื้อหาหลัก
+% -----------------------------------------------------------
+
+\section{บทนำ (Introduction)}
+ในปัจจุบันระบบการจัดการคลังสินค้ามีความสำคัญอย่างยิ่งต่อภาคอุตสาหกรรม การระบุตัวตนสินค้าที่รวดเร็วและแม่นยำเป็นปัจจัยหลักในการลดต้นทุน... เทคโนโลยีบาร์โค้ด (Barcode) มีข้อจำกัดเรื่องการอ่านแบบ Line-of-sight \cite{ref1} ในขณะที่ RFID เข้ามาแก้ปัญหานี้ด้วยการใช้คลื่นวิทยุ...
+
+\section{วิธีการดำเนินงาน (Methodology)}
+การทดลองนี้แบ่งออกเป็น 2 ส่วนหลัก คือการทดสอบความเร็วและการทดสอบความแม่นยำ โดยใช้อุปกรณ์ดังนี้:
+\begin{itemize}
+    \item เครื่องอ่าน RFID Reader รุ่น UHF Gen 2 (920-925 MHz)
+    \item เครื่องอ่าน Barcode Scanner แบบ Laser 1D
+    \item สินค้าตัวอย่างจำนวน 500 ชิ้น
+\end{itemize}
+
+สมการคำนวณความเร็วเฉลี่ย ($V_{avg}$) คือ:
+\begin{equation}
+    V_{avg} = \frac{N_{total}}{T_{total}}
+\end{equation}
+
+\section{ผลการทดลอง (Experimental Results)}
+จากการทดสอบเปรียบเทียบความเร็วระหว่างการใช้ Barcode สแกนทีละชิ้น กับการใช้ RFID เดินผ่านประตู (Gate Reader) ได้ผลลัพธ์ดังแสดงในรูปที่ \ref{fig:graph_comparison} และตารางที่ \ref{tab:comparison}
+
+% --- ส่วนแทรกรูปภาพกราฟ ---
+\begin{figure}[htbp]
+    \centering
+    % ดึงไฟล์รูปภาพชื่อ comparison_graph.png มาแสดง
+    % width=\linewidth คือให้ความกว้างเท่ากับความกว้างคอลัมน์พอดี
+    \includegraphics[width=\linewidth]{comparison_graph.png}    
+    \caption{กราฟแสดงการเปรียบเทียบเวลาในการอ่านข้อมูลเมื่อจำนวนสินค้าเพิ่มขึ้น (Line Chart)}
+    \label{fig:graph_comparison}
+\end{figure}
+
+จากกราฟจะเห็นได้ว่า เมื่อปริมาณสินค้าเพิ่มขึ้น เวลาที่ใช้ในระบบ Barcode จะเพิ่มขึ้นแบบเชิงเส้น (Linear) ตามจำนวนชิ้นสินค้า ในขณะที่ระบบ RFID ใช้เวลาเพิ่มขึ้นเพียงเล็กน้อยเนื่องจากสามารถอ่านได้พร้อมกันหลายชิ้น (Multi-read)
+
+% --- ส่วนแทรกตารางเปรียบเทียบ ---
+\begin{table}[htbp]
+    \caption{ตารางเปรียบเทียบคุณสมบัติและประสิทธิภาพ}
+    \begin{center}
+    \begin{tabular}{lcc}
+    \toprule % เส้นขอบบน (หนา)
+    \textbf{รายการทดสอบ} & \textbf{RFID (Gen 2)} & \textbf{Barcode (1D)} \\
+    \midrule % เส้นแบ่งหัวตาราง (บาง)
+    ความเร็วเฉลี่ย (ชิ้น/วินาที) & 33.3 & 0.3 \\
+    ระยะการอ่านสูงสุด (เมตร) & 5 - 8 & 0.2 - 0.5 \\
+    การอ่านพร้อมกัน & ได้ (Anti-collision) & ไม่ได้ \\
+    ความทนทานต่อสิ่งสกปรก & สูง & ต่ำ \\
+    ต้นทุนต่อหน่วย (บาท) & 3 - 5 & < 0.1 \\
+    \bottomrule % เส้นขอบล่าง (หนา)
+    \end{tabular}
+    \label{tab:comparison}
+    \end{center}
+\end{table}
+
+\section{สรุปผล (Conclusion)}
+จากการศึกษาพบว่า RFID มีความเร็วในการอ่านข้อมูลสูงกว่า Barcode อย่างมาก เหมาะสำหรับงานที่ต้องการความรวดเร็วและลดแรงงานคน...
+
+% -----------------------------------------------------------
+% เอกสารอ้างอิง
+% -----------------------------------------------------------
+\begin{thebibliography}{00}
+
+\bibitem{ref1} 
+G. Santucci, "The Internet of Things: Between the Revolution of the Internet and the Metamorphosis of Objects," in \textit{Vision and Challenges for Realising the Internet of Things}, European Commission, 2010.
+
+\bibitem{ref2}
+S. Shepard, \textit{RFID: Radio Frequency Identification}, McGraw-Hill Professional, 2005.
+
+\end{thebibliography}
+
+\end{document}

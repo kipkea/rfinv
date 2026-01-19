@@ -2,7 +2,8 @@ from django.contrib import admin
 
 # Register your models here.
 
-from .models import RFIDTag, Location, Inventory, Inspection
+#from .models import RFIDTag, Location, Inventory, Inspection
+from .models import RFIDTag, Location, Inventory, InventoryImage, Inspection
 
 """
 admin.site.register(rfinv_loc)
@@ -12,7 +13,10 @@ list_display = '__ALL__'
 """
 @admin.register(RFIDTag)
 class RFIDTagAdmin(admin.ModelAdmin):
-    list_display = ('RFID','is_location')
+    #list_display = ('RFID','is_location')
+    list_display = ('rfid_code', 'is_location', 'registered_by', 'registered_at')
+    search_fields = ('rfid_code',)
+    list_filter = ('is_location',)    
     #list_filter = ('accType')
     #search_fields = ('accCode','accName')
     #prepopulated_fields = {'accName':('accCode')}
@@ -22,18 +26,40 @@ class RFIDTagAdmin(admin.ModelAdmin):
 
 @admin.register(Location)
 class LocationAdmin(admin.ModelAdmin):
-    list_display = ('rfid_tag','name','recorded_by','recorded_at',)
-    
+    #list_display = ('rfid_tag','name','recorded_by','recorded_at',)
+    list_display = ('name', 'rfid_tag', 'created_by', 'created_at')
+    search_fields = ('name',)
+        
 @admin.register(Inventory)    
 class InventoryAdmin(admin.ModelAdmin):
-    list_display = ('rfid_tag','name','recorded_by','recorded_at','Inv_Last_Check_Time','Inv_Last_Loc',)
-
+    #list_display = ('rfid_tag','name','recorded_by','recorded_at','Inv_Last_Check_Time','Inv_Last_Loc',)
+    list_display = (
+        'name', 
+        'rfid_tag', 
+        'current_location', 
+        'last_seen_at', 
+        'registered_by'
+    )
+    search_fields = ('name', 'rfid_tag__rfid_code')
+    list_filter = ('current_location',)
+    
+@admin.register(InventoryImage)
+class InventoryImageAdmin(admin.ModelAdmin):
+    list_display = ('inventory', 'photographed_at', 'photographed_by')
 
 @admin.register(Inspection)
 class InspectionAdmin(admin.ModelAdmin):
-      #list_display = '__ALL__'
-      list_display = ('inspected_at','inspected_by',)
-      
+    #list_display = '__ALL__'
+    #list_display = ('inspected_at','inspected_by',)
+    list_display = (
+        'location', 
+        'inspected_at', 
+        'inspected_by', 
+        'total_expected', 
+        'total_found', 
+        'total_missing'
+    )
+    list_filter = ('location', 'inspected_at')     
 
 
       

@@ -1,0 +1,296 @@
+\documentclass[conference]{IEEEtran}
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{pgfplots} % สำหรับวาดกราฟ
+\pgfplotsset{compat=1.18}
+
+% --- ตั้งค่าภาษาไทย (สำหรับ XeLaTeX) ---
+\usepackage{fontspec}
+\usepackage{xunicode}
+\usepackage{xltxtra}
+\XeTeXlinebreaklocale "th"
+\XeTeXlinebreakskip = 0pt plus 1pt
+
+% *** เปลี่ยนชื่อฟอนต์ตรงนี้ถ้าเครื่องคุณใช้ฟอนต์อื่น ***
+% เช่น Angsana New, Leelawadee UI, หรือ Browallia New
+\setmainfont{TH Sarabun New}[
+    Scale=1.25,       % ปรับขนาดฟอนต์ให้อ่านง่ายขึ้นใน format IEEE
+    BoldFont={* Bold},
+    ItalicFont={* Italic},
+    BoldItalicFont={* Bold Italic}
+]
+
+\usepackage{url}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\graphicspath{{pictures/}}
+
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+
+% --- เพิ่ม Package สำหรับวาดรูป TikZ ---
+\usepackage{tikz}
+\usepackage{fontawesome5} % สำหรับไอคอนสวยๆ
+\usetikzlibrary{shapes, arrows.meta, positioning, fit, backgrounds, shadows}
+\usepackage{standalone}
+\usepackage{float}
+\usepackage{amsmath}
+
+
+\begin{document}
+
+% --- ส่วนหัวเรื่อง ---
+\title{ระบบบริหารจัดการสินค้าคงคลังด้วยอาร์เอฟไอดีและเทคโนโลยีคลาวด์\\
+{\footnotesize Inventory Management System Using RFID and Cloud Technology}}
+
+\author{\IEEEauthorblockN{อภิชาติ กันสีนวล (Apichart Kanseenuan)}
+\IEEEauthorblockA{\textit{ภาควิชาวิทยาการคอมพิวเตอร์} \\
+\textit{มหาวิทยาลัยเชียงใหม่}\\
+รหัสนักศึกษา: 650532005 \\
+อาจารย์ที่ปรึกษา: ผศ.ดร.ศุภกิจ อาวิพันธุ์}
+}
+
+\maketitle
+
+% --- บทคัดย่อ ---
+\begin{abstract}
+การบริหารจัดการสินค้าคงคลังในปัจจุบันที่ใช้ระบบ Barcode หรือ QR-Code ประสบปัญหาความล่าช้าในการทำงาน เนื่องจากต้องสแกนในระยะใกล้และต้องเห็นรหัสชัดเจน อีกทั้งรหัสที่ติดยังมีโอกาสชำรุดเสียหายได้ง่ายเมื่อเวลาผ่านไป บทความนี้นำเสนอระบบบริหารจัดการสินค้าคงคลังโดยใช้เทคโนโลยีระบุตัวรหัสสินค้าคงคลังด้วยคลื่นวิทยุ (RFID) ร่วมกับเทคโนโลยีคลาวด์ เพื่อแก้ปัญหาดังกล่าว โดยใช้ RFID Tag แบบ UHF และชุดอ่านที่ทำขึ้นโดยใช้ Raspberry Pi ทำให้สามารถอ่านรหัสสินค้าคงคลังได้พร้อมกันหลายชิ้นโดยไม่ต้องเห็นตัว RFID Tag ข้อมูลจะถูกประมวลผลและจัดเก็บในระบบคลาวด์ Amazon Web Services (AWS) ผ่าน Application ที่พัฒนาด้วย Django จากผลการทดลองแสดงให้เห็นว่าระบบ RFID มีความรวดเร็วและคุ้มค่าในการบริหารจัดการสินค้าคงคลังที่มีปริมาณมาก เมื่อเทียบกับระบบ Barcode หรือ QR-Code แบบดั้งเดิม
+\end{abstract}
+
+\begin{IEEEkeywords}
+RFID, เทคโนโลยีคลาวด์, สินค้าคงคลัง, Raspberry Pi, AWS
+\end{IEEEkeywords}
+
+% --- 1. บทนำ ---
+\section{บทนำ}
+การบริหารจัดการสินค้าคงคลังในปัจจุบันมีรูปแบบในการจัดการที่หลากหลาย มีการกำหนดรหัสของสินค้าคงคลังต่างวิธีกันไม่ว่าจะเป็นเขียนด้วยอักษร ใช้ Barcode หรือ QR-Code เป็นต้น ในการระบุรหัสสินค้าคงคลังด้วย Barcode หรือ QR-Code มีปัญหาในการใช้งานคือทำงานได้ช้า ตำแหน่งที่ตั้งของรหัสไม่ได้อยู่ในตำแหน่งเดียวกันทั้งหมดทำให้การตรวจนับสินค้าคงคลังต้องใช้เวลานาน และรหัสสินค้าคงคลังที่ติดอาจจะมีการหลุดหรือเลือนได้เพราะต้องติดไว้ในตำแหน่งที่เห็นได้ชัดเจน ในการศึกษาครั้งนี้จะใช้ RFID ในการระบุรหัสของสินค้าคงคลังเพื่อเพิ่มความเร็วในการตรวจสอบเพราะใช้หลักการทำงานของคลื่นวิทยุ ทำให้ไม่จำเป็นต้องติดข้างนอกของสินค้าคงคลัง ทำให้เกิดความทนทานกว่าเดิม อีกทั้งยังสามารถตรวจสอบได้ทีละหลายๆรหัสได้ต่างจาก Barcode และ QR-Code ที่ต้องตรวจสอบทีละรหัส
+
+
+% --- 2. ทฤษฎีและงานวิจัยที่เกี่ยวข้อง ---
+\section{ทฤษฎีและงานวิจัยที่เกี่ยวข้อง}
+จากการศึกษา งานวิจัยที่เกี่ยวข้องมีการนำ RFID มาประยุกต์ใช้ในหลากหลายด้าน เช่น ระบบจัดการห้องสมุดอัจฉริยะ [5], ระบบคิดเงินอัตโนมัติ [6], และการระบุตำแหน่งทรัพย์สินในศูนย์สุขภาพ [7] ซึ่งแสดงให้เห็นถึงศักยภาพของ RFID ในการติดตามและระบุข้อมูล
+
+องค์ประกอบหลักทางเทคโนโลยีที่ใช้ในงานวิจัยนี้ ได้แก่:
+\begin{enumerate}
+    \item \textbf{RFID (UHF):} ใช้โมดูล Fonkan FM-505 และ Tag แบบ Passive Sticker (Alien 9662 U8) ย่านความถี่ 860-960 MHz [1]
+    \item \textbf{Raspberry Pi 5:} ใช้เป็นหน่วยประมวลผลหลักในการควบคุมอุปกรณ์อ่าน RFID และเชื่อมต่อเครือข่าย [2]
+    \item \textbf{Cloud Technology (AWS):} ใช้บริการ EC2 สำหรับติดตั้ง Server และ ฐานข้อมูล [4]
+    \item \textbf{Django Framework:} ใช้พัฒนา Web Application ด้วยภาษา Python [3]
+    \item \textbf{Kivy : Cross-platform Python Framework for apps Development:} ใช้ออกแบบหน้าจอ GUI ที่ใช้ควบคุมอุปกรณ์และบริหารสินค้าคงคลังทั้งหมด [11]
+\end{enumerate}
+
+% --- 3. การออกแบบระบบ ---
+\section{การออกแบบและวิธีการดำเนินการ}
+ระบบถูกออกแบบให้เชื่อมโยงระหว่างอุปกรณ์ฮาร์ดแวร์และระบบคลาวด์ ผ่านทาง API ที่พัฒนาขึ้นจาก Django ดังนี้:
+
+\begin{figure}[h!]
+    \centering
+    % เรียกไฟล์รูปที่สร้างไว้ตะกี้เข้ามา
+    %\input{graphs/rfinv_diagram.tex} 
+    \resizebox{0.5\textwidth}{!}{%
+        \input{graphs/rfinv_diagram.tex}
+    }%    
+    \caption{สถาปัตยกรรมของระบบ}
+    \label{fig:system_architecture}
+\end{figure}
+
+
+\subsection{ส่วนประกอบฮาร์ดแวร์}
+ชุดอ่าน RFID ประกอบด้วย Raspberry Pi 5 เชื่อมต่อกับ RFID Reader Module (FM-505) เพื่อทำการอ่านค่าจาก RFID Tag ที่ติดอยู่กับสินค้าคงคลัง รหัสที่ได้จะถูกประมวลผลเบื้องต้นและทำการเชื่อมต่อไปยังระบบคลาวด์เพื่อทำการเก็บหรือเรียกค้นจากนั้นจำนำมาแสดงผลที่อุปกรณ์ผ่านทาง API ที่จัดทำขึ้น
+
+% --- เริ่มส่วนแทรกรูปภาพ ---
+\begin{figure}[h!]
+    \centering
+    % รูปซ้าย
+    \begin{subfigure}[b]{0.17\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{scan_module_01_r.png}
+        \caption{ชุดอ่าน RFID ด้านขวา} % แก้คำบรรยายตรงนี้
+        \label{fig:scan01}
+    \end{subfigure}
+    \hfill % เว้นระยะห่าง
+    % รูปขวา
+    \begin{subfigure}[b]{0.2\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{scan_module_02_r.png}
+        \caption{ชุดอ่าน RFID ด้านซ้าย} % แก้คำบรรยายตรงนี้
+        \label{fig:scan02}
+    \end{subfigure}
+    
+    \caption{แสดงลักษณะการติดตั้งชุดอ่าน RFID} % คำบรรยายรวม
+    \label{fig:scan_modules}
+\end{figure}
+% --- จบส่วนแทรกรูปภาพ ---
+
+\subsection{ส่วนประกอบซอฟต์แวร์}
+พัฒนาระบบด้วยภาษา Python และ Django Framework ติดตั้งบน AWS EC2 โดยมีการจัดการฐานข้อมูลสินค้า (ชื่อ, ขนาด, สถานที่จัดเก็บ) API ผู้ใช้งานสามารถตรวจสอบสถานะสินค้า เพิ่มข้อมูล หรือดูรายงานผ่าน Web Browser บนคอมพิวเตอร์หรือโทรศัพท์มือถือได้
+
+% --- เริ่มส่วนแทรกรูปภาพ ---
+\begin{figure}[h!]
+    \centering
+    % ปรับขนาดรูปตรง width (เช่น 0.6 คือ 60% ของความกว้างหน้ากระดาษ)
+    \includegraphics[width=0.4\textwidth]{pictures/django_db.png}
+    \caption{ระบบบริหารฐานข้อมูลของ Django}
+    \label{fig:my_single_image}
+\end{figure}
+% --- จบส่วนแทรกรูปภาพ ---
+
+\subsection{ขั้นตอนการทำงาน}
+1. ทำการลงทะเบียน RFID Tag เข้ากับสินค้าคงคลังด้วยชุดอ่าน RFID เพื่อเก็บข้อมูลไว้บนระบบคลาวด์ โดยจะทำการติด Barcode และ RFID Tag ไว้ที่ตัวสินค้าคงคลัง และจำลองสินค้าหลายขนาดต่างกันออกไป
+
+% --- เริ่มส่วนแทรกรูปภาพ ---
+\begin{figure}[h!]
+    \centering
+    % รูปซ้าย
+    \begin{subfigure}[b]{0.2\textwidth}
+        \centering
+        \includegraphics[width=0.8\textwidth]{sample_01.png}
+        \caption{ตัวอย่างที่ 1} % แก้คำบรรยายตรงนี้
+        \label{fig:inv01}
+    \end{subfigure}
+    \hfill % เว้นระยะห่าง
+    % รูปขวา
+    \begin{subfigure}[b]{0.23\textwidth}
+        \centering
+        \includegraphics[width=1\textwidth]{sample_02.png}
+        \caption{ตัวอย่างที่ 2} % แก้คำบรรยายตรงนี้
+        \label{fig:inv02}
+    \end{subfigure}
+    
+    \caption{แสดงตัวอย่างของการติดรหัส และ ขนาดของสินค้าคงคลัง} % คำบรรยายรวม
+    \label{fig:invs}
+\end{figure}
+% --- จบส่วนแทรกรูปภาพ ---
+
+
+2. ใช้ชุดอ่าน RFID ทำการสแกนสินค้าคงคลังเพื่อตรวจสอบความถูกต้องเทียบกันระหว่างระบบเดิมซึ่งใช้ Barcode และ ระบบใหม่ที่ใช้ RFID Tag ในการระบุสินค้าคงคลัง
+
+% --- เริ่มส่วนแทรกรูปภาพ ---
+\begin{figure}[h!]
+    \centering
+    % ปรับขนาดรูปตรง width (เช่น 0.6 คือ 60% ของความกว้างหน้ากระดาษ)
+    \includegraphics[width=0.3\textwidth]{pictures/tag_test.png}
+    \caption{การทดสอบการอ่านรหัสสินค้าคงคลัง}
+    \label{fig:tag_test}
+\end{figure}
+% --- จบส่วนแทรกรูปภาพ ---
+
+
+3. ข้อมูลการตรวจสอบจะถูกบันทึกขึ้นสู่ระบบที่ออกแบบไว้บนระบบคลาวด์ และนำมาใช้ในการคำนวณ
+
+\begin{equation}
+    T_{avg} = \frac{T_{read}}{T_{total}}
+    \label{eq:avg_time_var}
+\end{equation}
+
+\noindent โดยที่:
+\begin{itemize}
+    \item[] $T_{avg}$ คือ เวลาเฉลี่ย
+    \item[] $T_{read}$ คือ เวลาที่ใช้ในการอ่านรหัสสินค้าคงคลัง
+    \item[] $T_{total}$ คือ เวลาที่ใช้ทั้งหมด (วินาที)
+\end{itemize}
+
+
+% --- เริ่มส่วนแทรกรูปภาพ ---
+\begin{figure}[h!]
+    \centering
+    % ปรับขนาดรูปตรง width (เช่น 0.6 คือ 60% ของความกว้างหน้ากระดาษ)
+    \includegraphics[width=0.3\textwidth]{pictures/rf_time.png}
+    \caption{ผลการทดสอบความเร็วในการอ่านรหัสสินค้าคงคลัง}
+    \label{fig:time_test}
+\end{figure}
+% --- จบส่วนแทรกรูปภาพ ---
+
+
+% --- 4. ผลการทดลอง (ส่วนที่เพิ่มตามโจทย์) ---
+\section{ผลการทดลองและการวิเคราะห์}
+ในการศึกษาครั้งนี้ ได้ทำการทดลองเปรียบเทียบประสิทธิภาพระหว่างการใช้ระบบ Barcode แบบดั้งเดิมในที่นี้จะใช้เครื่องอ่าน Barcode แบบเลเซอร์ Zebra LS2208 [10] เปรียบเที่ยบกับชุดอ่าน RFID ที่พัฒนาขึ้น โดยวัดเวลาที่ใช้ในการตรวจนับสินค้าคงคลังในจำนวนที่ต่างกัน (1, 5, 10, 20, และ 50 ชิ้น)
+
+\subsection{ผลการเปรียบเทียบเวลา}
+ผลการทดลองแสดงความสัมพันธ์ระหว่างจำนวนสินค้าคงคลังและเวลาที่ใช้ในการตรวจสอบ ดังนี้
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+    title={กราฟเปรียบเทียบเวลาที่ใช้ในการตรวจนับสินค้าคงคลัง},
+    xlabel={จำนวนสินค้าคงคลัง (ชิ้น)},
+    ylabel={เวลาที่ใช้ (วินาที)},
+    xmin=0, xmax=60,
+    ymin=0, ymax=230,
+    xtick={0,10,20,30,40,50},
+    ytick={0,20,40,60,80,100,120,140,160,180,200,220},
+    legend pos=north west,
+    ymajorgrids=true,
+    grid style=dashed,
+    legend style={font=\footnotesize} % ปรับขนาดฟอนต์ใน legend
+]
+
+% กราฟ RFID (เส้นตรง ความชันน้อย)
+\addplot[
+    color=blue,
+    mark=square,
+    thick
+    ]
+    coordinates {
+    (1, 0.012)
+    (5, 0.9)
+    (10, 3.68)
+    (20, 4.56)
+    (50, 10.35)
+    };
+    \addlegendentry{ระบบ RFID}
+
+% กราฟ Barcode (เส้นตรง ความชันสูง)
+\addplot[
+    color=red,
+    mark=triangle,
+    thick
+    ]
+    coordinates {
+    (1, 1)
+    (5, 10)
+    (10, 36)
+    (20, 76)
+    (50, 210)
+    };
+    \addlegendentry{ระบบ ฺBarcode}
+
+\end{axis}
+\end{tikzpicture}
+\caption{เปรียบเทียบความเร็วในการตรวจนับสินค้า ระบบ RFID (เส้นสีน้ำเงิน) ใช้เวลาเพิ่มขึ้นเพียงเล็กน้อยเมื่อสินค้าเพิ่มขึ้น ในขณะที่ระบบ Barcode (เส้นสีแดง) ใช้เวลาเพิ่มขึ้นแบบทวีคูณ}
+\label{fig:comparison}
+\end{figure}
+
+
+
+\subsection{ความคุ้มค่า}
+ถึงแม้ว่าการนำระบบ RFID มาประยุกต์ใช้งานจะมีต้นทุนด้านอุปกรณ์เริ่มต้นที่สูงกว่าระบบ Barcode และ QR-Code แต่เมื่อพิจารณาเวลาในการใช้งานที่ลดลงและความแม่นยำในการอ่านรหัสจำนวนมาก ระบบ RFID จึงให้ความคุ้มค่าที่สูงกว่ามาก
+
+% --- 5. สรุปผล ---
+\section{สรุปผลการศึกษา}
+การพัฒนาระบบบริหารจัดการสินค้าคงคลังด้วย RFID และเทคโนโลยีคลาวด์ ช่วยแก้ปัญหาความล่าช้าและความยุ่งยากของระบบ Barcode และ QR-Code ในระบบดั้งเดิมได้อย่างมีประสิทธิภาพ จากผลการทดลองยืนยันว่า RFID ช่วยลดเวลาในการตรวจสอบสินค้าได้อย่างมีนัยสำคัญ โดยเฉพาะในการบริหารจัดการสินค้าจำนวนมาก อีกทั้งการใช้ระบบคลาวด์ยังช่วยให้ข้อมูลมีความปลอดภัยและเข้าถึงได้ง่าย ลดภาระค่าใช้จ่ายในการดูแล Server และการใช้พลังงานไฟฟ้าภายในองค์กรได้อีกด้วย
+
+
+% --- เอกสารอ้างอิง ---
+\begin{thebibliography}{00}
+
+\bibitem{b1} Daniel M. Dobkin. (2008). \textit{The RF in RFID Passive UHF RFID in practice}, Elsevier Inc.
+\bibitem{b2} James Gale. (2020). \textit{Raspberry Pi THE COMPLETE GUIDE}, Black Dog Media Limited.
+\bibitem{b3} D. Martinez, et al., "Library in django framework to standardize early-stage web application development," \textit{2023 18th Iberian Conference on Information Systems and Technologies (CISTI)}, 2023.
+\bibitem{b4} Ashish Prajapati, et al. (2023). \textit{AWS Cloud Computing Concepts and Tech Analogies}, Packt Publishing.
+\bibitem{b5} R. Neha Mukund, et al., "Intelligent RFID Based Library Management System," \textit{2021 IEEE International Conference on Electronics, Computing and Communication Technologies (CONECCT)}, 2021.
+\bibitem{b6} D. Sinha, et al., "Automated Billing System using RFID and Cloud," \textit{2019 Innovations in Power and Advanced Computing Technologies (i-PACT)}, 2019.
+\bibitem{b7} T. D. McAllister, et al., "Localization of Health Center Assets Through an IoT Environment (LoCATE)," \textit{2017 Systems and Information Engineering Design Symposium (SIEDS)}, 2017.
+\bibitem{b8} Fonkan Technology. "RFID Module FM-505 specs." Available: http://www.fonkan.com/
+\bibitem{b9} AliExpress. "UHF 860-960MHz Tag AZ Chip U8 9662." Accessed: 04 September 2023.
+\bibitem{ZebraLS2208} Zebra Technologies. \textit{LS2208 Quick Start Guide}. MN000753A04EN Rev. A, 2017. [Online]. Available: \url{https://www.zebra.com/content/dam/support-dam/en/documentation/unrestricted/guide/product/MN000753A04ENa_ls2208-qsg-en.pdf}
+\bibitem{kivy} The Kivy Organization. \textit{Kivy: Cross-platform Python Framework for GUI Development}. [Online]. Available: \url{https://kivy.org/} (Accessed: Jan. 18, 2026).
+\end{thebibliography}
+
+\end{document}

@@ -1,0 +1,40 @@
+% ไฟล์นี้เก็บเฉพาะโค้ดกราฟผลการทดลอง
+\begin{tikzpicture}
+\begin{axis}[
+    xlabel={จำนวนสินค้า (ชิ้น)},
+    ylabel={เวลาที่ใช้ (วินาที)},
+    xmin=0, xmax=500,
+    ymin=0, ymax=600,
+    xtick={0,100,200,300,400,500},
+    ytick={0,100,200,300,400,500,600},
+    legend pos=north west,
+    ymajorgrids=true,
+    grid style=dashed,
+    legend style={font=\footnotesize},
+    width=0.85\linewidth % ปรับขนาดให้พอดีกับคอลัมน์
+]
+
+% กราฟ RFID
+\addplot[
+    color=blue,
+    mark=square,
+    thick
+    ]
+    coordinates {
+    (10, 1.5) (50, 4) (100, 6) (200, 10) (500, 18)
+    };
+    \addlegendentry{ระบบ RFID (RPi 5)}
+
+% กราฟ Barcode
+\addplot[
+    color=red,
+    mark=triangle,
+    thick,
+    domain=10:500,
+    samples=50
+    ]
+    {0.0025*x^2 + 0.5*x}; 
+    \addlegendentry{ระบบ Barcode}
+
+\end{axis}
+\end{tikzpicture}

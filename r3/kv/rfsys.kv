@@ -1,0 +1,206 @@
+#:import Factory kivy.factory.Factory
+# Factory.register('Camera', module='kivy.uix.camera')
+
+<ProductRow@BoxLayout>:
+    orientation: 'horizontal'
+    size_hint_y: None
+    height: '60dp'
+    padding: 5
+    spacing: 5
+    canvas.before:
+        Color:
+            rgba: 0.9, 0.9, 0.9, 1
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+    Label:
+        text: root.index
+        color: 0,0,0,1
+        size_hint_x: 0.1
+    Label:
+        text: root.code
+        color: 0,0,0,1
+        size_hint_x: 0.2
+    Label:
+        text: root.desc
+        color: 0,0,0,1
+        size_hint_x: 0.3
+        text_size: self.size
+        halign: 'left'
+        valign: 'middle'
+        shorten: True
+    Label:
+        text: root.location
+        color: 0,0,0,1
+        size_hint_x: 0.15
+    Label:
+        text: root.date
+        color: 0,0,0,1
+        size_hint_x: 0.15
+    AsyncImage:
+        source: root.img_url
+        size_hint_x: 0.1
+        allow_stretch: True
+
+<HeaderButton@Button>:
+    background_normal: ''
+    background_color: 0.3, 0.5, 0.7, 1
+    bold: True
+
+<GalleryRow@BoxLayout>:
+    orientation: 'horizontal'
+    size_hint_y: None
+    height: '120dp'
+    padding: 5
+    spacing: 10
+    canvas.before:
+        Color:
+            rgba: 0.95, 0.95, 0.95, 1
+        Rectangle:
+            pos: self.pos
+            size: self.size
+    AsyncImage:
+        source: root.image_url
+        size_hint_x: 0.2
+        allow_stretch: True
+    BoxLayout:
+        orientation: 'vertical'
+        size_hint_x: 0.8
+        Label:
+            text: f"File: {root.filename}"
+            text_size: self.width, None
+            halign: 'left'
+            color: 0,0,0,1
+        Label:
+            text: f"Date: {root.timestamp}"
+            halign: 'left'
+            color: 0,0,0,1
+        Label:
+            text: f"User: {root.user} | Dimensions: {root.dimensions}"
+            halign: 'left'
+            color: 0,0,0,1
+
+<HeaderButton@Button>:
+    background_normal: ''
+    background_color: 0.3, 0.5, 0.7, 1
+    bold: True
+
+<MainLayout>:
+    do_default_tab: False
+    
+    # --- Tab 1: Command Runner ---
+    TabbedPanelItem:
+        text: 'Command Runner'
+        BoxLayout:
+            orientation: 'vertical'
+            padding: 10
+            spacing: 10
+            BoxLayout:
+                size_hint_y: None
+                height: '40dp'
+                TextInput:
+                    id: cmd_input
+                    hint_text: 'Enter command...'
+                    multiline: False
+                    on_text_validate: root.run_command()
+                Button:
+                    text: 'Run'
+                    size_hint_x: 0.2
+                    on_press: root.run_command()
+            TextInput:
+                id: output_text
+                text: 'Ready...'
+                readonly: True
+
+    # --- Tab 2: Product List (API) ---
+    TabbedPanelItem:
+        text: 'Products (API)'
+        BoxLayout:
+            orientation: 'vertical'
+            padding: 5
+            spacing: 5
+            
+            # ปุ่มโหลดข้อมูล
+            Button:
+                text: 'Load Data from API'
+                size_hint_y: None
+                height: '40dp'
+                on_release: root.fetch_data()
+
+            # ส่วนหัวตาราง (Headers) สำหรับกด Sort
+            BoxLayout:
+                size_hint_y: None
+                height: '40dp'
+                spacing: 2
+                HeaderButton:
+                    text: 'No.'
+                    size_hint_x: 0.1
+                    on_release: root.sort_data('index')
+                HeaderButton:
+                    text: 'Code'
+                    size_hint_x: 0.2
+                    on_release: root.sort_data('code')
+                HeaderButton:
+                    text: 'Description'
+                    size_hint_x: 0.3
+                    on_release: root.sort_data('desc')
+                HeaderButton:
+                    text: 'Location'
+                    size_hint_x: 0.15
+                    on_release: root.sort_data('location')
+                HeaderButton:
+                    text: 'Date'
+                    size_hint_x: 0.15
+                    on_release: root.sort_data('date')
+                Label:
+                    text: 'Image'
+                    size_hint_x: 0.1
+                    color: 0,0,0,1
+                    canvas.before:
+                        Color:
+                            rgba: 0.8,0.8,0.8,1
+                        Rectangle:
+                            pos: self.pos
+                            size: self.size
+
+            # ตารางแสดงข้อมูล
+            RecycleView:
+                id: rv_products
+                viewclass: 'ProductRow'
+                RecycleBoxLayout:
+                    default_size: None, dp(60)
+                    default_size_hint: 1, None
+                    size_hint_y: None
+                    height: self.minimum_height
+                    orientation: 'vertical'
+                    spacing: 2
+
+    # --- Tab 3: Camera ---
+    # --- Tab 4: Gallery ---
+    TabbedPanelItem:
+        text: 'Gallery'
+        BoxLayout:
+            orientation: 'vertical'
+            padding: 5
+            spacing: 5
+            Button:
+                text: 'Refresh'
+                size_hint_y: None
+                height: '40dp'
+                on_release: root.fetch_gallery()
+            RecycleView:
+                id: rv_gallery
+                viewclass: 'GalleryRow'
+                RecycleBoxLayout:
+                    default_size: None, dp(120)
+                    default_size_hint: 1, None
+                    size_hint_y: None
+                    height: self.minimum_height
+                    orientation: 'vertical'
+                    spacing: 2
+
+    # --- Tab 5: Register Item ---
+    TabbedPanelItem:
+        text: 'Register'
+        RegisterItemScreen: # เรียกใช้ Widget ที่เราสร้าง                    

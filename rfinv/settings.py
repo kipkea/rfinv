@@ -58,7 +58,7 @@ INSTALLED_APPS = [
     "rest_framework",
     'rvapi',
     'rest_framework_api_key',
-    'rest_framework_swagger',
+    'drf_yasg',
     'corsheaders',
     #'rest_framework.authtoken',
 ]

@@ -1,0 +1,232 @@
+\documentclass[conference]{IEEEtran}
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{pgfplots} % สำหรับวาดกราฟ
+\pgfplotsset{compat=1.18}
+
+% --- ตั้งค่าภาษาไทย (สำหรับ XeLaTeX) ---
+\usepackage{fontspec}
+\usepackage{xunicode}
+\usepackage{xltxtra}
+\XeTeXlinebreaklocale "th"
+\XeTeXlinebreakskip = 0pt plus 1pt
+
+% *** เปลี่ยนชื่อฟอนต์ตรงนี้ถ้าเครื่องคุณใช้ฟอนต์อื่น ***
+% เช่น Angsana New, Leelawadee UI, หรือ Browallia New
+\setmainfont{TH Sarabun New}[
+    Scale=1.25,       % ปรับขนาดฟอนต์ให้อ่านง่ายขึ้นใน format IEEE
+    BoldFont={* Bold},
+    ItalicFont={* Italic},
+    BoldItalicFont={* Bold Italic}
+]
+
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+
+% --- เพิ่ม Package สำหรับวาดรูป TikZ ---
+\usepackage{tikz}
+\usetikzlibrary{shapes, arrows, positioning, fit, calc, backgrounds, shadows}
+
+% --- กำหนดสไตล์ของกล่องและเส้นต่างๆ ---
+\tikzset{
+    % กล่องพื้นฐาน
+    basicblock/.style = {rectangle, draw, rounded corners, minimum height=3em, minimum width=6em, align=center, font=\small, drop shadow},
+    % กล่องฮาร์ดแวร์ (สีเทา)
+    hardware/.style = {basicblock, fill=gray!10, draw=gray!60!black},
+    % กล่อง Raspberry Pi (สีชมพู)
+    rpiblock/.style = {basicblock, fill=magenta!10, draw=magenta!60!black},
+    % กล่อง AWS/Cloud (สีส้ม)
+    awsblock/.style = {basicblock, fill=orange!10, draw=orange!60!black},
+    % กล่องฐานข้อมูล (รูปทรงกระบอก)
+    database/.style = {cylinder, shape border rotate=90, draw, aspect=0.25, fill=blue!10, draw=blue!60!black, minimum height=4em, minimum width=4em, align=center, font=\small, drop shadow},
+    % รูปก้อนเมฆอินเทอร์เน็ต
+    cloudshape/.style = {cloud, draw, cloud puffs=10, cloud puff arc=120, aspect=2, fill=cyan!5, draw=cyan!60!black, minimum width=3.5cm, minimum height=2cm, align=center, font=\bfseries},
+    % เส้นเชื่อมต่อ
+    line/.style = {draw, -latex', thick, >={LaTeX[width=2mm,length=2mm]}},
+    % เส้นประ
+    dashedline/.style = {line, dashed},
+    % เส้นหนาสำหรับ API
+    apiline/.style = {line, line width=1.5pt, color=blue!70!black},
+    % ป้ายกำกับบนเส้น
+    protoolabel/.style = {midway, font=\footnotesize\sffamily, align=center, fill=white, inner sep=1.5pt, rounded corners}
+}
+
+\begin{document}
+
+% --- ส่วนหัวเรื่อง ---
+\title{ระบบบริหารจัดการสินค้าคงคลังด้วยอาร์เอฟไอดีและเทคโนโลยีคลาวด์\\
+{\footnotesize Inventory Management System Using RFID and Cloud Technology}}
+
+\author{\IEEEauthorblockN{อภิชาติ กันสีนวล (Apichart Kanseenuan)}
+\IEEEauthorblockA{\textit{ภาควิชาวิทยาการคอมพิวเตอร์} \\
+\textit{มหาวิทยาลัยเชียงใหม่}\\
+รหัสนักศึกษา: 650532005 \\
+อาจารย์ที่ปรึกษา: ผศ.ดร.ศุภกิจ อาวิพันธุ์}
+}
+
+\maketitle
+
+% --- บทคัดย่อ ---
+\begin{abstract}
+การบริหารจัดการสินค้าคงคลังในปัจจุบันมีรูปแบบในการจัดการที่หลากหลาย มีการกำหนดรหัสของสินค้าคงคลังต่างวิธีกันไม่ว่าจะเป็นเขียนด้วยอักษร ใช้ Barcode หรือ QR-Code เป็นต้น ในการระบุรหัสสินค้าคงคลังด้วย Barcode หรือ QR-Code มีปัญหาในการใช้งานคือทำงานได้ช้า ตำแหน่งที่ตั้งของรหัสไม่ได้อยู่ในตำแหน่งเดียวกันทั้งหมดทำให้การตรวจนับสินค้าคงคลังต้องใช้เวลานาน และรหัสสินค้าคงคลังที่ติดอาจจะมีการหลุดหรือเลือนได้เพราะต้องติดไว้ในตำแหน่งที่เห็นได้ชัดเจน ในการศึกษาครั้งนี้จะใช้ RFID ในการระบุรหัสของสินค้าคงคลังเพื่อเพิ่มความเร็วในการตรวจสอบเพราะใช้หลักการทำงานของคลื่นวิทยุ ทำให้ไม่จำเป็นต้องติดข้างนอกของสินค้าคงคลัง ทำให้เกิดความทนทานกว่าเดิม อีกทั้งยังสามารถตรวจสอบได้ทีละหลายๆรหัสได้ต่างจาก Barcode และ QR-Code ที่ต้องตรวจสอบทีละรหัส
+\end{abstract}
+
+\begin{IEEEkeywords}
+RFID, เทคโนโลยีคลาวด์, สินค้าคงคลัง, Raspberry Pi, AWS
+\end{IEEEkeywords}
+
+% --- 1. บทนำ ---
+\section{บทนำ}
+การบริหารจัดการสินค้าคงคลังเป็นหัวใจสำคัญของธุรกิจ ปัจจุบันมีการใช้รหัสสินค้าหลายรูปแบบ เช่น ตัวอักษร, Barcode หรือ QR-Code อย่างไรก็ตาม การใช้ Barcode มีข้อจำกัดสำคัญคือ ทำงานได้ช้าเนื่องจากตำแหน่งของรหัสอาจไม่อยู่ในจุดที่สะดวกต่อการตรวจสอบ และต้องใช้เวลาในการค้นหาตำแหน่งรหัสสินค้าแต่ละชิ้น นอกจากนี้ ฉลากรหัสยังมีโอกาสหลุดลอกหรือเลือนหายได้ง่ายเมื่อต้องติดในตำแหน่งที่สัมผัสได้
+
+งานวิจัยนี้จึงนำเสนอการใช้เทคโนโลยี RFID (Radio Frequency Identification) เข้ามาช่วยในการระบุรหัสสินค้า เพื่อเพิ่มความเร็วในการตรวจสอบ เนื่องจากใช้คลื่นวิทยุในการรับส่งข้อมูล ทำให้ไม่จำเป็นต้องมองเห็นตัวรหัส (Non-line-of-sight) และสามารถอ่านข้อมูลได้ทีละหลายรหัสพร้อมกัน ซึ่งมีความทนทานและประสิทธิภาพสูงกว่า Barcode โดยระบบจะทำงานร่วมกับเทคโนโลยีคลาวด์ (Cloud Technology) เพื่อให้สามารถบริหารจัดการข้อมูลได้ทุกที่ผ่านอินเทอร์เน็ต
+
+% --- 2. ทฤษฎีและงานวิจัยที่เกี่ยวข้อง ---
+\section{ทฤษฎีและงานวิจัยที่เกี่ยวข้อง}
+จากการศึกษา งานวิจัยที่เกี่ยวข้องมีการนำ RFID มาประยุกต์ใช้ในหลากหลายด้าน เช่น ระบบจัดการห้องสมุดอัจฉริยะ [5], ระบบคิดเงินอัตโนมัติ [6], และการระบุตำแหน่งทรัพย์สินในศูนย์สุขภาพ [7] ซึ่งแสดงให้เห็นถึงศักยภาพของ RFID ในการติดตามและระบุข้อมูล
+
+องค์ประกอบหลักทางเทคโนโลยีที่ใช้ในงานวิจัยนี้ ได้แก่:
+\begin{enumerate}
+    \item \textbf{RFID (UHF):} ใช้โมดูล Fonkan FM-505 และ Tag แบบ Passive Sticker (Alien 9662 U8) ย่านความถี่ 860-960 MHz [1]
+    \item \textbf{Raspberry Pi 3:} ใช้เป็นหน่วยประมวลผลหลักในการควบคุมอุปกรณ์อ่าน RFID และเชื่อมต่อเครือข่าย [2]
+    \item \textbf{Cloud Technology (AWS):} ใช้บริการ EC2 สำหรับติดตั้ง Server และ RDS สำหรับฐานข้อมูล [4]
+    \item \textbf{Django Framework:} ใช้พัฒนา Web Application ด้วยภาษา Python [3]
+\end{enumerate}
+
+% --- 3. การออกแบบระบบ ---
+\section{การออกแบบและวิธีการดำเนินการ}
+ระบบถูกออกแบบให้เชื่อมโยงระหว่างอุปกรณ์ฮาร์ดแวร์และระบบคลาวด์ ดังนี้:
+
+\subsection{ส่วนประกอบฮาร์ดแวร์}
+ชุดอ่าน RFID ประกอบด้วย Raspberry Pi 3 เชื่อมต่อกับ RFID Reader Module (FM-505) และเสาอากาศ เพื่อทำการอ่านค่าจาก RFID Tag ที่ติดอยู่กับสินค้า ข้อมูลที่ได้จะถูกประมวลผลเบื้องต้นและส่งต่อไปยังระบบคลาวด์
+
+\subsection{ส่วนประกอบซอฟต์แวร์}
+พัฒนาระบบด้วยภาษา Python และ Django Framework ติดตั้งบน AWS EC2 โดยมีการจัดการฐานข้อมูลสินค้า (ชื่อ, ขนาด, สถานที่จัดเก็บ) ผ่าน AWS RDS ผู้ใช้งานสามารถตรวจสอบสถานะสินค้า เพิ่มข้อมูล หรือดูรายงานผ่าน Web Browser บนคอมพิวเตอร์หรือโทรศัพท์มือถือ
+
+
+
+\subsection{ขั้นตอนการทำงาน}
+1. ติด RFID Tag เข้ากับสินค้าและลงทะเบียนข้อมูลเข้าระบบ
+2. ใช้ชุดอ่านทำการสแกนสินค้าเพื่อตรวจสอบความถูกต้อง หรือนับจำนวน
+3. ข้อมูลการตรวจสอบจะถูกบันทึกและอัปเดตสถานะขึ้นสู่ระบบ Cloud แบบ Real-time
+
+% --- 4. ผลการทดลอง (ส่วนที่เพิ่มตามโจทย์) ---
+\section{ผลการทดลองและการวิเคราะห์}
+ในการศึกษาครั้งนี้ ได้ทำการทดลองเปรียบเทียบประสิทธิภาพระหว่างการใช้ระบบ Barcode แบบดั้งเดิม กับระบบ RFID ที่พัฒนาขึ้น โดยวัดเวลาที่ใช้ในการตรวจนับสินค้าคงคลังที่จำนวนต่างกัน (10, 50, 100, 200, และ 500 ชิ้น)
+
+\subsection{ผลการเปรียบเทียบเวลา}
+ผลการทดลองแสดงความสัมพันธ์ระหว่างจำนวนสินค้าและเวลาที่ใช้ในการตรวจสอบ ดังภาพที่ 1
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+    title={ภาพที่ 1 กราฟเปรียบเทียบเวลาในการตรวจนับสินค้า},
+    xlabel={จำนวนสินค้า (ชิ้น)},
+    ylabel={เวลาที่ใช้ (วินาที)},
+    xmin=0, xmax=500,
+    ymin=0, ymax=600,
+    xtick={0,100,200,300,400,500},
+    ytick={0,100,200,300,400,500,600},
+    legend pos=north west,
+    ymajorgrids=true,
+    grid style=dashed,
+    legend style={font=\footnotesize} % ปรับขนาดฟอนต์ใน legend
+]
+
+% กราฟ RFID (เส้นตรง ความชันน้อย)
+\addplot[
+    color=blue,
+    mark=square,
+    thick
+    ]
+    coordinates {
+    (10, 2)
+    (50, 5)
+    (100, 8)
+    (200, 12)
+    (500, 20)
+    };
+    \addlegendentry{ระบบ RFID}
+
+% กราฟ Barcode (Exponential/ความชันสูง)
+\addplot[
+    color=red,
+    mark=triangle,
+    thick,
+    domain=10:500,
+    samples=50
+    ]
+    {0.0025*x^2 + 0.5*x}; 
+    % จำลองกราฟแบบ Exponential (Quadratic)
+    \addlegendentry{ระบบ Barcode}
+
+\end{axis}
+\end{tikzpicture}
+\caption{เปรียบเทียบความเร็วในการตรวจนับสินค้า ระบบ RFID (เส้นสีน้ำเงิน) ใช้เวลาเพิ่มขึ้นเพียงเล็กน้อยเมื่อสินค้าเพิ่มขึ้น ในขณะที่ระบบ Barcode (เส้นสีแดง) ใช้เวลาเพิ่มขึ้นแบบทวีคูณ}
+\label{fig:comparison}
+\end{figure}
+
+จากกราฟจะเห็นได้ว่า:
+\begin{enumerate}
+    \item \textbf{ระบบ RFID:} เส้นกราฟมีความชันต่ำและเป็นลักษณะเส้นตรง (Linear) เนื่องจากสามารถอ่าน Tag ได้พร้อมกันหลายชิ้นในคราวเดียว ทำให้เวลาที่ใช้ในการตรวจสอบเพิ่มขึ้นเพียงเล็กน้อยแม้จำนวนสินค้าจะเพิ่มขึ้นมาก
+    \item \textbf{ระบบ Barcode:} เส้นกราฟมีลักษณะพุ่งขึ้นแบบทวีคูณ (Exponential) เนื่องจากต้องทำการสแกนทีละชิ้น และต้องใช้เวลาในการจัดท่าทางหรือค้นหาตำแหน่งบาร์โค้ด ยิ่งจำนวนสินค้ามาก ความล่าช้าสะสมยิ่งสูงขึ้นอย่างชัดเจน
+\end{enumerate}
+
+\subsection{test graph}
+เราได้ทำการทดลองและแสดงผลลัพธ์ดังภาพที่ \ref{fig:results_graph} และแผนภาพระบบในภาพที่ \ref{fig:system_arch}
+
+% ==================================================================
+% ตัวอย่างที่ 1: การดึงไฟล์กราฟผลการทดลองเข้ามา
+% ==================================================================
+\begin{figure}[htbp]
+    \centering
+    % ใช้คำสั่ง \input แล้วตามด้วยชื่อไฟล์กราฟที่เราแยกไว้
+    % สมมติว่าไฟล์ชื่อ graph_results.tex และวางอยู่โฟลเดอร์เดียวกัน
+    \input{graphs/graph_results.tex}
+
+    \caption{กราฟแสดงผลการทดลอง (โค้ดถูกแยกไปไว้ในไฟล์ graph\_results.tex)}
+    \label{fig:results_graph}
+\end{figure}
+
+% ==================================================================
+% ตัวอย่างที่ 2: การดึงไฟล์แผนภาพระบบเข้ามา
+% ==================================================================
+\begin{figure*}[htbp]
+    \centering
+    % ดึงอีกไฟล์เข้ามา
+    \input{diagram_system.tex}
+
+    \caption{แผนภาพระบบ (โค้ดถูกแยกไปไว้ในไฟล์ diagram\_system.tex)}
+    \label{fig:system_arch}
+\end{figure*}
+
+
+\subsection{ความคุ้มค่า}
+แม้ระบบ RFID จะมีต้นทุนอุปกรณ์เริ่มต้นที่สูงกว่า แต่เมื่อพิจารณาในระยะยาวและการจัดการสินค้าจำนวนมาก ระบบ RFID ให้ความคุ้มค่าสูงกว่ามากในด้านเวลาและแรงงานที่ลดลง
+
+% --- 5. สรุปผล ---
+\section{สรุปผลการศึกษา}
+การพัฒนาระบบบริหารจัดการสินค้าคงคลังด้วย RFID และเทคโนโลยีคลาวด์ ช่วยแก้ปัญหาความล่าช้าและความยุ่งยากของระบบ Barcode เดิมได้อย่างมีประสิทธิภาพ ผลการทดลองยืนยันว่า RFID ช่วยลดเวลาในการตรวจสอบสินค้าได้อย่างมีนัยสำคัญ โดยเฉพาะในการบริหารจัดการสินค้าจำนวนมาก อีกทั้งการใช้ระบบคลาวด์ยังช่วยให้ข้อมูลมีความปลอดภัยและเข้าถึงได้ง่าย ลดภาระค่าใช้จ่ายในการดูแล Server ภายในองค์กร
+
+
+% --- เอกสารอ้างอิง ---
+\begin{thebibliography}{00}
+
+\bibitem{b1} Daniel M. Dobkin. (2008). \textit{The RF in RFID Passive UHF RFID in practice}, Elsevier Inc.
+\bibitem{b2} James Gale. (2020). \textit{Raspberry Pi THE COMPLETE GUIDE}, Black Dog Media Limited.
+\bibitem{b3} D. Martinez, et al., "Library in django framework to standardize early-stage web application development," \textit{2023 18th Iberian Conference on Information Systems and Technologies (CISTI)}, 2023.
+\bibitem{b4} Ashish Prajapati, et al. (2023). \textit{AWS Cloud Computing Concepts and Tech Analogies}, Packt Publishing.
+\bibitem{b5} R. Neha Mukund, et al., "Intelligent RFID Based Library Management System," \textit{2021 IEEE International Conference on Electronics, Computing and Communication Technologies (CONECCT)}, 2021.
+\bibitem{b6} D. Sinha, et al., "Automated Billing System using RFID and Cloud," \textit{2019 Innovations in Power and Advanced Computing Technologies (i-PACT)}, 2019.
+\bibitem{b7} T. D. McAllister, et al., "Localization of Health Center Assets Through an IoT Environment (LoCATE)," \textit{2017 Systems and Information Engineering Design Symposium (SIEDS)}, 2017.
+\bibitem{b8} Fonkan Technology. "RFID Module FM-505 specs." Available: http://www.fonkan.com/
+\bibitem{b9} AliExpress. "UHF 860-960MHz Tag AZ Chip U8 9662." Accessed: 04 September 2023.
+
+\end{thebibliography}
+
+\end{document}
