@@ -30,6 +30,12 @@
 \usepackage{subcaption}
 \graphicspath{{pictures/}}
 
+\usepackage{booktabs} % จำเป็นสำหรับคำสั่ง \toprule, \midrule, \bottomrule
+\usepackage{caption}  % สำหรับจัดการหัวข้อตาราง
+\usepackage{geometry} % ตั้งค่าขอบกระดาษ (เผื่อตารางกว้าง)
+
+
+
 \def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
     T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
 
@@ -46,7 +52,7 @@
 
 % --- ส่วนหัวเรื่อง ---
 \title{ระบบบริหารจัดการสินค้าคงคลังด้วยอาร์เอฟไอดีและเทคโนโลยีคลาวด์\\
-{\footnotesize Inventory Management System Using RFID and Cloud Technology}}
+{\large Inventory Management System Using RFID and Cloud Technology}}
 
 \author{\IEEEauthorblockN{อภิชาติ กันสีนวล (Apichart Kanseenuan)}
 \IEEEauthorblockA{\textit{ภาควิชาวิทยาการคอมพิวเตอร์} \\
@@ -73,11 +79,36 @@ RFID, เทคโนโลยีคลาวด์, สินค้าคงค
 
 % --- 2. ทฤษฎีและงานวิจัยที่เกี่ยวข้อง ---
 \section{ทฤษฎีและงานวิจัยที่เกี่ยวข้อง}
-จากการศึกษา งานวิจัยที่เกี่ยวข้องมีการนำ RFID มาประยุกต์ใช้ในหลากหลายด้าน เช่น ระบบจัดการห้องสมุดอัจฉริยะ [5], ระบบคิดเงินอัตโนมัติ [6], และการระบุตำแหน่งทรัพย์สินในศูนย์สุขภาพ [7] ซึ่งแสดงให้เห็นถึงศักยภาพของ RFID ในการติดตามและระบุข้อมูล
+จากการศึกษา งานวิจัยที่เกี่ยวข้องมีการนำ RFID มาประยุกต์ใช้ในหลากหลายด้าน เช่น ระบบจัดการห้องสมุดอัจฉริยะ [5] จะเป็นการนำ RFID Tag มาช่วยในการนับหนังสือในแต่ละชั้น , ระบบคิดเงินอัตโนมัติโดยใช้ RFID และ เทคโนโลยีคลาวด์ [6] จะเป็นการพัฒนาระบบการคิดราคาสินค้าในร้านค้าโดยที่สามารถคำนวณราคาสินค้าได้ทันทีที่เลือกสินค้า ขั้นตอนในการชำระเงินก็คำนวณจากเงินคงเหลือในระบบได้ , และการระบุตำแหน่งทรัพย์สินในศูนย์สุขภาพ [7] ได้ใช้ RFID Tag ในการตรวจสอบสินทรัพย์ว่าอยู่ตำแหน่งไหน โดยทำงานร่วมกับระบบคลาวด์ของ AWS โดยการคำนวณจุดที่ตั้งของสินทรัพย์จากความแรงของสัญญาณ Access Point เมื่อคำนวณตำแหน่งได้ก็ส่งข้อมูลไปจัดเก็บในระบบ ซึ่งแสดงให้เห็นถึงศักยภาพของการนำเทคโนโลยี RFID มาใช้ในการติดตามและระบุข้อมูล
 
 องค์ประกอบหลักทางเทคโนโลยีที่ใช้ในงานวิจัยนี้ ได้แก่:
 \begin{enumerate}
-    \item \textbf{RFID (UHF):} ใช้โมดูล Fonkan FM-505 และ Tag แบบ Passive Sticker (Alien 9662 U8) ย่านความถี่ 860-960 MHz [1]
+    \item \textbf{RFID (UHF):} ใช้โมดูล Fonkan FM-505 และ Tag แบบ Passive Sticker (Alien 9662 U8) ย่านความถี่ 860-960 MHz [1] หลักการของระบบคือ RFID Reader จะทำการส่งคลื่นวิทยุไปยัง RFID Tag ที่อยู่ในระยะการอ่านเมื่อตัว RFID Tag ได้รับสัญญาณก็จะส่งข้อมูลที่อยู่บนตัว RFID Tag ออกไปหาเครื่องอ่าน ข้อมูลที่ได้จาก RFID Tag จะประกอบด้วยรหัสที่สามารถระบุตัวตนได้ ในการศึกษาครั้งนี้จะใช้ RFID Module Fonkan FM-505 โดยมีคุณสมบัติดังนี้
+
+\begin{table}[h!]
+    \centering
+    \caption{คุณสมบัติของ RFID Module Fonkan FM-505}
+    \label{tab:fonkan-fm505}
+    \vspace{0.2cm} % เว้นระยะห่างระหว่างชื่อตารางและตัวตารางเล็กน้อย
+    \begin{tabular}{ll} % ll หมายถึงจัดชิดซ้ายทั้ง 2 คอลัมน์
+        \toprule
+        \textbf{คุณสมบัติ (Property)} & \textbf{รายละเอียด (Value)} \\
+        \midrule
+        Brand Name & Fonkan \\
+        Model & FM-505 \\
+        Protocol & ISO 18000-6C / EPC C1 GEN2 \\
+        Frequency & 865-868MHZ (EU), 902-928MHZ (US) \\
+        RF Power Output & -2 $\sim$ 25 dBm \\
+        Interface & TTL (UART) \\
+        Gain antenna & 5.5 dBi antenna \\
+        Module size & 120 x 120 mm \\
+        Read distance & 2.5 m (depends on tags) \\
+        Power supply & 3.3V - 5V \\
+        Read Speed & $>$ 50 times/second \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
     \item \textbf{Raspberry Pi 5:} ใช้เป็นหน่วยประมวลผลหลักในการควบคุมอุปกรณ์อ่าน RFID และเชื่อมต่อเครือข่าย [2]
     \item \textbf{Cloud Technology (AWS):} ใช้บริการ EC2 สำหรับติดตั้ง Server และ ฐานข้อมูล [4]
     \item \textbf{Django Framework:} ใช้พัฒนา Web Application ด้วยภาษา Python [3]
