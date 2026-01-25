@@ -49,6 +49,7 @@
 \usepackage{standalone}
 \usepackage{float}
 \usepackage{amsmath}
+\usepackage{tabularx} % เรียกใช้ package tabularx [2]
 
 
 \begin{document}
@@ -86,7 +87,7 @@ RFID, เทคโนโลยีคลาวด์, สินค้าคงค
 
 องค์ประกอบหลักทางเทคโนโลยีที่ใช้ในงานวิจัยนี้ ได้แก่:
 \begin{enumerate}
-    \item \textbf{RFID (UHF):} ใช้โมดูล Fonkan FM-505 และ Tag แบบ Passive Sticker (Alien 9662 U8) ย่านความถี่ 860-960 MHz [1] หลักการของระบบคือ RFID Reader จะทำการส่งคลื่นวิทยุไปยัง RFID Tag ที่อยู่ในระยะการอ่านเมื่อตัว RFID Tag ได้รับสัญญาณก็จะส่งข้อมูลที่อยู่บนตัว RFID Tag ออกไปหาเครื่องอ่าน ข้อมูลที่ได้จาก RFID Tag จะประกอบด้วยรหัสที่สามารถระบุตัวตนได้ ในการศึกษาครั้งนี้จะใช้ RFID Module Fonkan FM-505 โดยมีคุณสมบัติดังนี้
+    \item \textbf{RFID (UHF):} ใช้โมดูล Fonkan FM-505 และ Tag แบบ Passive Sticker (Alien 9662 U8) ย่านความถี่ 860-960 MHz [1] หลักการทำงานของระบบคือ RFID Reader จะทำการส่งคลื่นวิทยุไปยัง RFID Tag ที่อยู่ในระยะการอ่านเมื่อตัว RFID Tag ได้รับสัญญาณก็จะส่งข้อมูลที่อยู่บนตัว RFID Tag ออกไปหาเครื่องอ่าน ข้อมูลที่ได้จาก RFID Tag จะประกอบด้วยรหัสที่สามารถระบุตัวตนได้ ในการศึกษาครั้งนี้จะใช้ RFID Module Fonkan FM-505 และ RFID Tag LH-9662PST-100 โดยมีคุณสมบัติดังนี้
 
 \begin{table}[h!]
     \centering
@@ -112,10 +113,74 @@ RFID, เทคโนโลยีคลาวด์, สินค้าคงค
     \end{tabular}
 \end{table}
 
-    \item \textbf{Raspberry Pi 5:} ใช้เป็นหน่วยประมวลผลหลักในการควบคุมอุปกรณ์อ่าน RFID และเชื่อมต่อเครือข่าย [2]
-    \item \textbf{Cloud Technology (AWS):} ใช้บริการ EC2 สำหรับติดตั้ง Server และ ฐานข้อมูล [4]
-    \item \textbf{Django Framework:} ใช้พัฒนา Web Application ด้วยภาษา Python [3]
-    \item \textbf{Kivy : Cross-platform Python Framework for apps Development:} ใช้ออกแบบหน้าจอ GUI ที่ใช้ควบคุมอุปกรณ์และบริหารสินค้าคงคลังทั้งหมด [11]
+% --- เริ่มส่วนแทรกรูปภาพ ---
+\begin{figure}[h!]
+    \centering
+    % ปรับขนาดรูปตรง width (เช่น 0.6 คือ 60% ของความกว้างหน้ากระดาษ)
+    \includegraphics[width=0.4\textwidth]{pictures/fm-505.png}
+    \caption{RFID Module FM-505}
+    \label{fig:FM505}
+\end{figure}
+% --- จบส่วนแทรกรูปภาพ ---
+
+\begin{table}[h!]
+    \centering
+    \caption{คุณสมบัติของ RFID ID Tag [9]}
+    \label{tab:rfid-tag}
+    \vspace{0.2cm}
+    % เปลี่ยนเป็น tabularx และกำหนดความกว้างเท่ากับ \textwidth
+    % l = คอลัมน์แรกชิดซ้ายตามความกว้างข้อความ
+    % X = คอลัมน์สองขยายเต็มพื้นที่ที่เหลือและตัดบรรทัดอัตโนมัติ [2]
+    \begin{tabularx}{0.5\textwidth}{lX} 
+        \toprule
+        \textbf{คุณสมบัติ (Property)} & \textbf{รายละเอียด (Value)} \\
+        \midrule
+        Brand Name & zhizaibide \\
+        Model Number & LH-9662PST-100 \\
+        Size & 73 x 21mm \\
+        Frequency & UHF 860-960 MHz \\
+        Read range & 1-15 m (depending on application/ reader/antenna/install sites) \\
+        Protocol & ISO/IEC 18000-6c, EPC Class1 Gen2 \\
+        Type & passive \\
+        chip & alien 9662 U8 chip \\
+        Function & Read and write \\
+        EPC Storage & 96 bits \\
+        User memory & 512 bits \\
+        The service life & 100000 rewrite Times, 10 years of data storage capacity \\
+        Using the environment & Temperature: - 50 $\sim$ + 85 $^\circ$C \\ % แก้ไขสัญลักษณ์ให้อ่านง่ายขึ้น
+        Anti-jamming & strong \\
+        Wide application & vehicle car access, books library, door control access, asset inventory, sports club clothing, warehouse, vehicle car, shop store, etc. \\
+        Installation & sticker adhesive \\
+        \bottomrule
+    \end{tabularx}
+\end{table}
+
+
+% --- เริ่มส่วนแทรกรูปภาพ ---
+\begin{figure}[h!]
+    \centering
+    % ปรับขนาดรูปตรง width (เช่น 0.6 คือ 60% ของความกว้างหน้ากระดาษ)
+    \includegraphics[width=0.4\textwidth]{pictures/rfid-tag.png}
+    \caption{RFID Tag}
+    \label{fig:rfid-tag}
+\end{figure}
+% --- จบส่วนแทรกรูปภาพ ---
+
+    \item \textbf{Raspberry Pi 5:} ใช้เป็นหน่วยประมวลผลหลักในการควบคุมอุปกรณ์อ่าน RFID โดยทำการสื่อสารระหว่าง RFID Module (FM-505) และ Raspberry Pi 5 ผ่านทาง Protocol UART (Universal Asynchronous Receiver/Transmitter) และ จัดเก็บข้อมูลไว้ที่ระบบคลาวด์บน Amazon AWS โดยการสื่อสารเชื่อมโยงข้อมูลผ่านทาง API ที่พัฒนาด้วยภาษา Python [2]
+
+% --- เริ่มส่วนแทรกรูปภาพ ---
+\begin{figure}[h!]
+    \centering
+    % ปรับขนาดรูปตรง width (เช่น 0.6 คือ 60% ของความกว้างหน้ากระดาษ)
+    \includegraphics[width=0.4\textwidth]{pictures/pi5.png}
+    \caption{Raspberry Pi 5 8GB}
+    \label{fig:pi5}
+\end{figure}
+% --- จบส่วนแทรกรูปภาพ ---
+
+    \item \textbf{Cloud Technology (AWS):} ใช้บริการ EC2 สำหรับติดตั้ง Server และ จัดเก็บฐานข้อมูล โดยมี API ทำหน้าเชื่อมต่อระหว่างอุปกรณ์และ AWS [4]
+    \item \textbf{Django Framework:} ใช้พัฒนา Web API ด้วยภาษา Python ประกอบด้วยการอ่านและบันทึกข้อมูลลงฐานข้อมูลบนคลาวด์ เพื่อมาใช้งานในชุดอ่าน RFID หรือ เครื่อง Client เช่น มือถือ และ คอมพิวเตอร์  [3]
+    \item \textbf{Kivy : Cross-platform Python Framework for apps Development:} ใช้ในการออกแบบหน้าจอ GUI ที่ใช้ควบคุมอุปกรณ์และบริหารสินค้าคงคลังทั้งหมด [11]
 \end{enumerate}
 
 % --- 3. การออกแบบระบบ ---
@@ -202,7 +267,7 @@ RFID, เทคโนโลยีคลาวด์, สินค้าคงค
 % --- จบส่วนแทรกรูปภาพ ---
 
 
-2. ใช้ชุดอ่าน RFID ทำการสแกนสินค้าคงคลังเพื่อตรวจสอบความถูกต้องเทียบกันระหว่างระบบเดิมซึ่งใช้ Barcode และ ระบบใหม่ที่ใช้ RFID Tag ในการระบุสินค้าคงคลัง
+2. ใช้ชุดอ่าน RFID ทำการอ่านรหัสสินค้าคงคลังเพื่อตรวจสอบความถูกต้องเทียบกันระหว่างระบบเดิมซึ่งใช้ Barcode และ ระบบใหม่ที่ใช้ RFID Tag ในการระบุรหัสสินค้าคงคลัง
 
 % --- เริ่มส่วนแทรกรูปภาพ ---
 \begin{figure}[h!]
@@ -214,20 +279,35 @@ RFID, เทคโนโลยีคลาวด์, สินค้าคงค
 \end{figure}
 % --- จบส่วนแทรกรูปภาพ ---
 
+3. ข้อมูลการตรวจสอบจะถูกบันทึกขึ้นสู่ระบบที่ออกแบบไว้บนระบบคลาวด์ และนำมาใช้ในการคำนวณ 
 
-3. ข้อมูลการตรวจสอบจะถูกบันทึกขึ้นสู่ระบบที่ออกแบบไว้บนระบบคลาวด์ และนำมาใช้ในการคำนวณ
+\subsection{(Calculation Formulas)} 
+ในการทดสอบประสิทธิภาพการอ่านข้อมูล ได้กำหนดตัวแปรและสูตรการคำนวณดังนี้:
 
+% สูตรหาค่าเฉลี่ย
+\subsection{สูตรหาค่าเฉลี่ยเวลาในการอ่าน (Average Time)}
 \begin{equation}
-    T_{avg} = \frac{T_{read}}{T_{total}}
-    \label{eq:avg_time_var}
+    \bar{t} = \frac{\sum_{i=1}^{n} t_i}{n}
 \end{equation}
-
-\noindent โดยที่:
+โดยกำหนดให้:
 \begin{itemize}
-    \item[] $T_{avg}$ คือ เวลาเฉลี่ย
-    \item[] $T_{read}$ คือ เวลาที่ใช้ในการอ่านรหัสสินค้าคงคลัง
-    \item[] $T_{total}$ คือ เวลาที่ใช้ทั้งหมด (วินาที)
+    \item $\bar{t}$ คือ เวลาเฉลี่ย (วินาที)
+    \item $t_i$ คือ เวลาที่ใช้ในการทดสอบรอบที่ $i$
+    \item $n$ คือ จำนวนรอบการทดสอบ (ในที่นี้ $n=5$)
 \end{itemize}
+
+% สูตรหาความเร็ว
+\noindent \textbf{1.2 ความเร็วในการอ่านข้อมูล (Reading Speed)}
+\begin{equation}
+    Speed = \frac{N}{\bar{t}}
+\end{equation}
+โดยกำหนดให้:
+\begin{itemize}
+    \item $Speed$ คือ ความเร็วในการอ่าน (รหัส/วินาที)
+    \item $N$ คือ จำนวนรหัสสินค้า (5, 10, 30, 50, 100 ชิ้น)
+    \item $\bar{t}$ คือ เวลาเฉลี่ยจากการคำนวณ
+\end{itemize}
+
 
 
 % --- เริ่มส่วนแทรกรูปภาพ ---

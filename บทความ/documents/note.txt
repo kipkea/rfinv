@@ -7,3 +7,10 @@ https://www.zebra.com/content/dam/support-dam/en/documentation/unrestricted/guid
 
 36.033996/3.68226=9.79
 
+
+
+5 0.5
+10 0.8
+30 4
+50 8
+100 20

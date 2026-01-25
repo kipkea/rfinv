@@ -75,14 +75,14 @@ time.sleep(0.2)
 # สมมติว่าสร้าง set ไว้เก็บ UID ที่ไม่ซ้ำกัน
 scanned_tags = set()
 current_count = 0
-target_tag_count = 10
+target_tag_count = 30
 
 # 5. ลูปอ่าน Tag อย่างต่อเนื่อง
 try:
     while current_count < target_tag_count:
         # ส่งคำสั่งอ่าน Multi-Tag (U)
         rfcmd("U")
-        time.sleep(0.5)
+        #time.sleep(0.5)
         
         # อ่านข้อมูลที่ไหลเข้ามา
         # ข้อมูลตอบกลับจะเริ่มด้วย LF และจบด้วย CR LF [9], [10]

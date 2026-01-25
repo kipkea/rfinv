@@ -2,6 +2,8 @@ import time
 import sys
 import RPi.GPIO as GPIO
 import serial
+import argparse
+
 
 RFID_EN_PIN = 4
 
@@ -16,10 +18,28 @@ GPIO.output(RFID_EN_PIN, GPIO.HIGH)
 port = '/dev/ttyAMA0'
 #port = '/dev/ttyS0'
 
+def rfcmd(cmd_str):
+    # คำสั่งต้องขึ้นต้นด้วย LF (0x0A) และจบด้วย CR (0x0D) [9]
+    full_cmd = b'\x0A' + cmd_str.encode() + b'\x0D'
+    ser.write(full_cmd)
+    
 buadrate = 38400
 #buadrate = 57600
 #buadrate = 115200
+#buadrate = 230400
 
+ser = serial.Serial(port,buadrate,8)
+ser.port = port
+ser.baudrate = buadrate
+time.sleep(1)
+
+#เปลี่ยนความเร็วเป็น 230400
+rfcmd("NA,7")
+time.sleep(0.2)
+ser.close()
+
+#เชื่อมต่อใหม่
+bouadrate = 230400
 ser = serial.Serial(port,buadrate,8)
 ser.port = port
 ser.baudrate = buadrate
@@ -73,10 +93,48 @@ class RFCounter:
                 #MQ_EPC อ่านหลายแท็กพร้อมกัน
                 ser.write(cmd_MQ_EPC)
                 #time.sleep(0.1)     
-                time.sleep(0.01)
+                #time.sleep(0.01)
                 self.count_cmd_loop += 1
                 try:
-                    while ser.inWaiting() > 0:
+                    # 2. อ่านข้อมูล Response
+                    while True:
+                        if ser.in_waiting > 0:
+                            try:
+                                # อ่านข้อมูลจนจบLine (<LF>) [4]
+                                raw_line = ser.read_until(b'\x0A')
+                                print("Raw Line: ", raw_line)
+                                line = raw_line.decode('ascii', errors='ignore').strip()
+
+                                # ถ้าเป็น 'U' ตัวเดียว คือจบ Batch รอบนี้
+                                if len(line) == 1:
+                                    break 
+                                
+                                idx = line.find('E2')
+                                if idx != -1 and len(line)>28:
+                                    x = line[-8:]
+                                    #print(x)
+                                    #if x not in Items and len(x)>=33 and x.startswith("300",1,4):
+                                    #เก็บเฉพาะ 8 หลักสุดท้ายเพื่อประหยัดพื้นที่                       
+                                    code = x  
+
+                                # เริ่มจับเวลาเมื่อข้อมูลแรกเข้ามา
+                                if self.current_count == 0:
+                                    self.start_time = time.perf_counter()
+                                    print(f"--> เริ่มจับเวลา! (อ่านครั้งแรก: {code})")
+                                
+                                if code not in self.scanned_data and len(code)==8:            
+                                    self.current_count += 1
+                                    self.scanned_data.append(code)
+                                    
+                                    # แสดงผลความคืบหน้า
+                                    print(f"[{self.current_count}/{self.target_count}] รับข้อมูล: {code}")                                        
+                                        
+                            except UnicodeDecodeError:
+                                pass
+
+                    
+                    '''
+                    #while ser.inWaiting() > 0:
                         x = ser.readline().strip().decode("utf-8")
                         #x = ser.readline()
                         #EPC GEN2 ขึ้นต้นด้วย E2
@@ -88,7 +146,7 @@ class RFCounter:
                             #if x not in Items and len(x)>=33 and x.startswith("300",1,4):
                             #เก็บเฉพาะ 8 หลักสุดท้ายเพื่อประหยัดพื้นที่                       
                             code = x        
-                                               
+                              '''                 
                 except EOFError:
                     break
 
@@ -96,18 +154,9 @@ class RFCounter:
                     continue  # ข้ามถ้าเป็นค่าว่าง
 
 
-                # เริ่มจับเวลาเมื่อข้อมูลแรกเข้ามา
-                if self.current_count == 0:
-                    self.start_time = time.perf_counter()
-                    print(f"--> เริ่มจับเวลา! (อ่านครั้งแรก: {code})")
-                
-                if code not in self.scanned_data and len(code)==8:            
-                    self.current_count += 1
-                    self.scanned_data.append(code)
-                    
-                    # แสดงผลความคืบหน้า
-                    print(f"[{self.current_count}/{self.target_count}] รับข้อมูล: {code}")
-
+                                    
+                # หน่วงเวลาเล็กน้อยระหว่างรอบคำสั่ง U เพื่อไม่ให้ Buffer เต็ม
+                time.sleep(0.01)
             # จบการทำงานเมื่อครบจำนวน
             self.end_time = time.perf_counter()
             self.show_summary()
