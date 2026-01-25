@@ -25,6 +25,7 @@ ser.port = port
 ser.baudrate = buadrate
 time.sleep(0.2)
 
+
 cmd_fw_version = b'\x0A\x56\x0D'    #<LF>V<CR>
 cmd_reader_id = b'\x0A\x53\x0D'     #<LF>S<CR>
 cmd_Q_EPC = b'\x0A\x51\x0D'         #<LF>Q<CR>
@@ -47,7 +48,6 @@ def sys_cmd(CMD):
 sys_cmd(cmd_Reader_Power_Max)
 #sys_cmd(cmd_Reader_Power_Min)
 #sys_cmd(cmd_Reader_Power_Mid)
-       
 
 class RFCounter:
     def __init__(self, target_count):
@@ -56,6 +56,7 @@ class RFCounter:
         self.start_time = None
         self.end_time = None
         self.scanned_data = []
+        self.count_cmd_loop = 0
 
     def run(self):
         """เริ่มการทำงานของโปรแกรม"""
@@ -69,11 +70,11 @@ class RFCounter:
                 #code = input() 
                 ser.reset_output_buffer()
                 #print("Send command : ",cmd_MQ_EPC)
-
+                #MQ_EPC อ่านหลายแท็กพร้อมกัน
                 ser.write(cmd_MQ_EPC)
                 #time.sleep(0.1)     
-                time.sleep(0.05)
-                
+                time.sleep(0.01)
+                self.count_cmd_loop += 1
                 try:
                     while ser.inWaiting() > 0:
                         x = ser.readline().strip().decode("utf-8")
@@ -87,9 +88,9 @@ class RFCounter:
                             #if x not in Items and len(x)>=33 and x.startswith("300",1,4):
                             #เก็บเฉพาะ 8 หลักสุดท้ายเพื่อประหยัดพื้นที่                       
                             code = x        
-                                                
+                                               
                 except EOFError:
-                        break
+                    break
 
                 if not code:
                     continue  # ข้ามถ้าเป็นค่าว่าง
@@ -125,6 +126,7 @@ class RFCounter:
             print("="*40)
             print(f"เวลาทั้งหมดที่ใช้ : {total_time:.6f} วินาที")
             print(f"ความเร็วเฉลี่ย    : {avg_time:.6f} วินาที/รายการ")
+            print(f"ใช้คำสั่งทั้งหมด    : {self.count_cmd_loop} ครั้ง")
             print("="*40)
         else:
             print("\nยังไม่มีข้อมูลเพียงพอสำหรับการคำนวณ")

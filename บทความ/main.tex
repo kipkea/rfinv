@@ -1,4 +1,5 @@
 \documentclass[conference]{IEEEtran}
+%\documentclass{article}
 \usepackage{cite}
 \usepackage{amsmath,amssymb,amsfonts}
 \usepackage{algorithmic}
@@ -32,8 +33,10 @@
 
 \usepackage{booktabs} % จำเป็นสำหรับคำสั่ง \toprule, \midrule, \bottomrule
 \usepackage{caption}  % สำหรับจัดการหัวข้อตาราง
-\usepackage{geometry} % ตั้งค่าขอบกระดาษ (เผื่อตารางกว้าง)
-
+%\usepackage{geometry} % ตั้งค่าขอบกระดาษ (เผื่อตารางกว้าง)
+\usepackage[a4paper, margin=1in]{geometry} % ตั้งค่าขอบกระดาษให้กว้างขึ้นเพื่อให้พอดีกับตาราง
+\usepackage[table]{xcolor} % เรียกใช้ package สำหรับใส่สีในตาราง [3]
+\usepackage{multirow}      % สำหรับรวมแถว (optional)
 
 
 \def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
@@ -244,6 +247,105 @@ RFID, เทคโนโลยีคลาวด์, สินค้าคงค
 
 \subsection{ผลการเปรียบเทียบเวลา}
 ผลการทดลองแสดงความสัมพันธ์ระหว่างจำนวนสินค้าคงคลังและเวลาที่ใช้ในการตรวจสอบ ดังนี้
+
+% ตัวอย่างการกำหนดสีหัวตารางแบบรวมแถว
+\definecolor{headergray}{gray}{0.85}
+
+% --- ตารางที่ 1: 5 ชิ้น ---
+\begin{table}[H]
+\centering
+\caption{ผลการทดสอบเวลาในการอ่านรหัสสินค้าจำนวน \textbf{5 ชิ้น} (หน่วย: วินาที)}
+\vspace{0.2cm}
+\begin{tabular}{|c|ccccc|c|}
+\hline
+% --- แถวที่ 1 ---
+\rowcolor{headergray}
+ & \multicolumn{5}{c|}{\textbf{การตรวจครั้งที่}} & \\ % เว้นช่องว่างไว้สำหรับ multirow ที่จะเขียนย้อนขึ้นมาจากแถวล่าง
+\cline{2-6} 
+
+% --- แถวที่ 2 ---
+\rowcolor{headergray}
+% ใช้ -2 เพื่อบอกว่าให้รวมกับแถวด้านบน (นับย้อนขึ้นไป 2 แถว)
+\multirow{-2}{*}{\textbf{วิธีการอ่าน}} & \textbf{1} & \textbf{2} & \textbf{3} & \textbf{4} & \textbf{5} & \multirow{-2}{*}{\textbf{เฉลี่ย}} \\ 
+\hline
+RFID    & 0.5 & 0.6 & 0.5 & 0.5 & 0.6 & \textbf{0.54} \\ \hline
+Barcode & 2.1 & 2.0 & 2.2 & 2.1 & 2.3 & \textbf{2.14} \\ \hline
+\end{tabular}
+\end{table}
+\vspace{0.5cm}
+
+% --- ตารางที่ 2: 10 ชิ้น ---
+\begin{table}[H]
+\centering
+\caption{ผลการทดสอบเวลาในการอ่านรหัสสินค้าจำนวน \textbf{10 ชิ้น} (หน่วย: วินาที)}
+\vspace{0.2cm}
+\begin{tabular}{|c|ccccc|c|}
+\hline
+\rowcolor{headergray}
+\multirow{2}{*}{\textbf{วิธีการอ่าน}} & \multicolumn{5}{c|}{\textbf{การตรวจครั้งที่}} & \multirow{2}{*}{\textbf{เฉลี่ย}} \\ 
+\cline{2-6}
+\rowcolor{headergray}
+ & \textbf{1} & \textbf{2} & \textbf{3} & \textbf{4} & \textbf{5} & \\ \hline
+RFID    & 0.8 & 0.9 & 0.8 & 0.8 & 0.9 & \textbf{0.84} \\ \hline
+Barcode & 4.5 & 4.4 & 4.6 & 4.5 & 4.5 & \textbf{4.50} \\ \hline
+\end{tabular}
+\end{table}
+\vspace{0.5cm}
+
+% --- ตารางที่ 3: 20 ชิ้น ---
+\begin{table}[H]
+\centering
+\caption{ผลการทดสอบเวลาในการอ่านรหัสสินค้าจำนวน \textbf{20 ชิ้น} (หน่วย: วินาที)}
+\vspace{0.2cm}
+\begin{tabular}{|c|ccccc|c|}
+\hline
+\rowcolor{headergray}
+\multirow{2}{*}{\textbf{วิธีการอ่าน}} & \multicolumn{5}{c|}{\textbf{การตรวจครั้งที่}} & \multirow{2}{*}{\textbf{เฉลี่ย}} \\ 
+\cline{2-6}
+\rowcolor{headergray}
+ & \textbf{1} & \textbf{2} & \textbf{3} & \textbf{4} & \textbf{5} & \\ \hline
+RFID    & 1.2 & 1.3 & 1.2 & 1.1 & 1.3 & \textbf{1.22} \\ \hline
+Barcode & 9.0 & 8.9 & 9.1 & 9.2 & 9.0 & \textbf{9.04} \\ \hline
+\end{tabular}
+\end{table}
+\vspace{0.5cm}
+
+% --- ตารางที่ 4: 50 ชิ้น ---
+\begin{table}[H]
+\centering
+\caption{ผลการทดสอบเวลาในการอ่านรหัสสินค้าจำนวน \textbf{50 ชิ้น} (หน่วย: วินาที)}
+\vspace{0.2cm}
+\begin{tabular}{|c|ccccc|c|}
+\hline
+\rowcolor{headergray}
+\multirow{2}{*}{\textbf{วิธีการอ่าน}} & \multicolumn{5}{c|}{\textbf{การตรวจครั้งที่}} & \multirow{2}{*}{\textbf{เฉลี่ย}} \\ 
+\cline{2-6}
+\rowcolor{headergray}
+ & \textbf{1} & \textbf{2} & \textbf{3} & \textbf{4} & \textbf{5} & \\ \hline
+RFID    & 2.5 & 2.6 & 2.5 & 2.4 & 2.7 & \textbf{2.54} \\ \hline
+Barcode & 22.5 & 23.0 & 22.8 & 23.1 & 22.4 & \textbf{22.76} \\ \hline
+\end{tabular}
+\end{table}
+\vspace{0.5cm}
+
+% --- ตารางที่ 5: 100 ชิ้น ---
+\begin{table}[H]
+\centering
+\caption{ผลการทดสอบเวลาในการอ่านรหัสสินค้าจำนวน \textbf{100 ชิ้น} (หน่วย: วินาที)}
+\vspace{0.2cm}
+\begin{tabular}{|c|ccccc|c|}
+\hline
+\rowcolor{headergray}
+\multirow{2}{*}{\textbf{วิธีการอ่าน}} & \multicolumn{5}{c|}{\textbf{การตรวจครั้งที่}} & \multirow{2}{*}{\textbf{เฉลี่ย}} \\ 
+\cline{2-6}
+\rowcolor{headergray}
+ & \textbf{1} & \textbf{2} & \textbf{3} & \textbf{4} & \textbf{5} & \\ \hline
+RFID    & 4.8 & 5.0 & 4.9 & 4.8 & 5.1 & \textbf{4.92} \\ \hline
+Barcode & 45.0 & 46.2 & 45.5 & 45.8 & 46.0 & \textbf{45.70} \\ \hline
+\end{tabular}
+\end{table}
+
+
 
 \begin{figure}[htbp]
 \centering
