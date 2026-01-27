@@ -24,15 +24,19 @@ class RFIDTester(BoxLayout):
         self.is_reading = False
         self.read_thread = None
         
+        self.scan_tag = set()
+        self.current_count = 0
+        self.loop_counter = 0
+        
         # --- ส่วนที่ 1: การเชื่อมต่อ (Connection) ---
         conn_layout = BoxLayout(size_hint_y=0.1)
-        self.port_input = TextInput(text=DEFAULT_PORT, multiline=False)
+        self.port_input = TextInput(text=DEFAULT_PORT, multiline=False) #ช่องใส่ Port
         self.baud_spinner = Spinner(
             text='38400',
             values=('9600', '19200', '38400', '115200', '230400')
-        )
-        self.btn_connect = Button(text="Connect")
-        self.btn_connect.bind(on_press=self.toggle_connection)
+        )   #ช่องเลือก Baudrate
+        self.btn_connect = Button(text="Connect")   #ปุ่มเชื่อมต่อ
+        self.btn_connect.bind(on_press=self.toggle_connection)  #ผูกฟังก์ชันเชื่อมต่อ
         
         conn_layout.add_widget(Label(text="Port:"))
         conn_layout.add_widget(self.port_input)
@@ -61,11 +65,19 @@ class RFIDTester(BoxLayout):
         btn_set_baud = Button(text="Set Baud to 230400")
         btn_set_baud.bind(on_press=self.set_high_speed)
 
+        btn_clear_log = Button(text="Clear Log")
+        btn_clear_log.bind(on_press=lambda x: self.clear_log_text())
+        
+        self.Tag_Count = TextInput(text="0", multiline=False, readonly=True)
+        
         setting_layout.add_widget(btn_get_id)
         setting_layout.add_widget(btn_get_power)
         setting_layout.add_widget(self.power_spinner)
         setting_layout.add_widget(btn_set_power)
         setting_layout.add_widget(btn_set_baud)
+        setting_layout.add_widget(btn_clear_log)
+        setting_layout.add_widget(Label(text="Tags Read:"))
+        setting_layout.add_widget(self.Tag_Count)
         self.add_widget(setting_layout)
 
         # --- ส่วนที่ 3: อ่าน Tag (Operations) ---
@@ -108,15 +120,21 @@ class RFIDTester(BoxLayout):
         
         # 2. จำกัดความยาวข้อความ (Buffer limit) 
         # เก็บไว้แค่ 5000 ตัวอักษรล่าสุด เพื่อป้องกันแอปค้างเมื่อรันไปนานๆ
-        if len(new_text) > 5000:
-            new_text = new_text[-5000:]
+        if len(new_text) > 50000:
+            new_text = new_text[-50000:]
             
         self.log_display.text = new_text
+        
+                                            
+        self.Tag_Count.text = str(self.current_count)
 
         # 3. สั่งให้เลื่อนลงล่างสุด (Auto-Scroll to Bottom)
         # ต้องรอจังหวะเล็กน้อยให้ Text อัปเดตก่อนจึงย้าย Cursor
         Clock.schedule_once(self.scroll_to_bottom, 0.1)
 
+    def clear_log_text(self):
+        self.log_display.text = "Ready...\n"
+        
     def scroll_to_bottom(self, dt):
         # ย้าย Cursor ไปที่บรรทัดสุดท้าย คอลัมน์ที่ 0
         # self.log_display._lines คือลิสต์ของบรรทัดทั้งหมด
@@ -159,11 +177,27 @@ class RFIDTester(BoxLayout):
                     raw_data = self.ser.read_until(b'\x0D\x0A')
                     decoded = raw_data.decode('ascii', errors='ignore').strip()
                     if decoded:
-                        self.log(f"<< Recv: {decoded}")
+                        if len(decoded) > 10:
+                            #self.log(f"<< Recv: {decoded}")
+                            # ตรวจสอบรูปแบบข้อมูล (เช่น ต้องมี E2 และความยาวเหมาะสม)
+                            idx = decoded.find('E2')
+                            if idx != -1 and len(decoded) > 28:
+                                # สกัดเอาเฉพาะรหัส EPC (ตัวอย่างนี้เอา 8 หลักสุดท้ายตามเดิม)
+                                tag_id = decoded[-8:]
+                                
+                                # ตรวจสอบว่ายังไม่เคยอ่านแท็กนี้ในรอบนี้
+                                if tag_id not in self.scan_tag:
+                                    self.loop_counter += 1
+                                    self.scan_tag.add(tag_id)
+                                    self.current_count = len(self.scan_tag)
+                                    self.log(f"{self.loop_counter} Tag Found: {tag_id} | Total: {self.current_count}")
+                        #else:
+                            #self.log(f"<< Recv: {decoded}")
+
             except Exception as e:
                 self.log(f"Read Error: {e}")
                 break
-            time.sleep(0.01)
+            time.sleep(0.005)
 
     def set_rf_power(self, instance):
         # คำสั่ง N1,<value> ค่า 00-1B [2], [3]
@@ -192,7 +226,8 @@ class RFIDTester(BoxLayout):
             # U อ่านหลาย tag ใน field เดียว หรือจะส่งถี่ๆ ก็ได้
             full_cmd = b'\x0A' + b'U' + b'\x0D'
             self.ser.write(full_cmd)
-            time.sleep(0.05) # Delay เล็กน้อยป้องกัน Buffer Overflow
+            self.loop_counter = 0
+            time.sleep(0.005) # Delay เล็กน้อยป้องกัน Buffer Overflow
 
 class RFIDApp(App):
     def build(self):

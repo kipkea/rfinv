@@ -50,6 +50,49 @@
 \usepackage{float}
 \usepackage{amsmath}
 \usepackage{tabularx} % เรียกใช้ package tabularx [2]
+\usepackage{colortbl}
+
+% ตัวอย่างการกำหนดสีหัวตารางแบบรวมแถว
+\definecolor{headergray}{gray}{0.85}
+
+
+% กำหนดคอลัมน์ตัวเลขให้เล็กลงและจัดกึ่งกลาง
+\newcolumntype{C}{>{\centering\arraybackslash\fontsize{8}{10}\selectfont}X}
+
+\newcommand{\RFIDHalfTable}[8]{
+    \begin{table}[H]
+    \centering
+    \caption{\small ผลการทดสอบเวลาในการอ่านรหัสสินค้าจำนวน #1 ชิ้น (หน่วย: วินาที)}
+    \vspace{0.2cm}
+    \renewcommand{\arraystretch}{1.5}
+    \setlength{\tabcolsep}{2pt} % ลดระยะห่างระหว่างคอลัมน์เพื่อให้ลงตัวในครึ่งหน้า
+    \begin{tabularx}{\columnwidth}{|>{\centering\arraybackslash\bfseries\fontsize{8}{10}\selectfont}p{1.3cm}|CCCCC|c|}
+    \hline
+    \rowcolor{headergray}
+    \textbf{วิธี} & \textbf{ครั้ง 1} & \textbf{ครั้ง 2} & \textbf{ครั้ง 3} & \textbf{ครั้ง 4} & \textbf{ครั้ง 5} & \textbf{เฉลี่ย} \\ \hline
+    RFID    & #2 & #3 & #4 & #5 & #6 & \textbf{#7} \\ \hline
+    Barcode & #8 \\ \hline
+    \end{tabularx}
+    \end{table}
+}
+
+\newcommand{\BoxTable}[8]{
+    \begin{table}[H]
+    \centering
+    \caption{\small ผลการทดสอบเวลาในการอ่านรหัสสินค้าจำนวน #1 ชิ้น (หน่วย: วินาที)}
+    \vspace{0.2cm}
+    \renewcommand{\arraystretch}{1.5}
+    \setlength{\tabcolsep}{2pt} % ลดระยะห่างระหว่างคอลัมน์เพื่อให้ลงตัวในครึ่งหน้า
+    \begin{tabularx}{\columnwidth}{|>{\centering\arraybackslash\bfseries\fontsize{8}{10}\selectfont}p{1.3cm}|CCCCC|c|}
+    \hline
+    \rowcolor{headergray}
+    \textbf{ประเภท} & \textbf{ครั้ง 1} & \textbf{ครั้ง 2} & \textbf{ครั้ง 3} & \textbf{ครั้ง 4} & \textbf{ครั้ง 5} & \textbf{เฉลี่ย} \\ \hline
+    กล่องกระดาษ    & #2 & #3 & #4 & #5 & #6 & \textbf{#7} \\ \hline
+    กล่องพลาสติก & #8 \\ \hline
+    \end{tabularx}
+    \end{table}
+}
+
 
 
 \begin{document}
@@ -200,13 +243,13 @@ RFID, เทคโนโลยีคลาวด์, สินค้าคงค
 
 
 \subsection{ส่วนประกอบฮาร์ดแวร์}
-ชุดอ่าน RFID ประกอบด้วย Raspberry Pi 5 เชื่อมต่อกับ RFID Reader Module (FM-505) เพื่อทำการอ่านค่าจาก RFID Tag ที่ติดอยู่กับสินค้าคงคลัง รหัสที่ได้จะถูกประมวลผลเบื้องต้นและทำการเชื่อมต่อไปยังระบบคลาวด์เพื่อทำการเก็บหรือเรียกค้นจากนั้นจำนำมาแสดงผลที่อุปกรณ์ผ่านทาง API ที่จัดทำขึ้น
+ชุดอ่าน RFID ประกอบด้วย Raspberry Pi 5 เชื่อมต่อกับ RFID Reader Module (FM-505) เพื่อทำการอ่านค่าจาก RFID Tag ที่ติดอยู่กับสินค้าคงคลัง รหัสที่ได้จะถูกประมวลผลเบื้องต้นและทำการเชื่อมต่อไปยังระบบคลาวด์เพื่อทำการเก็บหรือเรียกค้นจากนั้นจะนำมาแสดงผลที่อุปกรณ์ผ่านทาง API ที่จัดทำขึ้น
 
 % --- เริ่มส่วนแทรกรูปภาพ ---
 \begin{figure}[h!]
     \centering
     % รูปซ้าย
-    \begin{subfigure}[b]{0.17\textwidth}
+    \begin{subfigure}[b]{0.2\textwidth}
         \centering
         \includegraphics[width=\textwidth]{scan_module_01_r.png}
         \caption{ชุดอ่าน RFID ด้านขวา} % แก้คำบรรยายตรงนี้
@@ -214,7 +257,7 @@ RFID, เทคโนโลยีคลาวด์, สินค้าคงค
     \end{subfigure}
     \hfill % เว้นระยะห่าง
     % รูปขวา
-    \begin{subfigure}[b]{0.2\textwidth}
+    \begin{subfigure}[b]{0.22\textwidth}
         \centering
         \includegraphics[width=\textwidth]{scan_module_02_r.png}
         \caption{ชุดอ่าน RFID ด้านซ้าย} % แก้คำบรรยายตรงนี้
@@ -233,7 +276,7 @@ RFID, เทคโนโลยีคลาวด์, สินค้าคงค
 \begin{figure}[h!]
     \centering
     % ปรับขนาดรูปตรง width (เช่น 0.6 คือ 60% ของความกว้างหน้ากระดาษ)
-    \includegraphics[width=0.4\textwidth]{pictures/django_db.png}
+    \includegraphics[width=0.5\textwidth]{pictures/django_db.png}
     \caption{ระบบบริหารฐานข้อมูลของ Django}
     \label{fig:my_single_image}
 \end{figure}
@@ -273,7 +316,7 @@ RFID, เทคโนโลยีคลาวด์, สินค้าคงค
 \begin{figure}[h!]
     \centering
     % ปรับขนาดรูปตรง width (เช่น 0.6 คือ 60% ของความกว้างหน้ากระดาษ)
-    \includegraphics[width=0.3\textwidth]{pictures/tag_test.png}
+    \includegraphics[width=0.5\textwidth]{pictures/tag_test.png}
     \caption{การทดสอบการอ่านรหัสสินค้าคงคลัง}
     \label{fig:tag_test}
 \end{figure}
@@ -285,16 +328,18 @@ RFID, เทคโนโลยีคลาวด์, สินค้าคงค
 ในการทดสอบประสิทธิภาพการอ่านข้อมูล ได้กำหนดตัวแปรและสูตรการคำนวณดังนี้:
 
 % สูตรหาค่าเฉลี่ย
-\subsection{สูตรหาค่าเฉลี่ยเวลาในการอ่าน (Average Time)}
+\noindent \textbf{1.1 สูตรหาค่าเฉลี่ยเวลาในการอ่าน (Average Time)}
 \begin{equation}
     \bar{t} = \frac{\sum_{i=1}^{n} t_i}{n}
 \end{equation}
 โดยกำหนดให้:
 \begin{itemize}
-    \item $\bar{t}$ คือ เวลาเฉลี่ย (วินาที)
+    \item $\bar{t}$ คือ เวลาเฉลี่ยในการหารหัสสินค้า มีหน่วยเป็นวินาที
     \item $t_i$ คือ เวลาที่ใช้ในการทดสอบรอบที่ $i$
     \item $n$ คือ จำนวนรอบการทดสอบ (ในที่นี้ $n=5$)
 \end{itemize}
+
+\vspace{0.2cm}
 
 % สูตรหาความเร็ว
 \noindent \textbf{1.2 ความเร็วในการอ่านข้อมูล (Reading Speed)}
@@ -303,8 +348,8 @@ RFID, เทคโนโลยีคลาวด์, สินค้าคงค
 \end{equation}
 โดยกำหนดให้:
 \begin{itemize}
-    \item $Speed$ คือ ความเร็วในการอ่าน (รหัส/วินาที)
-    \item $N$ คือ จำนวนรหัสสินค้า (5, 10, 30, 50, 100 ชิ้น)
+    \item $Speed$ คือ ความเร็วในการอ่านรหัสสินค้างคงคลัง (รหัส/วินาที)
+    \item $N$ คือ จำนวนรหัสสินค้าคงคลังที่นำมาทดสอบ (5, 10, 30, 50, 100 ชิ้น)
     \item $\bar{t}$ คือ เวลาเฉลี่ยจากการคำนวณ
 \end{itemize}
 
@@ -314,130 +359,48 @@ RFID, เทคโนโลยีคลาวด์, สินค้าคงค
 \begin{figure}[h!]
     \centering
     % ปรับขนาดรูปตรง width (เช่น 0.6 คือ 60% ของความกว้างหน้ากระดาษ)
-    \includegraphics[width=0.3\textwidth]{pictures/rf_time.png}
+    \includegraphics[width=0.5\textwidth]{pictures/rf_time.png}
     \caption{ผลการทดสอบความเร็วในการอ่านรหัสสินค้าคงคลัง}
     \label{fig:time_test}
 \end{figure}
 % --- จบส่วนแทรกรูปภาพ ---
 
+%\vspace{0.2cm}
 
 % --- 4. ผลการทดลอง (ส่วนที่เพิ่มตามโจทย์) ---
 \section{ผลการทดลองและการวิเคราะห์}
 ในการศึกษาครั้งนี้ ได้ทำการทดลองเปรียบเทียบประสิทธิภาพระหว่างการใช้ระบบ Barcode แบบดั้งเดิมในที่นี้จะใช้เครื่องอ่าน Barcode แบบเลเซอร์ Zebra LS2208 [10] เปรียบเที่ยบกับชุดอ่าน RFID ที่พัฒนาขึ้น โดยวัดเวลาที่ใช้ในการตรวจนับสินค้าคงคลังในจำนวนที่ต่างกัน (1, 5, 10, 20, และ 50 ชิ้น)
 
-\subsection{ผลการเปรียบเทียบเวลา}
+\subsection{ผลการเปรียบเทียบด้านเวลาที่ใช้ในการอ่านรหัสสินค้าคงคลัง}
 ผลการทดลองแสดงความสัมพันธ์ระหว่างจำนวนสินค้าคงคลังและเวลาที่ใช้ในการตรวจสอบ ดังนี้
 
-% ตัวอย่างการกำหนดสีหัวตารางแบบรวมแถว
-\definecolor{headergray}{gray}{0.85}
 
-% --- ตารางที่ 1: 5 ชิ้น ---
-\begin{table}[H]
-\centering
-\caption{ผลการทดสอบเวลาในการอ่านรหัสสินค้าจำนวน \textbf{5 ชิ้น} (หน่วย: วินาที)}
-\vspace{0.2cm}
-\begin{tabular}{|c|ccccc|c|}
-\hline
-% --- แถวที่ 1 ---
-\rowcolor{headergray}
- & \multicolumn{5}{c|}{\textbf{การตรวจครั้งที่}} & \\ % เว้นช่องว่างไว้สำหรับ multirow ที่จะเขียนย้อนขึ้นมาจากแถวล่าง
-\cline{2-6} 
+% --- ส่วนเนื้อหา (เรียกใช้งานครบทั้ง 5 ตาราง) ---
 
-% --- แถวที่ 2 ---
-\rowcolor{headergray}
-% ใช้ -2 เพื่อบอกว่าให้รวมกับแถวด้านบน (นับย้อนขึ้นไป 2 แถว)
-\multirow{-2}{*}{\textbf{วิธีการอ่าน}} & \textbf{1} & \textbf{2} & \textbf{3} & \textbf{4} & \textbf{5} & \multirow{-2}{*}{\textbf{เฉลี่ย}} \\ 
-\hline
-RFID    & 0.5 & 0.6 & 0.5 & 0.5 & 0.6 & \textbf{0.54} \\ \hline
-Barcode & 2.1 & 2.0 & 2.2 & 2.1 & 2.3 & \textbf{2.14} \\ \hline
-\end{tabular}
-\end{table}
-\vspace{0.5cm}
+\RFIDHalfTable{5}{0.81}{0.75}{0.58}{0.63}{0.92}{0.74}{9.34 & 7.24 & 8.62 & 8.68 & 8.34 & \textbf{8.37}}
 
-% --- ตารางที่ 2: 10 ชิ้น ---
-\begin{table}[H]
-\centering
-\caption{ผลการทดสอบเวลาในการอ่านรหัสสินค้าจำนวน \textbf{10 ชิ้น} (หน่วย: วินาที)}
-\vspace{0.2cm}
-\begin{tabular}{|c|ccccc|c|}
-\hline
-\rowcolor{headergray}
-\multirow{2}{*}{\textbf{วิธีการอ่าน}} & \multicolumn{5}{c|}{\textbf{การตรวจครั้งที่}} & \multirow{2}{*}{\textbf{เฉลี่ย}} \\ 
-\cline{2-6}
-\rowcolor{headergray}
- & \textbf{1} & \textbf{2} & \textbf{3} & \textbf{4} & \textbf{5} & \\ \hline
-RFID    & 0.8 & 0.9 & 0.8 & 0.8 & 0.9 & \textbf{0.84} \\ \hline
-Barcode & 4.5 & 4.4 & 4.6 & 4.5 & 4.5 & \textbf{4.50} \\ \hline
-\end{tabular}
-\end{table}
-\vspace{0.5cm}
+\RFIDHalfTable{10}{0.86}{1.21}{0.73}{0.92}{1.53}{1.05}{14.26 & 13.37 & 12.68 & 13.49 & 14.35 & \textbf{13.63}}
 
-% --- ตารางที่ 3: 20 ชิ้น ---
-\begin{table}[H]
-\centering
-\caption{ผลการทดสอบเวลาในการอ่านรหัสสินค้าจำนวน \textbf{20 ชิ้น} (หน่วย: วินาที)}
-\vspace{0.2cm}
-\begin{tabular}{|c|ccccc|c|}
-\hline
-\rowcolor{headergray}
-\multirow{2}{*}{\textbf{วิธีการอ่าน}} & \multicolumn{5}{c|}{\textbf{การตรวจครั้งที่}} & \multirow{2}{*}{\textbf{เฉลี่ย}} \\ 
-\cline{2-6}
-\rowcolor{headergray}
- & \textbf{1} & \textbf{2} & \textbf{3} & \textbf{4} & \textbf{5} & \\ \hline
-RFID    & 1.2 & 1.3 & 1.2 & 1.1 & 1.3 & \textbf{1.22} \\ \hline
-Barcode & 9.0 & 8.9 & 9.1 & 9.2 & 9.0 & \textbf{9.04} \\ \hline
-\end{tabular}
-\end{table}
-\vspace{0.5cm}
+\RFIDHalfTable{30}{5.24}{4.69}{6.62}{5.42}{5.65}{5.52}{43.28 & 39.42 & 42.36 & 37.49 & 38.24 & \textbf{40.16}}
 
-% --- ตารางที่ 4: 50 ชิ้น ---
-\begin{table}[H]
-\centering
-\caption{ผลการทดสอบเวลาในการอ่านรหัสสินค้าจำนวน \textbf{50 ชิ้น} (หน่วย: วินาที)}
-\vspace{0.2cm}
-\begin{tabular}{|c|ccccc|c|}
-\hline
-\rowcolor{headergray}
-\multirow{2}{*}{\textbf{วิธีการอ่าน}} & \multicolumn{5}{c|}{\textbf{การตรวจครั้งที่}} & \multirow{2}{*}{\textbf{เฉลี่ย}} \\ 
-\cline{2-6}
-\rowcolor{headergray}
- & \textbf{1} & \textbf{2} & \textbf{3} & \textbf{4} & \textbf{5} & \\ \hline
-RFID    & 2.5 & 2.6 & 2.5 & 2.4 & 2.7 & \textbf{2.54} \\ \hline
-Barcode & 22.5 & 23.0 & 22.8 & 23.1 & 22.4 & \textbf{22.76} \\ \hline
-\end{tabular}
-\end{table}
-\vspace{0.5cm}
+\RFIDHalfTable{50}{7.43}{8.94}{9.71}{8.65}{8.21}{8.59}{72.43 & 82.38 & 76.46 & 74.85 & 78.69 & \textbf{76.96}}
 
-% --- ตารางที่ 5: 100 ชิ้น ---
-\begin{table}[H]
-\centering
-\caption{ผลการทดสอบเวลาในการอ่านรหัสสินค้าจำนวน \textbf{100 ชิ้น} (หน่วย: วินาที)}
-\vspace{0.2cm}
-\begin{tabular}{|c|ccccc|c|}
-\hline
-\rowcolor{headergray}
-\multirow{2}{*}{\textbf{วิธีการอ่าน}} & \multicolumn{5}{c|}{\textbf{การตรวจครั้งที่}} & \multirow{2}{*}{\textbf{เฉลี่ย}} \\ 
-\cline{2-6}
-\rowcolor{headergray}
- & \textbf{1} & \textbf{2} & \textbf{3} & \textbf{4} & \textbf{5} & \\ \hline
-RFID    & 4.8 & 5.0 & 4.9 & 4.8 & 5.1 & \textbf{4.92} \\ \hline
-Barcode & 45.0 & 46.2 & 45.5 & 45.8 & 46.0 & \textbf{45.70} \\ \hline
-\end{tabular}
-\end{table}
-
+\RFIDHalfTable{100}{26.42}{25.43}{22.46}{23.34}{22.94}{24.12}{142.35 & 139.24 & 146.49 & 143.49 & 141.92 & \textbf{142.70}}
 
 
 \begin{figure}[htbp]
 \centering
+
+\scalebox{0.9}{ 
 \begin{tikzpicture}
 \begin{axis}[
     title={กราฟเปรียบเทียบเวลาที่ใช้ในการตรวจนับสินค้าคงคลัง},
     xlabel={จำนวนสินค้าคงคลัง (ชิ้น)},
     ylabel={เวลาที่ใช้ (วินาที)},
-    xmin=0, xmax=60,
-    ymin=0, ymax=230,
-    xtick={0,10,20,30,40,50},
-    ytick={0,20,40,60,80,100,120,140,160,180,200,220},
+    xmin=0, xmax=100,
+    ymin=0, ymax=160,
+    xtick={0,5,10,30,50,100},
+    ytick={0,20,40,60,80,100,120,140,160},
     legend pos=north west,
     ymajorgrids=true,
     grid style=dashed,
@@ -451,11 +414,11 @@ Barcode & 45.0 & 46.2 & 45.5 & 45.8 & 46.0 & \textbf{45.70} \\ \hline
     thick
     ]
     coordinates {
-    (1, 0.012)
-    (5, 0.9)
-    (10, 3.68)
-    (20, 4.56)
-    (50, 10.35)
+    (5, 0.74)
+    (10, 1.05)
+    (30, 5.52)
+    (50, 8.59)
+    (100, 24.12)
     };
     \addlegendentry{ระบบ RFID}
 
@@ -466,28 +429,107 @@ Barcode & 45.0 & 46.2 & 45.5 & 45.8 & 46.0 & \textbf{45.70} \\ \hline
     thick
     ]
     coordinates {
-    (1, 1)
-    (5, 10)
-    (10, 36)
-    (20, 76)
-    (50, 210)
+    (5, 8.37)
+    (10, 13.63)
+    (30, 40.16)
+    (50, 76.96)
+    (100, 142.70)
     };
     \addlegendentry{ระบบ ฺBarcode}
 
 \end{axis}
 \end{tikzpicture}
+}
 \caption{เปรียบเทียบความเร็วในการตรวจนับสินค้า ระบบ RFID (เส้นสีน้ำเงิน) ใช้เวลาเพิ่มขึ้นเพียงเล็กน้อยเมื่อสินค้าเพิ่มขึ้น ในขณะที่ระบบ Barcode (เส้นสีแดง) ใช้เวลาเพิ่มขึ้นแบบทวีคูณ}
 \label{fig:comparison}
 \end{figure}
 
 
+\subsection{ผลการทดสอบการอ่านรหัสสินค้าคงคลัง}
+เนื่องจากหลักการทำงานของ RFID คือใช้คลื่นวิทยุไม่ได้ใช้แสงในการอ่านรหัสเหมือน Barcode และ QR-Code จึงทำการทดลองประสิทธิภาพในการอ่านรหัสสินค้าคงคลังผ่านบรรจุภัณฑ์ต่างชนิดกัน ในการทดลองครั้งนี้จะนำกล่องกระดาษ และกล่องพลาสติกมาบรรจุสินค้า และทำการเปรียบเทียบความเร็วในการอ่านรหัสว่าแตกต่างกันหรือไม่ ซึ่งผลการทดลองแสดงได้ในตารางนี้
 
-\subsection{ความคุ้มค่า}
+\BoxTable{5}{0.92}{0.71}{0.76}{0.85}{0.79}{0.81}{0.84 & 0.62 & 0.78 & 0.87 & 0.68 & \textbf{0.76}}
+
+% --- เริ่มส่วนแทรกรูปภาพ ---
+\begin{figure}[h!]
+    \centering
+    % รูปซ้าย
+    \begin{subfigure}[b]{0.4\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{box1.png}
+        \caption{การจัดเรียงสินค้าในกล่องกระดาษ} % แก้คำบรรยายตรงนี้
+        \label{fig:box1}
+    \end{subfigure}
+    \hfill % เว้นระยะห่าง
+    % รูปขวา
+    \begin{subfigure}[b]{0.35\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{box2.png}
+        \caption{ปิดกล่องเพื่อทำการทดสอบ} % แก้คำบรรยายตรงนี้
+        \label{fig:box2}
+    \end{subfigure}
+       % รูปซ้าย
+    \begin{subfigure}[b]{0.4\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{plastic_box1.png}
+        \caption{การจัดเรียงสินค้าในกล่องพลาสติก} % แก้คำบรรยายตรงนี้
+        \label{fig:box3}
+    \end{subfigure}
+    \hfill % เว้นระยะห่าง
+    % รูปขวา
+    \begin{subfigure}[b]{0.35\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{plastic_box2.png}
+        \caption{ปิดกล่องเพื่อทำการทดสอบ} % แก้คำบรรยายตรงนี้
+        \label{fig:box4}
+    \end{subfigure} 
+    \caption{แสดงการเรียงสินค้าในกล่องกระดาษและกล่องพลาสติกเพื่อทำการทดสอบประสิทธิภาพการอ่านรหัสสินค้าคงคลังในบรรจุภัณฑ์ต่างชนิดกัน} % คำบรรยายรวม
+    \label{fig:boxs}
+\end{figure}
+% --- จบส่วนแทรกรูปภาพ ---
+
+
+\subsection{ความคุ้มค่าในการนำ RFID มาแทน Barcode หรือ QR-Code}
 ถึงแม้ว่าการนำระบบ RFID มาประยุกต์ใช้งานจะมีต้นทุนด้านอุปกรณ์เริ่มต้นที่สูงกว่าระบบ Barcode และ QR-Code แต่เมื่อพิจารณาเวลาในการใช้งานที่ลดลงและความแม่นยำในการอ่านรหัสจำนวนมาก ระบบ RFID จึงให้ความคุ้มค่าที่สูงกว่ามาก
+
+\begin{table}[h]
+\centering
+\renewcommand{\arraystretch}{1.5} % เพิ่มความสูงของแถวให้อ่านง่ายขึ้น
+\begin{tabular}{|p{2.5cm}|p{4cm}|}
+\hline
+% ใส่สีแถวหัวตาราง (เทาอ่อน) [3]
+\rowcolor{lightgray} 
+\textbf{หัวข้อเปรียบเทียบ} & \textbf{ระบบ Barcode หรือ QR-Code}  \\ \hline
+ต้นทุนต่อหน่วย  & ต่ำมาก  \\ \hline
+ต้นทุนอุปกรณ์อ่าน & ราคาถูก หาซื้อง่าย \\ \hline
+อายุการใช้งาน & สั้น ชำรุด เลือนได้ง่าย  \\ \hline
+ต้นทุนด้านแรงงาน & สูง ต้องทำการตรวจทีละชิ้น  \\ \hline
+ความแม่นยำของข้อมูล & มีโอกาสผิดพลาดจากผู้ใช้  \\ \hline
+\end{tabular}
+\caption{ตารางแสดงข้อมูลที่ใช้ระบบ Barcode หรือ QR-Code }
+\end{table}
+
+
+\begin{table}[h]
+\centering
+\renewcommand{\arraystretch}{1.5} % เพิ่มความสูงของแถวให้อ่านง่ายขึ้น
+\begin{tabular}{|p{2.5cm}|p{4cm}|}
+\hline
+% ใส่สีแถวหัวตาราง (เทาอ่อน) [3]
+\rowcolor{lightgray} 
+\textbf{หัวข้อเปรียบเทียบ} & \textbf{ระบบ RFID}  \\ \hline
+ต้นทุนต่อหน่วย  & สูงกว่า  \\ \hline
+ต้นทุนอุปกรณ์อ่าน & ราคาสูง \\ \hline
+อายุการใช้งาน & ยาวนานกว่า  \\ \hline
+ต้นทุนด้านแรงงาน & ต่ำ อ่านได้ครั้งละมากๆได้  \\ \hline
+ความแม่นยำของข้อมูล & สูงกว่า  \\ \hline
+\end{tabular}
+\caption{ตารางแสดงข้อมูลที่ใช้ระบบ RFID }
+\end{table}
 
 % --- 5. สรุปผล ---
 \section{สรุปผลการศึกษา}
-การพัฒนาระบบบริหารจัดการสินค้าคงคลังด้วย RFID และเทคโนโลยีคลาวด์ ช่วยแก้ปัญหาความล่าช้าและความยุ่งยากของระบบ Barcode และ QR-Code ในระบบดั้งเดิมได้อย่างมีประสิทธิภาพ จากผลการทดลองยืนยันว่า RFID ช่วยลดเวลาในการตรวจสอบสินค้าได้อย่างมีนัยสำคัญ โดยเฉพาะในการบริหารจัดการสินค้าจำนวนมาก อีกทั้งการใช้ระบบคลาวด์ยังช่วยให้ข้อมูลมีความปลอดภัยและเข้าถึงได้ง่าย ลดภาระค่าใช้จ่ายในการดูแล Server และการใช้พลังงานไฟฟ้าภายในองค์กรได้อีกด้วย
+การพัฒนาระบบบริหารจัดการสินค้าคงคลังด้วย RFID และเทคโนโลยีคลาวด์ ช่วยแก้ปัญหาความล่าช้าและความยุ่งยากของระบบ Barcode และ QR-Code ในระบบดั้งเดิมได้อย่างมีประสิทธิภาพ จากผลการทดลองยืนยันว่า RFID ช่วยลดเวลาในการตรวจสอบสินค้าได้อย่างมีนัยสำคัญ โดยเฉพาะในการบริหารจัดการสินค้าจำนวนมาก อีกทั้งการใช้ระบบคลาวด์ยังช่วยให้ข้อมูลมีความปลอดภัยและเข้าถึงได้ง่าย ลดภาระค่าใช้จ่ายในการดูแล Server และการใช้พลังงานไฟฟ้าภายในองค์กรได้อีกด้วย แต่ยังมีข้อจำกัดทางกายภาพที่ต้องคำนึงถึงในการใช้ RFID เนื่องจากลักษณะการทำงานที่เป็นคลื่นวิทยุเมื่ออยู่ใกล้วัสดุที่เป็นโลหะหรือมีของเหลว จะทำให้ประสิทธิภาพในการสื่อสารระหว่าชุดอ่านและตัว RFID Tag ลดลง และการจัดเรียงสินค้า ต้องไม่ชิดกันแน่นจนเกินไป 
 
 
 % --- เอกสารอ้างอิง ---
