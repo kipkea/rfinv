@@ -58,10 +58,10 @@
         \node [draw=gray!50, dashed, fill=gray!5, fit=(tags) (rpi5) (reader), label={[anchor=north west, font=\bfseries\small, xshift=0.5cm, yshift=-0.5cm]north west:Zone 1: Warehouse Edge (หน้างาน)}, inner sep=0.8cm, rounded corners] (zone1) {};
 
         % กรอบโซนคลาวด์
-        \node [draw=orange!50, dashed, fill=orange!5, fit=(ec2) (rds), label={[anchor=north east, font=\bfseries\small, xshift=-0.5cm, yshift=-0.5cm]north east:Zone 2: AWS Cloud (คลาวด์)}, inner sep=0.8cm, rounded corners] (zone2) {};
+        \node [draw=orange!50, dashed, fill=orange!5, fit=(ec2) (rds), label={[anchor=north east, font=\bfseries\small, xshift=-0.5cm, yshift=-0.5cm]north east:Zone 2: Cloud}, inner sep=0.8cm, rounded corners] (zone2) {};
     \end{pgfonlayer}
 
 \end{tikzpicture}
-\caption{แผนภาพสถาปัตยกรรมระบบ แสดงการเชื่อมโยงจาก Raspberry Pi 5 ผ่านอินเทอร์เน็ตไปยัง Django API บน AWS Cloud}
+\caption{แผนภาพสถาปัตยกรรมระบบ แสดงการเชื่อมโยงจาก Raspberry Pi 5 ผ่านอินเทอร์เน็ตไปยัง Django API บน ระบบ Cloud}
 \label{fig:system_architecture_tikz}
 \end{figure*}

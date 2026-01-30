@@ -1,0 +1,78 @@
+\documentclass[a4paper,12pt]{article}
+\usepackage{fontspec}
+\usepackage{multicol}
+\usepackage{graphicx}
+\usepackage{geometry}
+\usepackage{setspace}
+\usepackage{titlesec}
+
+% การตั้งค่าขนาดกระดาษ
+\geometry{top=2.54cm, bottom=2.54cm, left=2.54cm, right=2.54cm}
+
+% การตั้งค่าฟอนต์
+\setmainfont{Times New Roman}
+\newfontface\thaifont{Angsana New}
+
+% การตั้งค่าหัวข้อ
+\titleformat{\section}{\thaifont\Large\bfseries}{\thesection}{1em}{}
+\titleformat{\subsection}{\thaifont\large\bfseries}{\thesubsection}{1em}{}
+
+\begin{document}
+
+% ชื่อบทความ
+\begin{center}
+    {\thaifont\huge ชื่อบทความ} \\[1em]
+    {\fontspec{Times New Roman}\Large Title} \\
+\end{center}
+
+% ชื่อผู้แต่ง
+\begin{center}
+    {\thaifont\large ผู้แต่งไทย1 (English1)} \\[0.5em]
+    {\thaifont\large ผู้แต่งไทย2 (English2)} \\[0.5em]
+    {\thaifont\large ชื่อภาควิชาหรือหน่วยงาน ชื่อคณะ ชื่อมหาวิทยาลัย} \\[0.5em]
+    {\thaifont\large ชื่อภาควิชาหรือหน่วยงาน ชื่อคณะ ชื่อมหาวิทยาลัย} \\[0.5em]
+    \texttt{name1@anywhere.com, name2@anywhere.com}
+\end{center}
+
+% บทคัดย่อ
+\section*{\thaifont บทคัดย่อ}
+{\thaifont\normalsize
+บทความนี้เป็นตัวอย่างสำหรับการเตรียมการเขียนบทความที่จะส่งให้คณะกรรมการพิจารณาลงพิมพ์ในเอกสารประกอบการประชุม NCCIT...
+}
+\vspace{1em}
+
+\textbf{คำสำคัญ:} คำค้น1, คำค้น2, คำค้น3, คำค้น4, คำค้น5
+
+% Abstract
+\section*{Abstract}
+{\fontspec{Times New Roman}\normalsize
+This paper presents a guideline for preparing a paper to submit to the NCCIT committee...
+}
+\vspace{1em}
+
+\textbf{Keywords:} word 1, word 2, word 3, word 4, word 5.
+
+% บทนำ
+\section{บทนำ}
+บทความที่จะส่งต้องใช้กระดาษขนาด A4...
+
+% รูปแบบบทความ
+\section{รูปแบบบทความ}
+\subsection{ขอบเขตกระดาษ}
+เนื้อหาในบทความต้องอยู่ภายในขอบเขต...
+
+% เนื้อหาหลัก
+\section{เนื้อหาหลัก}
+เนื้อหาหลักควรประกอบด้วยหัวข้อดังต่อไปนี้...
+
+% การส่งบทความ
+\section{การส่งบทความ}
+ส่งบทความที่ได้รับการจัดรูปแบบ...
+
+% เอกสารอ้างอิง
+\section{เอกสารอ้างอิง}
+\begin{thebibliography}{99}
+\bibitem{ref1} P. P. Lin and K. Jules, “An intelligent system for monitoring the microgravity environment...”
+\end{thebibliography}
+
+\end{document}

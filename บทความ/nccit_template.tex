@@ -1,0 +1,222 @@
+% !TEX TS-program = xelatex
+% !TEX encoding = UTF-8 Unicode
+
+\documentclass[a4paper, 10pt]{article}
+
+\usepackage{fontspec}
+\usepackage{geometry}
+\usepackage{multicol}
+\usepackage{fancyhdr}
+\usepackage{parskip}
+\usepackage{titlesec}
+\usepackage{indentfirst}
+\usepackage{setspace}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{hyperref}
+
+% --- Font Setup ---
+% Assuming Angsana New and Times New Roman are available on the user's MiKTeX system.
+% XeLaTeX is required for this setup.
+\setmainfont{Times New Roman}
+\newfontfamily\thaiFont{Angsana New} % NOTE: User must ensure this font is installed on their system.
+
+% --- Geometry and Layout ---
+\geometry{
+  a4paper,
+  top=1in,
+  bottom=1in,
+  left=1in,
+  right=1in,
+  columnsep=0.25in % Standard two-column separation
+}
+
+% Remove page numbers (Requirement 4. เลขหน้า)
+\pagestyle{empty}
+
+% --- Custom Title and Author Formatting ---
+\newcommand{\thaipaperTitle}[1]{%
+  \centering
+  {\thaiFont\fontsize{20}{24}\selectfont\textbf{#1}\par}%
+  \vspace{0.5\baselineskip}%
+}
+\newcommand{\englishpaperTitle}[1]{%
+  \centering
+  {\fontsize{14}{16}\selectfont\textbf{#1}\par}%
+  \vspace{2\baselineskip}% (Requirement: เว้นบรรทัดหลังชื่อบทความสองบรรทัด)
+}
+\newcommand{\authorInfo}[3]{%
+  \centering
+  {\thaiFont\fontsize{14}{16}\selectfont\textit{#1}\par}% (Requirement: Angsana New 14pt italic)
+  {\fontsize{10}{12}\selectfont #2\par}% (Requirement: Times New Roman 10pt)
+  {\fontsize{10}{12}\selectfont #3\par}% (Requirement: Times New Roman 10pt)
+  \vspace{1\baselineskip}%
+}
+
+% --- Section Heading Formatting ---
+% 1. หัวข้อลำดับที่ 1 (e.g., 1. บทนำ)
+\titleformat{\section}
+  {\normalfont\setstretch{1}\raggedright\bfseries}
+  {\thesection.}
+  {0.5em}
+  {\thaiFont\fontsize{16}{18}\selectfont} % Thai: Angsana New 16pt Bold
+\titlespacing*{\section}
+  {0pt}{1\baselineskip}{1\baselineskip} % Before: 1 line, After: 1 line
+
+% 2. หัวข้อลำดับที่ 2 (e.g., 2.1 ขอบเขตกระดาษ)
+\titleformat{\subsection}
+  {\normalfont\setstretch{1}\raggedright\bfseries}
+  {\thesubsection}
+  {0.5em}
+  {\thaiFont\fontsize{14}{16}\selectfont} % Thai: Angsana New 14pt Bold
+\titlespacing*{\subsection}
+  {0pt}{1\baselineskip}{0pt} % Before: 1 line, After: 0 lines (start content immediately)
+
+% --- Paragraph Formatting ---
+% Set paragraph indentation to 1 pica (approx 0.422 cm)
+\setlength{\parindent}{0.422cm}
+\setlength{\parskip}{0pt} % No space between paragraphs
+
+% --- Caption Formatting ---
+\newcommand{\figtableCaption}[2]{%
+  \vspace{0.5\baselineskip}
+  \centering
+  {\thaiFont\fontsize{14}{16}\selectfont\textbf{#1}\par} % "ภาพที่/ตารางที่ X:" Angsana New 14pt Bold
+  {\thaiFont\fontsize{12}{14}\selectfont #2\par} % Detail: Angsana New 12pt Normal
+  \vspace{0.5\baselineskip}
+}
+
+% --- Main Document Start ---
+\begin{document}
+\begin{multicols}{2}
+
+% --- Title Section ---
+\thaipaperTitle{ชื่อบทความ (Angsana New ขนาด 20 จุด)}
+\englishpaperTitle{Title (Time New Roman, size 14 points)}
+
+% --- Author Section ---
+\authorInfo{ชื่อผู้แต่งไทย1 (English1)$^1$ และชื่อผู้แต่งไทย2 (English Name2)$^2$}
+{$^1$ชื่อภาควิชาหรือหน่วยงาน ชื่อคณะ ชื่อมหาวิทยาลัย}
+{name1@anywhare.com, name2@anywhere.com}
+% Note: For the English author name (P. Meesad), the user should adjust the \authorInfo command or use a custom command if only English is needed.
+% For simplicity, I'm combining the Thai/English author info as per the example.
+
+% --- Abstract Section (Thai) ---
+\begin{center}
+  {\thaiFont\fontsize{16}{18}\selectfont\textbf{บทคัดย่อ}\par} % Angsana New 16pt Bold, Centered
+\end{center}
+\vspace{-0.5\baselineskip} % Adjust spacing
+\setstretch{1} % Single space for Thai
+{\thaiFont\fontsize{14}{16}\selectfont\textit{%
+  บทความนี้เป็นตัวอย่างสำหรับการเตรียมการเขียนบทความที่จะส่งให้คณะกรรมการพิจารณาลงพิมพ์ในเอกสารประกอบการประชุม NCCIT บทความนี้จะกล่าวถึงรูปแบบการเขียนบทความ ขนาดตัวอักษรที่ใช้ แบบตัวอักษรที่ใช้ในส่วนต่างๆ
+}\par}
+\vspace{0.5\baselineskip}
+{\thaiFont\fontsize{14}{16}\selectfont\textbf{คำสำคัญ:} คำค้น1, คำค้น2, คำค้น3, คำค้น4, คำค้น5\par}
+\vspace{1\baselineskip} % 1 line space after abstract
+
+% --- Abstract Section (English) ---
+\begin{center}
+  {\fontsize{12}{14}\selectfont\textbf{Abstract}\par} % Times New Roman 12pt Bold, Centered
+\end{center}
+\vspace{-0.5\baselineskip} % Adjust spacing
+\setstretch{1.5} % 1.5 space for English
+{\fontsize{10}{12}\selectfont\textit{%
+  This paper presents a guideline for preparing a paper to submit to the NCCIT committee for considering publishing in the NCCIT proceeding. The paper describes the format, the sizes, and font types used in each section.
+}\par}
+\vspace{0.5\baselineskip}
+{\fontsize{10}{12}\selectfont\textbf{Keywords:} word 1, word 2, word 3, word 4, word 5.\par}
+\vspace{1\baselineskip} % 1 line space after abstract
+
+% Reset spacing to single for main body (Thai/Mixed)
+\setstretch{1}
+
+% --- Main Content ---
+
+\section{\thaiFont บทนำ} % 1. บทนำ
+\label{sec:intro}
+
+\setstretch{1} % Single space for Thai/Mixed content
+{\thaiFont\fontsize{14}{16}\selectfont
+บทความที่จะส่งต้องใช้กระดาษขนาด A4 (21 ซ.ม. x 29.7 ซ.ม.) จำนวน 6 แผ่น (ห้ามเกินเด็ดขาด) โดยรวมทั้งเนื้อหาและภาพประกอบต่าง ๆ แล้ว บทความนี้จะกล่าวถึงคู่มือการเขียนบทความทั้งในส่วนของขนาดตัวอักษร การเว้นระยะ และข้อกำหนดอื่น ๆ ที่เกี่ยวข้องในการเขียนบทความสำหรับลงพิมพ์ใน NCCIT Proceeding
+\par}
+
+\section{\thaiFont รูปแบบบทความ} % 2. รูปแบบบทความ
+
+\subsection{\thaiFont ขอบเขตกระดาษ} % 2.1 ขอบเขตกระดาษ
+\setstretch{1}
+{\thaiFont\fontsize{14}{16}\selectfont
+เนื้อหาในบทความต้องอยู่ภายในขอบเขต กว้าง 1 นิ้ว (2.54 ซ.ม.) และสูง 1 นิ้ว (2.54 ซ.ม.) อย่าให้เนื้อหาใดอยู่นอกขอบเขตนี้ เนื้อหาต้องจัดให้อยู่ในสองคอลัมน์ เนื้อหาต้องจัดแบบหน้าและหลังตรง (Thai Distributed)
+\par}
+
+\subsection{\thaiFont บทคัดย่อ} % 2.2 บทคัดย่อ
+\setstretch{1}
+{\thaiFont\fontsize{14}{16}\selectfont
+บทความที่เขียนเป็นภาษาไทย ต้องมีบทคัดย่อเป็นทั้งภาษาไทยและภาษาอังกฤษ สำหรับบทความภาษาไทยใช้คำว่า “บทคัดย่อ” เป็นหัวข้อเริ่มต้น ใช้ตัวอักษรแบบ Angsana New ขนาด 16 จุด ตัวหนาและจัดกลาง เนื้อหาในบทคัดย่อให้ใช้ตัวอักษรแบบ Angsana New ขนาด 14 จุด ให้จัดแบบหน้าหลังตรงและตัวอักษรเอียง สำหรับบทความภาษาอังกฤษ ใช้คำว่า “Abstract” เป็นหัวข้อเริ่มต้น ใช้ตัวอักษรแบบ Times New Roman ขนาด 12 จุด ตัวหนาจัดกลางหน้า เนื้อหาในบทคัดย่อให้ใช้ตัวอักษรแบบ Times New Roman ขนาด 10 จุด ให้จัดแบบหน้าหลังตรงและตัวอักษรเอียง ระยะระหว่างบรรทัด 1.5 จุด หลังจบบทคัดย่อ ให้เว้นระยะระหว่างบทคัดย่อกับเนื้อหาหลัก 1 บรรทัด บทคัดย่อควรยาวไม่เกิน 3 นิ้ว
+\par}
+
+\subsection{\thaiFont เนื้อหาหลัก} % 2.3 เนื้อหาหลัก
+\setstretch{1}
+{\thaiFont\fontsize{14}{16}\selectfont
+ชื่อเรื่องอยู่หน้าแรก จัดกลางหน้า ตัวหนา ชื่อเรื่องภาษาไทยให้ใช้รูปแบบตัวอักษร Angsana New ขนาด 20 จุด ชื่อเรื่องภาษาอังกฤษให้ใช้รูปแบบตัวอักษร Times New Roman ขนาด 14 จุด โดยคำนาม คำสรรพนาม คำคุณสรรพ คำกิริยา และคำขยายกิริยา ในภาษาอังกฤษให้ใช้ตัวอักษรพิมพ์ใหญ่นำตัวเดียว ตัวอักษรที่สองเป็นต้นไปใช้ตัวพิมพ์เล็ก สำหรับคำเชื่อมต่าง ๆ ให้ใช้ตัวอักษรพิมพ์เล็ก และให้เว้นบรรทัดหลังชื่อบทความสองบรรทัด
+\par}
+
+% --- Example Figure and Table ---
+\begin{figure}[h]
+  \centering
+  % \includegraphics[width=0.9\columnwidth]{example-image-a} % Placeholder image
+  \figtableCaption{ภาพที่ 1:}{นี่คือตัวอย่างภาพ}
+\end{figure}
+
+\begin{table}[h]
+  \centering
+  \figtableCaption{ตารางที่ 1:}{นี่คือตัวอย่างตาราง}
+  \begin{tabular}{|c|c|}
+    \hline
+    \thaiFont\fontsize{12}{14}\selectfont หัวข้อ & \thaiFont\fontsize{12}{14}\selectfont ข้อมูล \\
+    \hline
+    \thaiFont\fontsize{12}{14}\selectfont แถว 1 & \thaiFont\fontsize{12}{14}\selectfont ค่า 1 \\
+    \hline
+    \thaiFont\fontsize{12}{14}\selectfont แถว 2 & \thaiFont\fontsize{12}{14}\selectfont ค่า 2 \\
+    \hline
+  \end{tabular}
+\end{table}
+
+% --- References Section ---
+\section*{\thaiFont เอกสารอ้างอิง} % Unnumbered section for references
+\addcontentsline{toc}{section}{เอกสารอ้างอิง}
+
+\begin{thebibliography}{99}
+\setstretch{1.5} % 1.5 space for English references
+\fontsize{9}{11}\selectfont % Times New Roman 9pt for English
+
+\bibitem[1]{Lin2002} P. P. Lin and K. Jules, “An intelligent system for monitoring the microgravity environment quality on-board the International Space Station,” \textit{IEEE Trans. on Instrumentation and Measurement}, Vol. 51, No. 5, pp. 1002-1009, 2002.
+
+\bibitem[2]{Simpson1992} P. K. Simpson. “Fuzzy min-max neural networks-part 1: classification,” \textit{IEEE Trans. Neural Networks}, Vol. 3, No. 5, pp. 776-786, 1992.
+
+\bibitem[3]{Wu2004} S. Wu and T. W. S. Chow, “Induction machine fault detection using SOM-based RBF neural networks” \textit{IEEE Trans. on Industrial Electronics}, Vol. 51, No. 1, pp. 183-194, 2004.
+
+\bibitem[4]{Meesad2004} P. Meesad. “A One Pass Algorithm for Generating Fuzzy Rules from Data” \textit{The 8th National Computer Science and Engineering Conference (NCSEC 2004)}, Hat Yai , Songkhla, Thailand, October 21-22, 2004.
+
+\bibitem[5]{Meesad2003a} P. Meesad and G. Yen, “Fuzzy Temporal Representation and Reasoning,” \textit{Proceedings of the IEEE International Symposium on Circuits and Systems (ISCAS03)}, Bangkok, Thailand, May 25-May 28, 2003, Vol. 5, pp.789-792.
+
+\bibitem[6]{Meesad2003b} P. Meesad and G. Yen, “Combined Numerical and Linguistic Knowledge Representation for Medical Diagnosis,” \textit{IEEE transactions on Systems, Man, and Cybernetics-Part A: systems and humans}, Vol.33, No. 2, pp. 206-222, 2003.
+
+\bibitem[7]{Meesad2003c} P. Meesad and G. Yen, “Accuracy, Comprehensibility, and Completeness Evaluation of a Fuzzy Expert System,” \textit{International Journal of Uncertainty, Fuzziness and Knowledge-Based Systems (IJUFKS)}, Vol. 11, No. 4, pp. 445-466, 2003.
+
+\setstretch{1} % Single space for Thai references
+\thaiFont\fontsize{12}{14}\selectfont % Angsana New 12pt for Thai
+
+\bibitem[8]{Meesad2548} พยุง มีสัจ และ สมิช บัตรเจริญ, “การเปรียบเทียบผลพยากรณ์ปริมาณเลขหมายของชุมสายโทรศัพท์ระหว่างการถดถอย พหุคูณกับโครงข่ายประสาทเทียม” \textit{วารสารวิชาการพระจอมเกล้าพระนครเหนือ}, ปีที่ 15, ฉบับที่ 2, เม.ย.-มิ.ย. 2548 หน้า 54-64, 2548.
+
+\bibitem[9]{Meesad2547} พยุง มีสัจ และ สมพิศ โยมา. “ระบบสารสนเทศสำหรับงานการจัดการเรียนการสอนของระบบงานทวิภาคี.” \textit{วารสารพัฒนาเทคนิคศึกษา} ปีที่ 16 ฉบับที่ 51 กรกฎาคม-กันยายน พ.ศ. 2547 หน้า 69-75, 2547.
+
+\setstretch{1.5} % Back to 1.5 space for English
+\fontsize{9}{11}\selectfont % Back to Times New Roman 9pt
+
+\bibitem[10]{Rich1991} Elaine Rich and Kevin Knight, \textit{Artificial intelligence}, McGraw-Hill: New York, 1991.
+
+\end{thebibliography}
+
+\end{multicols}
+\end{document}

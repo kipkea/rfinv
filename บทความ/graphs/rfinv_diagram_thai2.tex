@@ -1,0 +1,67 @@
+\documentclass[tikz]{standalone}
+% ถ้า compile แยกไฟล์นี้ ให้เปิด package เหล่านี้ แต่ถ้าใช้ \includestandalone ในไฟล์หลัก มันจะถูกข้ามไปเอง
+\ifstandalone
+  \usepackage{fontspec}
+  \usepackage{fontawesome5}
+  \setmainfont{Angsana New} % เปลี่ยนให้ตรงตามฟอนต์ NCCIT 2026
+  \newfontfamily\thaifont{Angsana New}[Scale=1.25]
+\fi
+\usetikzlibrary{shapes, arrows.meta, positioning, fit, backgrounds, shadows}
+
+\begin{document}
+\begin{tikzpicture}[
+    node distance=2.5cm,
+    every node/.style={font=\thaifont}, % ใช้ \thaifont ที่นิยามจากไฟล์หลัก
+    device/.style={
+        rectangle, draw=gray!60, thick, rounded corners=5pt, fill=white, 
+        align=center, minimum width=3cm, minimum height=2cm, drop shadow
+    },
+    cloud_node/.style={
+        cloud, cloud puffs=15, draw=blue!50, thick, fill=blue!5, 
+        aspect=2.5, minimum width=6cm, minimum height=4cm, align=center
+    },
+    api_box/.style={
+        rectangle, draw=green!60!black, thick, fill=green!10, 
+        rounded corners, minimum width=2.5cm, minimum height=1.5cm, align=center
+    },
+    link/.style={draw, -Latex, thick, color=gray!80},
+    label_text/.style={font=\thaifont\footnotesize, color=gray!90!black, midway, above}
+]
+    % --- 1. AWS Cloud Section ---
+    \node[cloud_node] (aws) at (0,0) {}; 
+    \node[below=1.2cm of aws.north, font=\thaifont\bfseries\Large] (aws_text) {ระบบคลาวด์ (Cloud)};
+    
+    \node[api_box, below=0.2 cm of aws_text] (django) {      
+        \Large \faPython \\ 
+        \textbf{Django API} \\ 
+        \footnotesize (RESTful Service)
+    };
+
+    % --- 2. Hardware Section ---
+    \node[device, left=3.5cm of aws] (hardware) {
+        \Huge \faMicrochip \\ 
+        \vspace{0.1cm}
+        \textbf{อุปกรณ์ฮาร์ดแวร์} \\
+        \footnotesize RPi 5 + RFID (FM-505)
+    };
+
+    % --- 3. Client Section ---
+    \node[device, right=3.5cm of aws, yshift=1.8cm] (pc) {
+        \Huge \faDesktop \\ 
+        \vspace{0.1cm}
+        \textbf{หน้าเว็บแดชบอร์ด} \\
+        \footnotesize บริหารจัดการระบบ
+    };
+    \node[device, right=3.5cm of aws, yshift=-1.8cm] (mobile) {
+        \Huge \faMobile* \\ 
+        \vspace{0.1cm}
+        \textbf{แอปพลิเคชันมือถือ} \\
+        \footnotesize ตรวจสอบสินค้าคงคลัง
+    };
+
+    % --- 4. Arrows ---
+    \draw[link] (hardware) -- node[label_text] {ส่งข้อมูล (HTTPS / JSON)} (hardware -| aws.west);
+    \draw[link, <->] (aws.east |- pc) -- node[label_text, xshift=-0.5cm] {รับ-ส่งข้อมูล} (pc);
+    \draw[link, <->] (aws.east |- mobile) -- node[label_text, xshift=-0.5cm] {รับ-ส่งข้อมูล} (mobile);
+\end{tikzpicture}
+\end{document}

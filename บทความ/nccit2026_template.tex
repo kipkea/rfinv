@@ -1,0 +1,123 @@
+\documentclass[10pt,a4paper,twocolumn]{article}
+
+% --- การตั้งค่าขอบกระดาษ 1 นิ้วทุกด้าน [cite: 17, 18, 27] ---
+\usepackage[margin=1in, a4paper]{geometry}
+
+% --- ฟอนต์และการตัดคำภาษาไทย [cite: 20, 29, 31] ---
+\usepackage{fontspec}
+\usepackage{xunicode}
+\usepackage{xltxtra}
+
+\usepackage[mode=buildnew]{standalone}
+\usepackage{fontawesome5}
+
+% ตั้งค่าฟอนต์ตาม NCCIT 2026
+%\setmainfont{Times New Roman}
+%\newfontfamily\thaifont{Angsana New}[Scale=1.25] % NCCIT กำหนด Angsana New
+% *** เปลี่ยนชื่อฟอนต์ตรงนี้ถ้าเครื่องคุณใช้ฟอนต์อื่น ***
+% เช่น Angsana New, Leelawadee UI, หรือ Browallia New
+\setmainfont{Angsana New}[
+    Scale=1.25,       % ปรับขนาดฟอนต์ให้อ่านง่ายขึ้นใน format IEEE
+    BoldFont={* Bold},
+    ItalicFont={* Italic},
+    BoldItalicFont={* Bold Italic}
+]
+\newfontfamily\thaifont{Angsana New} % บรรทัดนี้สำคัญมาก เพื่อให้ TikZ เรียกใช้ได้
+
+\usepackage[thai,english]{babel}
+
+% --- การจัดการรูปภาพและโฟลเดอร์ [cite: 56] ---
+\usepackage{graphicx}
+\graphicspath{{pictures/}} % กำหนดโฟลเดอร์รูปภาพ
+
+% --- การใช้งาน TikZ จากโฟลเดอร์ย่อย ---
+\usepackage{standalone}
+\usepackage{tikz}
+\usetikzlibrary{positioning, shapes, fit}
+
+% --- การอ้างอิง biblatex (สไตล์ IEEE ตามตัวอย่าง) [cite: 61, 64] ---
+\usepackage[style=ieee, backend=biber]{biblatex}
+\addbibresource{rfinv.bib}
+
+% --- ตั้งค่าระยะบรรทัด [cite: 20, 31] ---
+\usepackage{setspace}
+
+% --- การจัดการหัวข้อ (Section) [cite: 38, 40] ---
+\usepackage{titlesec}
+\titleformat{\section}{\thaifont\fontsize{16}{19.2}\bfseries}{\thesection.}{0.5em}{}
+\titleformat{\subsection}{\thaifont\fontsize{14}{16.8}\bfseries}{\thesubsection}{0.5em}{}
+
+\XeTeXdashbreakstate=1
+\usepackage{ragged2e} % ช่วยจัดการการจัดแนว
+
+\begin{document}
+
+% --- ชื่อบทความ (TH 20pt Bold, EN 14pt Bold) [cite: 1, 2, 23] ---
+\twocolumn[
+  \begin{center}
+    {\thaifont\fontsize{20}{24}\bfseries ชื่อบทความภาษาไทย} \\
+    \vspace{0.5em}
+    {\fontsize{14}{16.8}\bfseries Research Title in English} \\
+    \vspace{2em} % เว้นบรรทัดหลังชื่อบทความ [cite: 23]
+    
+    % --- ชื่อผู้แต่ง (TH 14pt Italic) [cite: 3, 24, 25] ---
+    {\thaifont\fontsize{14}{16.8}\itshape ชื่อผู้แต่งไทย1 (English Name1)$^1$ และชื่อผู้แต่งไทย2 (English Name2)$^2$} \\
+    {\thaifont\fontsize{14}{16.8}\itshape $^1$ชื่อภาควิชา, คณะ, มหาวิทยาลัย, $^2$ชื่อภาควิชา, คณะ, มหาวิทยาลัย} \\
+    {\fontsize{10}{12}\itshape name1@anywhere.com, name2@anywhere.com} \\
+    \vspace{1.5em}
+  \end{center}
+]
+
+% --- บทคัดย่อภาษาไทย [cite: 7, 20, 21] ---
+\begin{center}
+    {\thaifont\fontsize{16}{19.2}\bfseries บทคัดย่อ}
+\end{center}
+{\thaifont\fontsize{14}{16.8}\itshape 
+บทความนี้สรุปย่อเกี่ยวกับงานวิจัยที่ทำ โดยกล่าวถึงปัญหา วัตถุประสงค์ และผลการดำเนินงาน [cite: 21]
+}
+\par\vspace{0.5em}
+{\thaifont\fontsize{14}{16.8}\bfseries{คำสำคัญ:} คำค้น1, คำค้น2}
+
+% --- Abstract English [cite: 10, 20] ---
+\begin{center}
+    {\fontsize{12}{14.4}\bfseries Abstract}
+\end{center}
+\begin{spacing}{1.5} % ระยะบรรทัด 1.5 สำหรับ Abstract อังกฤษ [cite: 20]
+{\fontsize{10}{12}\itshape 
+This paper presents a guideline for preparing a paper for NCCIT. [cite: 11]
+}
+\end{spacing}
+\par\vspace{0.5em}
+{\thaifont\fontsize{10}{12}\bfseries Keywords: word 1, word 2}
+
+\vspace{1em} % เว้นระยะก่อนเริ่มเนื้อหาหลัก [cite: 20]
+
+% --- เนื้อหาหลัก [cite: 42] ---
+\section{บทนำ}
+\thaifont\fontsize{16}{19.2}บทความต้องไม่เกิน 6 หน้า  สามารถอ้างอิงรูปภาพจากโฟลเดอร์ย่อยได้ เช่น ภาพที่ \ref{fig:example} 
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=\linewidth]{box2.png} % ไฟล์อยู่ใน pictures/
+    \caption{\thaifont\fontsize{12}{14.4} รายละเอียดภาพ }
+    \label{fig:example}
+\end{figure}
+
+\section{วรรณกรรมที่เกี่ยวข้อง}
+\thaifont\fontsize{16}{19.2}การอ้างอิงเอกสาร  เช่น งานวิจัยของ Meesad \cite{b_rfid_Automated_Billing} ซึ่งควรมีจำนวน 10-20 เรื่อง [cite: 46]
+
+\section{วิธีการดำเนินการวิจัย}
+\thaifont\fontsize{16}{19.2}การนำเข้าไฟล์ TikZ จากโฟลเดอร์ graphs:
+\begin{figure}[!ht]
+    \centering
+    \includestandalone{graphs/rfinv_diagram_thai2} % ไม่ต้องใส่ .tex
+    \caption{\thaifont\fontsize{12}{14.4} แผนผังการทำงานของระบบจัดการคลังสินค้า RFID}
+\end{figure}
+
+\section{สรุป}
+\thaifont\fontsize{16}{19.2}สรุปผลการวิจัยและแนวทางในอนาคต [cite: 52]
+
+% --- เอกสารอ้างอิง [cite: 60, 65] ---
+\printbibliography[title={เอกสารอ้างอิง}]
+
+\end{document}

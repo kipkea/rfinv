@@ -1,4 +1,24 @@
 \documentclass[tikz]{standalone} % สั่งให้เป็นไฟล์แยกที่ compile ได้เอง
+
+\usepackage{fontspec} 
+
+% ตั้งค่าฟอนต์ภาษาไทย (เลือกฟอนต์ที่มีในเครื่องของคุณ)
+% สำหรับ Windows แนะนำ: Leelawadee UI, Tahoma, หรือ Angsana New
+% สำหรับ Mac แนะนำ: Thonburi
+% สำหรับ Linux/Overleaf แนะนำ: Noto Sans Thai หรือ Sarabun
+%\setmainfont{Thonburi} % <-- เปลี่ยนชื่อฟอนต์ตรงนี้ให้ตรงกับในเครื่องครับ
+
+
+% *** เปลี่ยนชื่อฟอนต์ตรงนี้ถ้าเครื่องคุณใช้ฟอนต์อื่น ***
+% เช่น Angsana New, Leelawadee UI, หรือ Browallia New
+\setmainfont{TH Sarabun New}[
+    Scale=1.25,       % ปรับขนาดฟอนต์ให้อ่านง่ายขึ้นใน format IEEE
+    BoldFont={* Bold},
+    ItalicFont={* Italic},
+    BoldItalicFont={* Bold Italic}
+]
+
+
 \usepackage{fontawesome5}
 \usetikzlibrary{shapes, arrows.meta, positioning, fit, backgrounds, shadows}
 
@@ -56,9 +76,11 @@
 
     % --- 1. AWS Cloud Section ---
     \node[cloud_node] (aws) at (0,0) {}; 
-    \node[below=0.8cm of aws.north] (aws_logo) {\Huge \faAws};
-    \node[below=0.1cm of aws_logo, font=\bfseries] {AWS Cloud};
-    \node[api_box, below=0.7 cm of aws_logo] (django) {        
+    %\node[below=cm of aws.north] (aws_logo) {\Huge \faAws};
+    %\node[below=0.1cm of aws_logo, font=\bfseries] {AWS Cloud};
+    \node[below=1.2cm of aws.north, font=\bfseries] (aws_text) {Cloud};
+    %\node[api_box, below=0.7 cm of aws_logo] (django) {  
+    \node[api_box, below=0.2 cm of aws_text] (django) {      
         \Large \faPython \\ 
         \textbf{Django API} \\ 
         \footnotesize (RESTful)
@@ -77,13 +99,13 @@
         \Huge \faDesktop \\ 
         \vspace{0.2cm}
         \textbf{Web Dashboard} \\
-        \footnotesize Monitor Logic
+        \footnotesize บริหารจัดการ
     };
     \node[device, right=3cm of aws, yshift=-1.5cm] (mobile) {
         \Huge \faMobile* \\ 
         \vspace{0.2cm}
         \textbf{Mobile App} \\
-        \footnotesize Scan/Check Status
+        \footnotesize ตรวจสอบสินค้าคงคลัง
     };
 
     % --- 4. Arrows ---

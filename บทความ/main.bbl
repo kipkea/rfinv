@@ -1,0 +1,340 @@
+% $ biblatex auxiliary file $
+% $ biblatex bbl format version 3.3 $
+% Do not modify the above lines!
+%
+% This is an auxiliary file used by the 'biblatex' package.
+% This file may safely be deleted. It will be recreated by
+% biber as required.
+%
+\begingroup
+\makeatletter
+\@ifundefined{ver@biblatex.sty}
+  {\@latex@error
+     {Missing 'biblatex' package}
+     {The bibliography requires the 'biblatex' package.}
+      \aftergroup\endinput}
+  {}
+\endgroup
+
+
+\refsection{0}
+  \datalist[entry]{none/global//global/global/global}
+    \entry{b_rfid_Library}{inproceedings}{}{}
+      \true{moreauthor}
+      \true{morelabelname}
+      \name{author}{1}{}{%
+        {{hash=06e75bbc19610f93f849e1fddfc9be5f}{%
+           family={Mukund},
+           familyi={M\bibinitperiod},
+           given={R.\bibnamedelimi Neha},
+           giveni={R\bibinitperiod\bibinitdelim N\bibinitperiod}}}%
+      }
+      \strng{namehash}{1968856228130bea7340dfa25b15ff03}
+      \strng{fullhash}{1968856228130bea7340dfa25b15ff03}
+      \strng{fullhashraw}{1968856228130bea7340dfa25b15ff03}
+      \strng{bibnamehash}{1968856228130bea7340dfa25b15ff03}
+      \strng{authorbibnamehash}{1968856228130bea7340dfa25b15ff03}
+      \strng{authornamehash}{1968856228130bea7340dfa25b15ff03}
+      \strng{authorfullhash}{1968856228130bea7340dfa25b15ff03}
+      \strng{authorfullhashraw}{1968856228130bea7340dfa25b15ff03}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{2021 IEEE International Conference on Electronics, Computing and Communication Technologies (CONECCT)}
+      \field{title}{Intelligent RFID Based Library Management System}
+      \field{year}{2021}
+    \endentry
+    \entry{b_rfid_Automated_Billing}{inproceedings}{}{}
+      \true{moreauthor}
+      \true{morelabelname}
+      \name{author}{1}{}{%
+        {{hash=d2ca3d7e36219b9426ec113003a544a9}{%
+           family={Sinha},
+           familyi={S\bibinitperiod},
+           given={D.},
+           giveni={D\bibinitperiod}}}%
+      }
+      \strng{namehash}{04098f265b32d59843bf46299515759a}
+      \strng{fullhash}{04098f265b32d59843bf46299515759a}
+      \strng{fullhashraw}{04098f265b32d59843bf46299515759a}
+      \strng{bibnamehash}{04098f265b32d59843bf46299515759a}
+      \strng{authorbibnamehash}{04098f265b32d59843bf46299515759a}
+      \strng{authornamehash}{04098f265b32d59843bf46299515759a}
+      \strng{authorfullhash}{04098f265b32d59843bf46299515759a}
+      \strng{authorfullhashraw}{04098f265b32d59843bf46299515759a}
+      \field{sortinit}{2}
+      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{2019 Innovations in Power and Advanced Computing Technologies (i-PACT)}
+      \field{title}{Automated Billing System using RFID and Cloud}
+      \field{year}{2019}
+    \endentry
+    \entry{b_rfid_LoCATE}{inproceedings}{}{}
+      \true{moreauthor}
+      \true{morelabelname}
+      \name{author}{1}{}{%
+        {{hash=c72fa7152962ab439f237ae777bf6b53}{%
+           family={McAllister},
+           familyi={M\bibinitperiod},
+           given={T.\bibnamedelimi D.},
+           giveni={T\bibinitperiod\bibinitdelim D\bibinitperiod}}}%
+      }
+      \strng{namehash}{2ea89ddc17e3a2fd37286ff3e71e0816}
+      \strng{fullhash}{2ea89ddc17e3a2fd37286ff3e71e0816}
+      \strng{fullhashraw}{2ea89ddc17e3a2fd37286ff3e71e0816}
+      \strng{bibnamehash}{2ea89ddc17e3a2fd37286ff3e71e0816}
+      \strng{authorbibnamehash}{2ea89ddc17e3a2fd37286ff3e71e0816}
+      \strng{authornamehash}{2ea89ddc17e3a2fd37286ff3e71e0816}
+      \strng{authorfullhash}{2ea89ddc17e3a2fd37286ff3e71e0816}
+      \strng{authorfullhashraw}{2ea89ddc17e3a2fd37286ff3e71e0816}
+      \field{sortinit}{3}
+      \field{sortinithash}{ad6fe7482ffbd7b9f99c9e8b5dccd3d7}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{2017 Systems and Information Engineering Design Symposium (SIEDS)}
+      \field{title}{Localization of Health Center Assets Through an IoT Environment (LoCATE)}
+      \field{year}{2017}
+    \endentry
+    \entry{b_rfid_book}{book}{}{}
+      \name{author}{1}{}{%
+        {{hash=37c2c607e519e2f625f641afe09e0cbb}{%
+           family={Dobkin},
+           familyi={D\bibinitperiod},
+           given={Daniel\bibnamedelima M.},
+           giveni={D\bibinitperiod\bibinitdelim M\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {Elsevier Inc.}%
+      }
+      \strng{namehash}{37c2c607e519e2f625f641afe09e0cbb}
+      \strng{fullhash}{37c2c607e519e2f625f641afe09e0cbb}
+      \strng{fullhashraw}{37c2c607e519e2f625f641afe09e0cbb}
+      \strng{bibnamehash}{37c2c607e519e2f625f641afe09e0cbb}
+      \strng{authorbibnamehash}{37c2c607e519e2f625f641afe09e0cbb}
+      \strng{authornamehash}{37c2c607e519e2f625f641afe09e0cbb}
+      \strng{authorfullhash}{37c2c607e519e2f625f641afe09e0cbb}
+      \strng{authorfullhashraw}{37c2c607e519e2f625f641afe09e0cbb}
+      \field{sortinit}{4}
+      \field{sortinithash}{9381316451d1b9788675a07e972a12a7}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{The RF in RFID Passive UHF RFID in practice}
+      \field{year}{2008}
+    \endentry
+    \entry{b_rfid_fm505}{misc}{}{}
+      \name{author}{1}{}{%
+        {{hash=0ab7f81db6bf49eadb71d8b69b0e7e12}{%
+           family={{Fonkan Technology}},
+           familyi={F\bibinitperiod}}}%
+      }
+      \strng{namehash}{0ab7f81db6bf49eadb71d8b69b0e7e12}
+      \strng{fullhash}{0ab7f81db6bf49eadb71d8b69b0e7e12}
+      \strng{fullhashraw}{0ab7f81db6bf49eadb71d8b69b0e7e12}
+      \strng{bibnamehash}{0ab7f81db6bf49eadb71d8b69b0e7e12}
+      \strng{authorbibnamehash}{0ab7f81db6bf49eadb71d8b69b0e7e12}
+      \strng{authornamehash}{0ab7f81db6bf49eadb71d8b69b0e7e12}
+      \strng{authorfullhash}{0ab7f81db6bf49eadb71d8b69b0e7e12}
+      \strng{authorfullhashraw}{0ab7f81db6bf49eadb71d8b69b0e7e12}
+      \field{sortinit}{5}
+      \field{sortinithash}{20e9b4b0b173788c5dace24730f47d8c}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{note}{Available online}
+      \field{title}{RFID Module FM-505 specs}
+      \verb{urlraw}
+      \verb http://www.fonkan.com/
+      \endverb
+      \verb{url}
+      \verb http://www.fonkan.com/
+      \endverb
+    \endentry
+    \entry{b_rfid_tag}{misc}{}{}
+      \name{author}{1}{}{%
+        {{hash=33367874c7cdb60618558fd8604f6a74}{%
+           family={{AliExpress}},
+           familyi={A\bibinitperiod}}}%
+      }
+      \strng{namehash}{33367874c7cdb60618558fd8604f6a74}
+      \strng{fullhash}{33367874c7cdb60618558fd8604f6a74}
+      \strng{fullhashraw}{33367874c7cdb60618558fd8604f6a74}
+      \strng{bibnamehash}{33367874c7cdb60618558fd8604f6a74}
+      \strng{authorbibnamehash}{33367874c7cdb60618558fd8604f6a74}
+      \strng{authornamehash}{33367874c7cdb60618558fd8604f6a74}
+      \strng{authorfullhash}{33367874c7cdb60618558fd8604f6a74}
+      \strng{authorfullhashraw}{33367874c7cdb60618558fd8604f6a74}
+      \field{sortinit}{6}
+      \field{sortinithash}{b33bc299efb3c36abec520a4c896a66d}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{note}{Accessed: 04 September 2023}
+      \field{title}{UHF 860-960MHz Tag AZ Chip U8 9662}
+    \endentry
+    \entry{b_RaspberryPi_book}{book}{}{}
+      \name{author}{1}{}{%
+        {{hash=e83c944df605fbe9e4e73ec28e420dd0}{%
+           family={Gale},
+           familyi={G\bibinitperiod},
+           given={James},
+           giveni={J\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {Black Dog Media Limited}%
+      }
+      \strng{namehash}{e83c944df605fbe9e4e73ec28e420dd0}
+      \strng{fullhash}{e83c944df605fbe9e4e73ec28e420dd0}
+      \strng{fullhashraw}{e83c944df605fbe9e4e73ec28e420dd0}
+      \strng{bibnamehash}{e83c944df605fbe9e4e73ec28e420dd0}
+      \strng{authorbibnamehash}{e83c944df605fbe9e4e73ec28e420dd0}
+      \strng{authornamehash}{e83c944df605fbe9e4e73ec28e420dd0}
+      \strng{authorfullhash}{e83c944df605fbe9e4e73ec28e420dd0}
+      \strng{authorfullhashraw}{e83c944df605fbe9e4e73ec28e420dd0}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Raspberry Pi THE COMPLETE GUIDE}
+      \field{year}{2020}
+    \endentry
+    \entry{b_aws}{book}{}{}
+      \true{moreauthor}
+      \true{morelabelname}
+      \name{author}{1}{}{%
+        {{hash=523dafb06f9c451d109bb96f74b4b9a0}{%
+           family={Prajapati},
+           familyi={P\bibinitperiod},
+           given={Ashish},
+           giveni={A\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {Packt Publishing}%
+      }
+      \strng{namehash}{318ed7c2085b77caf1b72a8cc9669fa5}
+      \strng{fullhash}{318ed7c2085b77caf1b72a8cc9669fa5}
+      \strng{fullhashraw}{318ed7c2085b77caf1b72a8cc9669fa5}
+      \strng{bibnamehash}{318ed7c2085b77caf1b72a8cc9669fa5}
+      \strng{authorbibnamehash}{318ed7c2085b77caf1b72a8cc9669fa5}
+      \strng{authornamehash}{318ed7c2085b77caf1b72a8cc9669fa5}
+      \strng{authorfullhash}{318ed7c2085b77caf1b72a8cc9669fa5}
+      \strng{authorfullhashraw}{318ed7c2085b77caf1b72a8cc9669fa5}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{AWS Cloud Computing Concepts and Tech Analogies}
+      \field{year}{2023}
+    \endentry
+    \entry{b_Django_book}{inproceedings}{}{}
+      \true{moreauthor}
+      \true{morelabelname}
+      \name{author}{1}{}{%
+        {{hash=c26712db264a0df8a3847547b26249b1}{%
+           family={Martinez},
+           familyi={M\bibinitperiod},
+           given={D.},
+           giveni={D\bibinitperiod}}}%
+      }
+      \strng{namehash}{bb41a2ca824258ab28b3f3274552b5f8}
+      \strng{fullhash}{bb41a2ca824258ab28b3f3274552b5f8}
+      \strng{fullhashraw}{bb41a2ca824258ab28b3f3274552b5f8}
+      \strng{bibnamehash}{bb41a2ca824258ab28b3f3274552b5f8}
+      \strng{authorbibnamehash}{bb41a2ca824258ab28b3f3274552b5f8}
+      \strng{authornamehash}{bb41a2ca824258ab28b3f3274552b5f8}
+      \strng{authorfullhash}{bb41a2ca824258ab28b3f3274552b5f8}
+      \strng{authorfullhashraw}{bb41a2ca824258ab28b3f3274552b5f8}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{2023 18th Iberian Conference on Information Systems and Technologies (CISTI)}
+      \field{title}{Library in django framework to standardize early-stage web application development}
+      \field{year}{2023}
+    \endentry
+    \entry{b_kivy}{misc}{}{}
+      \name{author}{1}{}{%
+        {{hash=76f45cf13d737501a42a0ba1490759a8}{%
+           family={{The Kivy Organization}},
+           familyi={T\bibinitperiod}}}%
+      }
+      \strng{namehash}{76f45cf13d737501a42a0ba1490759a8}
+      \strng{fullhash}{76f45cf13d737501a42a0ba1490759a8}
+      \strng{fullhashraw}{76f45cf13d737501a42a0ba1490759a8}
+      \strng{bibnamehash}{76f45cf13d737501a42a0ba1490759a8}
+      \strng{authorbibnamehash}{76f45cf13d737501a42a0ba1490759a8}
+      \strng{authornamehash}{76f45cf13d737501a42a0ba1490759a8}
+      \strng{authorfullhash}{76f45cf13d737501a42a0ba1490759a8}
+      \strng{authorfullhashraw}{76f45cf13d737501a42a0ba1490759a8}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{note}{Accessed: Jan. 18, 2026}
+      \field{title}{Kivy: Cross-platform Python Framework for GUI Development}
+      \verb{urlraw}
+      \verb https://kivy.org/
+      \endverb
+      \verb{url}
+      \verb https://kivy.org/
+      \endverb
+    \endentry
+    \entry{b_ZebraLS2208}{manual}{}{}
+      \name{author}{1}{}{%
+        {{hash=39dae20c8bd34a07da994eb844b8a312}{%
+           family={{Zebra Technologies}},
+           familyi={Z\bibinitperiod}}}%
+      }
+      \strng{namehash}{39dae20c8bd34a07da994eb844b8a312}
+      \strng{fullhash}{39dae20c8bd34a07da994eb844b8a312}
+      \strng{fullhashraw}{39dae20c8bd34a07da994eb844b8a312}
+      \strng{bibnamehash}{39dae20c8bd34a07da994eb844b8a312}
+      \strng{authorbibnamehash}{39dae20c8bd34a07da994eb844b8a312}
+      \strng{authornamehash}{39dae20c8bd34a07da994eb844b8a312}
+      \strng{authorfullhash}{39dae20c8bd34a07da994eb844b8a312}
+      \strng{authorfullhashraw}{39dae20c8bd34a07da994eb844b8a312}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{note}{MN000753A04EN Rev. A}
+      \field{title}{LS2208 Quick Start Guide}
+      \field{year}{2017}
+      \verb{urlraw}
+      \verb https://www.zebra.com/content/dam/support-dam/en/documentation/unrestricted/guide/product/MN000753A04ENa_ls2208-qsg-en.pdf
+      \endverb
+      \verb{url}
+      \verb https://www.zebra.com/content/dam/support-dam/en/documentation/unrestricted/guide/product/MN000753A04ENa_ls2208-qsg-en.pdf
+      \endverb
+    \endentry
+    \entry{my_paper}{article}{}{}
+      \name{author}{1}{}{%
+        {{hash=4bb983b68767bfb7760064c0db4691d7}{%
+           family={Surname},
+           familyi={S\bibinitperiod},
+           given={Name},
+           giveni={N\bibinitperiod}}}%
+      }
+      \strng{namehash}{4bb983b68767bfb7760064c0db4691d7}
+      \strng{fullhash}{4bb983b68767bfb7760064c0db4691d7}
+      \strng{fullhashraw}{4bb983b68767bfb7760064c0db4691d7}
+      \strng{bibnamehash}{4bb983b68767bfb7760064c0db4691d7}
+      \strng{authorbibnamehash}{4bb983b68767bfb7760064c0db4691d7}
+      \strng{authornamehash}{4bb983b68767bfb7760064c0db4691d7}
+      \strng{authorfullhash}{4bb983b68767bfb7760064c0db4691d7}
+      \strng{authorfullhashraw}{4bb983b68767bfb7760064c0db4691d7}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{IEEE Transactions on Software Engineering}
+      \field{number}{2}
+      \field{title}{Advanced RFID Systems with Raspberry Pi 5}
+      \field{volume}{10}
+      \field{year}{2026}
+      \field{pages}{100\bibrangedash 110}
+      \range{pages}{11}
+    \endentry
+  \enddatalist
+\endrefsection
+\endinput
+

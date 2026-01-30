@@ -1,0 +1,65 @@
+\documentclass[a4paper,10pt,twocolumn]{article} % กำหนดเอกสารเป็น 2 คอลัมน์ [1]
+
+% --- ส่วนนำ (Preamble) ---
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}       % สำหรับใส่รูปภาพ [2]
+\usepackage{amsmath}        % สำหรับสมการคณิตศาสตร์ [3]
+\usepackage{geometry}       % ปรับระยะขอบ (ปรับค่าตามข้อกำหนด NCCIT ได้)
+\geometry{top=2.5cm, bottom=2.5cm, left=2cm, right=2cm}
+
+% ข้อมูลบทความ
+\title{\textbf{ชื่อบทความวิชาการ (Title of the Paper)}}
+\author{ชื่อผู้แต่ง$^1$, ชื่อผู้แต่ง$^2$ \\
+\small $^1$สาขาวิชา..., คณะ..., มหาวิทยาลัย... \\
+\small $^2$สาขาวิชา..., คณะ..., มหาวิทยาลัย... \\
+\small อีเมล: author1@example.com
+}
+\date{} % ไม่ใส่วันที่
+
+\begin{document}
+
+\maketitle % แสดงชื่อเรื่อง
+
+% --- บทคัดย่อ ---
+\begin{abstract}
+บทคัดย่อควรสรุปใจความสำคัญของงานวิจัย วัตถุประสงค์ วิธีการ และผลลัพธ์อย่างย่อ โดยปกติจะมีความยาวประมาณ 150-250 คำ
+\end{abstract}
+
+\textbf{คำสำคัญ:} คำสำคัญ 1, คำสำคัญ 2, คำสำคัญ 3
+
+% --- เนื้อหา ---
+\section{บทนำ (Introduction)}
+เนื้อหาส่วนบทนำ อธิบายความเป็นมาและความสำคัญของปัญหา ในการเขียนบทความวิชาการ คุณสามารถอ้างอิงเอกสารได้โดยใช้คำสั่ง cite เช่น การศึกษาเรื่อง AI มีความสำคัญมาก \cite{nccit_ref} หรืออ้างถึงหนังสือต้นฉบับ \cite{latex_guide} เป็นต้น [4]
+
+\section{วิธีการดำเนินงาน (Methodology)}
+อธิบายขั้นตอนการทำงาน หรือทฤษฎีที่ใช้ หากมีสมการคณิตศาสตร์ สามารถเขียนได้ดังนี้:
+\begin{equation}
+    E = mc^2
+\end{equation}
+และสามารถเขียนเมทริกซ์หรือสมการซับซ้อนได้โดยใช้ package amsmath [3]
+
+\section{ผลการทดลอง (Results)}
+แสดงผลข้อมูลในรูปแบบตาราง หรือกราฟ ตัวอย่างตาราง:
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|c|r|}
+    \hline
+    \textbf{การทดลอง} & \textbf{ค่า A} & \textbf{ค่า B} \\
+    \hline
+    ครั้งที่ 1 & 10.5 & 20.1 \\
+    ครั้งที่ 2 & 11.0 & 19.8 \\
+    \hline
+\end{tabular}
+\caption{ผลลัพธ์การทดลองเบื้องต้น}
+\end{table}
+
+\section{สรุปผล (Conclusion)}
+สรุปสิ่งที่ได้จากการศึกษาและข้อเสนอแนะ
+
+% --- บรรณานุกรม (References) ---
+% เลือกรูปแบบการอ้างอิง เช่น plain, ieeetr (สำหรับสายวิศวะ/คอมฯ)
+\bibliographystyle{ieeetr}  % [5]
+\bibliography{rfinv}   % เรียกใช้ไฟล์ references.bib [5]
+
+\end{document}
