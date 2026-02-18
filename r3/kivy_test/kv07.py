@@ -12,7 +12,8 @@ import threading # เพิ่มการ import threading ไว้ด้า�
 
 # --- การตั้งค่าพื้นฐาน ---
 #IPServer = "localhost"  
-IPServer = "10.35.116.201"  
+#IPServer = "10.35.116.201"  
+IPServer = "192.168.1.13"  
 API_URL = f"http://{IPServer}:8000/api/inventory/"
 BASE_URL = f"http://{IPServer}:8000"
 CACHE_DIR = "image_cache"
