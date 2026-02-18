@@ -11,19 +11,20 @@ import threading # เพิ่มการ import threading ไว้ด้า�
 
 
 # --- การตั้งค่าพื้นฐาน ---
-API_URL = "http://localhost:8000/api/inventory/"
-BASE_URL = "http://localhost:8000"
+#IPServer = "localhost"  
+IPServer = "10.35.116.201"  
+API_URL = f"http://{IPServer}:8000/api/inventory/"
+BASE_URL = f"http://{IPServer}:8000"
 CACHE_DIR = "image_cache"
 
 # สร้างโฟลเดอร์สำหรับเก็บรูปภาพถ้ายังไม่มี
 if not os.path.exists(CACHE_DIR):
     os.makedirs(CACHE_DIR)
 
-class CachedAsyncImage(AsyncImage):
-    """
-    Widget พิเศษที่เช็คว่ามีรูปในเครื่องหรือยัง 
-    ถ้ามีแล้วจะดึงจากเครื่องมาแสดงทันทีเพื่อประหยัด Data และลดภาระ Server
-    """
+"""
+Widget พิเศษที่เช็คว่ามีรูปในเครื่องหรือยัง 
+ถ้ามีแล้วจะดึงจากเครื่องมาแสดงทันทีเพื่อประหยัด Data และลดภาระ Server
+"""
 class CachedAsyncImage(AsyncImage):
     def __init__(self, **kwargs):
         self.original_source = kwargs.get('source', '')
@@ -109,7 +110,14 @@ class InventoryItem(BoxLayout):
         )
         name_label.bind(size=name_label.setter('text_size'))
         
-        loc_name = item_data.get('current_location_detail', {}).get('name', 'ไม่ระบุสถานที่')
+        # ดึงข้อมูล detail ออกมาดูก่อน ถ้าไม่มีให้เป็น Dictionary ว่าง {}
+        loc_detail = item_data.get('current_location_detail')
+
+        if loc_detail is not None:
+            loc_name = loc_detail.get('name', 'ไม่ระบุชื่อสถานที่')
+        else:
+            loc_name = 'ไม่ระบุสถานที่'
+            
         rfid_code = item_data.get('rfid_tag_detail', {}).get('rfid_code', '-')
         
         info_label = Label(
@@ -150,7 +158,7 @@ class InventoryApp(App):
         return self.root_layout
 
     def fetch_api_data(self):
-        print("API: Connecting...")
+        print(f"API: Connecting {API_URL}...")
         UrlRequest(API_URL, on_success=self.on_api_success, on_error=self.on_api_error)
 
     def on_api_success(self, request, result):
