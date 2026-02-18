@@ -191,7 +191,7 @@ REST_FRAMEWORK = {
 #dev
 STATIC_ROOT = os.path.join(BASE_DIR , 'root_static')
 #MEDIA_ROOT = BASE_DIR / 'root_media' 
-MEDIA_ROOT = os.path.join(BASE_DIR, 'root_media')
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 #aws
 #STATIC_ROOT = '/var/www/static'
@@ -207,6 +207,7 @@ STATICFILES_DIRS = [
 #global url อ้างอิงได้จาก tags {% load static %}
 STATIC_URL = "/static/"
 MEDIA_URL = '/media/'
+
 
 
 
