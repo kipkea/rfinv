@@ -9,13 +9,28 @@ from kivy.uix.image import AsyncImage
 from kivy.network.urlrequest import UrlRequest
 import threading # เพิ่มการ import threading ไว้ด้านบน
 
+from dotenv import load_dotenv
+import telepot
+from telepot.loop import MessageLoop
+
+#####################################
+# โหลดค่า environment จากไฟล์ .env
+load_dotenv()
+
+APISERVER = os.getenv("APISERVER")
+key = os.getenv("key")
+
+#telegram 
+bot_token = os.getenv("bot_token")
+bot_id = os.getenv("bot_id")
+######################################
 
 # --- การตั้งค่าพื้นฐาน ---
 #IPServer = "localhost"  
 #IPServer = "10.35.116.201"  
-IPServer = "192.168.1.13"  
-API_URL = f"http://{IPServer}:8000/api/inventory/"
-BASE_URL = f"http://{IPServer}:8000"
+#IPServer = "192.168.1.199"  
+API_URL = f"http://{APISERVER}:8000/api/inventory/"
+BASE_URL = f"http://{APISERVER}:8000"
 CACHE_DIR = "image_cache"
 
 # สร้างโฟลเดอร์สำหรับเก็บรูปภาพถ้ายังไม่มี

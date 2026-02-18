@@ -61,7 +61,11 @@ schema_view = get_schema_view(
    ),
    public=True,
    permission_classes=(permissions.AllowAny,),
+    # เพิ่มส่วนนี้ลงไปครับ
+   generator_class=None,
+   authentication_classes=[], # ปิด auth อื่นๆ สำหรับตัว schema เอง   
 )
+
 
 
 urlpatterns = [

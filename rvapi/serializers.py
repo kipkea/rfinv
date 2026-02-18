@@ -17,6 +17,12 @@ class RFIDTagSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class LocationSerializer(serializers.ModelSerializer):
+    rfid_code = serializers.SlugRelatedField(
+        queryset=RFIDTag.objects.filter(is_location=True),
+        slug_field='rfid_code',
+        source='rfid_tag'
+    )
+    
     class Meta:
         model = Location
         fields = '__all__'
@@ -27,8 +33,15 @@ class InventoryImageSerializer(serializers.ModelSerializer):
         fields = ['id', 'image', 'photographed_at']
 
 class InventorySerializer(serializers.ModelSerializer):
+    # เชื่อมโยง rfid_code แทนการใช้ ID เลขลำดับ
+    rfid_code = serializers.SlugRelatedField(
+        queryset=RFIDTag.objects.filter(is_location=False),
+        slug_field='rfid_code',
+        source='rfid_tag'
+    )
+
     # แสดงรายละเอียดของ Tag และ Location แทนที่จะโชว์แค่ ID
-    rfid_tag_detail = RFIDTagSerializer(source='rfid_tag', read_only=True)
+    #rfid_tag_detail = RFIDTagSerializer(source='rfid_tag', read_only=True)
     current_location_detail = LocationSerializer(source='current_location', read_only=True)
     images = InventoryImageSerializer(many=True, read_only=True) # Nested Images
 
@@ -42,12 +55,21 @@ class InspectionSerializer(serializers.ModelSerializer):
     """
     ใช้สำหรับแสดงผล (Read)
     """
+    # รับรายการ ID ของสินค้าที่สแกนเจอในรูปแบบ List
+    found_inventory_ids = serializers.PrimaryKeyRelatedField(
+        many=True, 
+        queryset=Inventory.objects.all(), 
+        source='found_inventories',
+        required=False
+    )
+
     location_name = serializers.CharField(source='location.name', read_only=True)
     inspected_by_name = serializers.CharField(source='inspected_by.username', read_only=True)
     
     class Meta:
         model = Inspection
         fields = '__all__'
+
 
 class InspectionCreateSerializer(serializers.ModelSerializer):
     """
@@ -81,7 +103,12 @@ class InspectionCreateSerializer(serializers.ModelSerializer):
         # ฝากผลลัพธ์ไว้ที่ instance ชั่วคราวเพื่อส่งกลับไปที่ View
         inspection._temp_results = results 
         return inspection
-    
+
+
+
+
+
+
 '''
 class StudentSerializer(serializers.ModelSerializer):  
     first_name = serializers.CharField(max_length=200, required=True)  

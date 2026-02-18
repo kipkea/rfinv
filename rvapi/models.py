@@ -137,6 +137,8 @@ class Inspection(models.Model):
     # วันที่และเวลาที่ตรวจสอบ (ใช้ default=timezone.now เพื่อให้สามารถแก้ไขย้อนหลังได้)
     inspected_at = models.DateTimeField(default=timezone.now)
     
+    found_inventories = models.ManyToManyField(Inventory, related_name='inspections', blank=True)
+    
     # เก็บสรุปผล (Optional แต่แนะนำให้มีเพื่อความเร็วในการดู Report ย้อนหลัง)
     total_expected = models.IntegerField(default=0, help_text="จำนวนที่ควรจะมี")
     total_found = models.IntegerField(default=0, help_text="จำนวนที่เจอจริง")

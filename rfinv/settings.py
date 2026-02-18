@@ -170,6 +170,11 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication', # รองรับ JWT
+        'rest_framework.authentication.SessionAuthentication',        # รองรับการ Login ผ่านเว็บ
+        'rest_framework.authentication.BasicAuthentication',
+    ],    
     # Use Django's standard `django.contrib.auth` permissions,
     # or allow read-only access for unauthenticated users.
     'DEFAULT_PERMISSION_CLASSES': [
@@ -177,9 +182,11 @@ REST_FRAMEWORK = {
         #'rest_framework.permissions.DjangoModelPermissions',
         
         'rest_framework.permissions.IsAuthenticated',
-        'rest_framework_api_key.permissions.HasAPIKey',        
+        'rest_framework_api_key.permissions.HasAPIKey',   
+        'rest_framework.permissions.AllowAny',     
     ],
-    'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',
+    #'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',
+
 }
 
 
@@ -209,7 +216,8 @@ STATIC_URL = "/static/"
 MEDIA_URL = '/media/'
 
 
-
+LOGIN_URL = 'rest_framework:login'
+LOGOUT_URL = 'rest_framework:logout'
 
 
 API_KEY_CUSTOM_HEADER = "HTTP_X_API_KEY"
@@ -223,3 +231,28 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'django.core.context_processors.static',
     'django.contrib.messages.context_processors.messages',  
 )
+
+
+
+SWAGGER_SETTINGS = {
+    'SECURITY_DEFINITIONS': {
+        # 1. สำหรับ Username/Password
+        'Basic': {
+            'type': 'basic'
+        },
+        # 2. สำหรับ API Key
+        'ApiKey': {
+            'type': 'apiKey',
+            'name': 'X-API-KEY',
+            'in': 'header'
+        },
+        # 3. สำหรับ JWT (ถ้าจะใช้)
+        'Bearer': {
+            'type': 'apiKey',
+            'name': 'Authorization',
+            'in': 'header',
+            'description': "Format: Bearer <your_token>"
+        }
+    },
+    'USE_SESSION_AUTH': True, # เปิดไว้เพื่อให้ Admin สลับมาใช้ Username/Pass ได้ด้วย
+}

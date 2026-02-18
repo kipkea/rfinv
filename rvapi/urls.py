@@ -8,9 +8,23 @@ from .views import (
     InventoryListAPIView, InventoryDetailAPIView,
     InspectionListAPIView, InspectionDetailAPIView,
     # อย่าลืม import view ของ RFIDTag และ Location ด้วยถ้าทำเพิ่ม
+    RFIDTagViewSet, 
+    LocationViewSet, 
+    InventoryViewSet, 
+    InspectionViewSet,
+
 )
 
+# สร้าง Router และลงทะเบียน ViewSets
+router = DefaultRouter()
+router.register(r'rfid-tags', RFIDTagViewSet, basename='rfidtag')
+router.register(r'locations', LocationViewSet, basename='location')
+router.register(r'inventory', InventoryViewSet, basename='inventory')
+router.register(r'inspections', InspectionViewSet, basename='inspection')
+
 urlpatterns = [
+    path('api/', include(router.urls)),
+
     # Inventory URLs
     path('api/inventory/', InventoryListAPIView.as_view(), name='inventory-list'),
     path('api/inventory/<int:pk>/', InventoryDetailAPIView.as_view(), name='inventory-detail'),

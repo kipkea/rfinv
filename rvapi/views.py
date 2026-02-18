@@ -1,5 +1,8 @@
 from django.shortcuts import render
 
+
+
+
 # Create your views here.
 from rest_framework.views import APIView  
 from rest_framework.response import Response  
@@ -9,6 +12,7 @@ from .models import RFIDTag, Location, Inventory, Inspection
 from django.shortcuts import get_object_or_404  
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework_api_key.permissions import HasAPIKey
+from rest_framework.permissions import AllowAny
 from rest_framework import viewsets, generics
 from rest_framework.decorators import action
 from django.utils import timezone
@@ -19,10 +23,54 @@ from .serializers import (
     InspectionSerializer, InspectionCreateSerializer
 )
 
+           
+    
+class RFIDTagViewSet(viewsets.ModelViewSet):
+    queryset = RFIDTag.objects.all()
+    serializer_class = RFIDTagSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(registered_by=self.request.user)
+
+class LocationViewSet(viewsets.ModelViewSet):
+    queryset = Location.objects.all()
+    serializer_class = LocationSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(created_by=self.request.user)
+
+class InventoryViewSet(viewsets.ModelViewSet):
+    queryset = Inventory.objects.all().prefetch_related('evidence_images')
+    serializer_class = InventorySerializer
+
+    def perform_create(self, serializer):
+        serializer.save(registered_by=self.request.user)
+
+class InspectionViewSet(viewsets.ModelViewSet):
+    queryset = Inspection.objects.all()
+    serializer_class = InspectionSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        # บันทึกข้อมูลพื้นฐานก่อน
+        inspection = serializer.save(inspected_by=self.request.user)
+        
+        # เรียก Celery Task ให้ทำงานเบื้องหลัง
+        process_inspection_results.delay(inspection.id)
+        
+        headers = self.get_success_headers(serializer.data)
+        return Response(
+            {"message": "Inspection started. Processing results in background.", "data": serializer.data},
+            status=status.HTTP_201_CREATED,
+            headers=headers
+        )
+    
 # --- 1. ตัวอย่างแบบ CRUD ปกติ (Inventory) ---
 
 class InventoryListAPIView(APIView):
-    permission_classes = [ HasAPIKey | IsAuthenticatedOrReadOnly]
+    permission_classes = [ HasAPIKey | IsAuthenticatedOrReadOnly | AllowAny]
     """
     รองรับ:
     - GET: ดึงรายการสินค้าทั้งหมด (รองรับ ?location_id=...)
