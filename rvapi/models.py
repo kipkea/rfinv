@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
 from django.contrib.auth import get_user_model
+import secrets
 
 # ใช้ get_user_model() เพื่ออ้างถึง User Model ของ Django
 User = get_user_model()
@@ -193,3 +194,14 @@ class Inspection(models.Model):
             "missing_items": Inventory.objects.filter(id__in=missing_ids),
             "extra_items": Inventory.objects.filter(id__in=extra_ids)
         }    
+        
+class UserAPIKey(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='api_keys')
+    key = models.CharField(max_length=64, unique=True, editable=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        if not self.key:
+            # สร้าง Key แบบปลอดภัย (Secure Random)
+            self.key = secrets.token_urlsafe(32)
+        super().save(*args, **kwargs)        

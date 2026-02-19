@@ -3,7 +3,7 @@ from django.contrib import admin
 # Register your models here.
 
 #from .models import RFIDTag, Location, Inventory, Inspection
-from .models import RFIDTag, Location, Inventory, InventoryImage, Inspection
+from .models import RFIDTag, Location, Inventory, InventoryImage, Inspection, UserAPIKey
 
 """
 admin.site.register(rfinv_loc)
@@ -61,7 +61,10 @@ class InspectionAdmin(admin.ModelAdmin):
     )
     list_filter = ('location', 'inspected_at')     
 
-
+@admin.register(UserAPIKey)
+class UserAPIKeyAdmin(admin.ModelAdmin):
+    list_display = ['user', 'key', 'created_at']
+    readonly_fields = ['key'] # ป้องกันการแก้ไข Key ด้วยมือ
       
 """
 class rfinv_loc(models.Model):

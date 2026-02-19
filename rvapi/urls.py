@@ -12,6 +12,7 @@ from .views import (
     LocationViewSet, 
     InventoryViewSet, 
     InspectionViewSet,
+    login_api,
 
 )
 
@@ -23,7 +24,11 @@ router.register(r'inventory', InventoryViewSet, basename='inventory')
 router.register(r'inspections', InspectionViewSet, basename='inspection')
 
 urlpatterns = [
-    path('api/', include(router.urls)),
+    # สำหรับ Login ด้วย Username/Password (Kivy จะส่ง POST มาที่นี่)
+    path('api/login/', login_api, name='login_api'),
+    
+    # หากคุณใช้ SimpleJWT (จาก Error ก่อนหน้า) ต้องมี path สำหรับ Token ด้วย
+    # path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
 
     # Inventory URLs
     path('api/inventory/', InventoryListAPIView.as_view(), name='inventory-list'),

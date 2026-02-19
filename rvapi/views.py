@@ -1,22 +1,29 @@
 from django.shortcuts import render
 
-
-
-
 # Create your views here.
 from rest_framework.views import APIView  
 from rest_framework.response import Response  
 from rest_framework import status  
-from .models import RFIDTag, Location, Inventory, Inspection
+from .models import RFIDTag, Location, Inventory, Inspection, UserAPIKey
 #from .serializers import RFIDTag_SL, Location_SL, Inventory_SL , Inspection_SL
 from django.shortcuts import get_object_or_404  
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework_api_key.permissions import HasAPIKey
 from rest_framework.permissions import AllowAny
 from rest_framework import viewsets, generics
-from rest_framework.decorators import action
+from rest_framework.decorators import action, authentication_classes
 from django.utils import timezone
 from django.db.models import Q
+
+from django.contrib.auth import authenticate
+from rest_framework.decorators import api_view, permission_classes
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+
+from .authentication import APIKeyAuthentication
+from rest_framework_simplejwt.authentication import JWTAuthentication
+
+
 
 from .serializers import (
     RFIDTagSerializer, LocationSerializer, InventorySerializer, 
@@ -24,7 +31,55 @@ from .serializers import (
 )
 
            
+@api_view(['GET'])
+@authentication_classes([APIKeyAuthentication, JWTAuthentication]) # รองรับทั้ง 2 แบบ
+@permission_classes([IsAuthenticated])
+def get_inventory_data(request):
+    # ถึงจุดนี้ request.user จะถูกเซตให้โดยอัตโนมัติ ไม่ว่าจะมาด้วยวิธีไหน
+    data = {"item": "Sensor Node A", "owner": request.user.username}
+    return Response(data)
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny]) # สำคัญมาก: อนุญาตให้ใครก็ได้เข้าถึงหน้า Login
+@csrf_exempt
+def login_api(request):
+    # 1. ตรวจสอบว่าเป็นการ Login แบบไหน (ดูจากข้อมูลที่ส่งมา)
+    api_key = request.data.get('api_key')    
+    username = request.data.get('username')
+    password = request.data.get('password')
     
+    # --- กรณีที่ 1: ใช้ API Key ---
+    if api_key:
+        try:
+            key_obj = UserAPIKey.objects.get(key=api_key)
+            user = key_obj.user
+            print(f"User {user.username} authenticated successfully with API Key.")
+            return JsonResponse({
+                "status": "success",
+                "message": f"Welcome {user.username} (Authenticated via API Key)",
+                "user_id": user.id
+            }, status=200)
+        except UserAPIKey.DoesNotExist:
+            return JsonResponse({"status": "error", "message": "Invalid API Key"}, status=401)
+
+    # --- กรณีที่ 2: ใช้ Username/Password ---
+    elif username and password:
+        user = authenticate(username=username, password=password)
+        if user is not None:
+            print(f"User {username} authenticated successfully with username/password.")
+            return JsonResponse({
+                "status": "success",
+                "message": f"Welcome {user.username}",
+                "user_id": user.id
+            }, status=200)
+        else:
+            return JsonResponse({"status": "error", "message": "Invalid Credentials"}, status=401)
+
+    # --- กรณีข้อมูลไม่ครบ ---
+    print("Login attempt failed: No credentials provided.")
+    return JsonResponse({"status": "error", "message": "Please provide Credentials or API Key"}, status=400)
+        
 class RFIDTagViewSet(viewsets.ModelViewSet):
     queryset = RFIDTag.objects.all()
     serializer_class = RFIDTagSerializer

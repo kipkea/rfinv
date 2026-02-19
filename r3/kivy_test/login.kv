@@ -1,0 +1,95 @@
+<WindowManager>:
+    LoginScreen:
+    APIKeyScreen:
+    HomeScreen:
+
+# หน้า Login ปกติ
+<LoginScreen>:
+    name: 'login'
+    BoxLayout:
+        orientation: 'vertical'
+        padding: 40
+        spacing: 15
+        
+        Label:
+            text: 'User Login'
+            font_size: 28
+
+        # เพิ่ม Label แสดง Error
+        Label:
+            id: error_label
+            text: ''
+            color: 1, 0, 0, 1  # สีแดง
+            size_hint_y: None
+            height: 30
+
+
+        TextInput:
+            id: username
+            hint_text: 'Username'
+            multiline: False
+            write_tab: False # กด Tab เพื่อเปลี่ยนช่องได้
+
+        TextInput:
+            id: password
+            hint_text: 'Password'
+            password: True
+            multiline: False
+            write_tab: False # กด Tab เพื่อเปลี่ยนช่องได้
+
+        Button:
+            text: 'Login'
+            background_color: 0.2, 0.6, 1, 1            
+            on_press: root.do_login(username.text, password.text)
+
+        Button:
+            text: 'Use API Key Instead'
+            size_hint_y: None
+            height: 40
+            on_release: app.root.current = 'api_key'
+
+# หน้าเข้าใช้งานด้วย API Key
+<APIKeyScreen>:
+    name: 'api_key'
+    BoxLayout:
+        orientation: 'vertical'
+        padding: 50
+        spacing: 20
+
+        Label:
+            text: 'API Key Access'
+            font_size: 32
+
+        # เพิ่ม Label แสดง Error
+        Label:
+            id: key_error_label
+            text: ''
+            color: 1, 0, 0, 1  # สีแดง
+            size_hint_y: None
+            height: 30
+            
+        TextInput:
+            id: api_key_input
+            hint_text: 'Enter your API Key here'
+            multiline: False
+
+        Button:
+            text: 'Enter with Key'
+            on_press: root.do_login_key(api_key_input.text)
+
+        Button:
+            text: 'Back to Username Login'
+            size_hint_y: None
+            height: 40
+            on_release: app.root.current = 'login'
+
+# หน้าหลักเมื่อเข้าสู่ระบบได้
+<HomeScreen>:
+    name: 'home'
+    BoxLayout:
+        orientation: 'vertical'
+        Label:
+            text: 'Welcome to System!'
+        Button:
+            text: 'Logout'
+            on_release: app.root.current = 'login'
