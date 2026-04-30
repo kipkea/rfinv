@@ -29,9 +29,11 @@ bot_id = os.getenv("bot_id")
 #IPServer = "localhost"  
 #IPServer = "10.35.116.201"  
 #IPServer = "192.168.1.199"  
-API_URL = f"http://{APISERVER}:8000/api/inventory/"
-BASE_URL = f"http://{APISERVER}:8000"
+API_URL = f"http://{APISERVER}/api/inventory/"
+BASE_URL = f"http://{APISERVER}"
 CACHE_DIR = "image_cache"
+
+print(BASE_URL)
 
 # สร้างโฟลเดอร์สำหรับเก็บรูปภาพถ้ายังไม่มี
 if not os.path.exists(CACHE_DIR):
@@ -112,6 +114,7 @@ class InventoryItem(BoxLayout):
         else:
             full_img_url = "" # หรือใส่ path รูป default
 
+        print(img_path)
         # ใช้ CachedAsyncImage แทน AsyncImage ปกติ
         img = CachedAsyncImage(source=full_img_url, size_hint_x=0.3)
         self.add_widget(img)

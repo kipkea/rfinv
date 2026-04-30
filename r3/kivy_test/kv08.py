@@ -29,6 +29,7 @@ class LoginScreen(Screen):
     def do_login(self, username, password):
         # URL ของ Django API (ตรวจสอบ IP ให้ถูกต้อง)
         url = f"http://{APISERVER}/api/login/" 
+        print(url)
         payload = {
             "username": username,
             "password": password

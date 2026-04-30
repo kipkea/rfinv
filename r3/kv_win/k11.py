@@ -134,7 +134,7 @@ class AppTabs(TabbedPanel):
     def detect_cameras(self):
         self.set_global_status("Detecting cameras...", 'left')
         found_indices = set()
-        for i in range(5): # Reduced range for speed
+        for i in range(2): # Reduced range for speed
             cap = cv2.VideoCapture(i, cv2.CAP_DSHOW)
             if cap.isOpened():
                 ret, _ = cap.read()

@@ -4,7 +4,7 @@ from django.shortcuts import render
 from rest_framework.views import APIView  
 from rest_framework.response import Response  
 from rest_framework import status  
-from .models import RFIDTag, Location, Inventory, Inspection, UserAPIKey
+from .models import RFIDTag, Location, Inventory, Inspection, UserAPIKey, InventoryImage
 #from .serializers import RFIDTag_SL, Location_SL, Inventory_SL , Inspection_SL
 from django.shortcuts import get_object_or_404  
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
@@ -27,7 +27,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from .serializers import (
     RFIDTagSerializer, LocationSerializer, InventorySerializer, 
-    InspectionSerializer, InspectionCreateSerializer
+    InspectionSerializer, InspectionCreateSerializer, InventoryImageSerializer
 )
 
            
@@ -122,6 +122,158 @@ class InspectionViewSet(viewsets.ModelViewSet):
             headers=headers
         )
     
+
+# --- 1. ตัวอย่างแบบ CRUD ปกติ (InventoryImage) ---
+
+class InventoryImageListAPIView(APIView):
+    permission_classes = [ HasAPIKey | IsAuthenticatedOrReadOnly | AllowAny]
+    """
+    รองรับ:
+    - GET: ดึงรายการTagทั้งหมด (รองรับ ?location_id=...)
+    - POST: สร้างTagใหม่
+    """
+    def get(self, request):
+        InventoryImages = InventoryImage.objects.all()
+           
+        serializer = InventoryImageSerializer(InventoryImages, many=True)
+        return Response(serializer.data)
+
+    def post(self, request):
+        serializer = InventoryImageSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+class InventoryImageDetailAPIView(APIView):
+    permission_classes = [ HasAPIKey | IsAuthenticatedOrReadOnly]
+    """
+    รองรับ: GET (ดู), PUT (แก้), DELETE (ลบ) รายตัว
+    """
+    def get_object(self, pk):
+        return get_object_or_404(InventoryImage, pk=pk)
+
+    def get(self, request, pk):
+        InventoryImages = self.get_object(pk)
+        serializer = InventoryImageSerializer(InventoryImages)
+        return Response(serializer.data)
+
+    def put(self, request, pk):
+        InventoryImages = self.get_object(pk)
+        serializer = InventoryImageSerializer(InventoryImages, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk):
+        InventoryImages = self.get_object(pk)
+        InventoryImages.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    
+# --- 1. ตัวอย่างแบบ CRUD ปกติ (Location) ---
+
+class LocationListAPIView(APIView):
+    permission_classes = [ HasAPIKey | IsAuthenticatedOrReadOnly | AllowAny]
+    """
+    รองรับ:
+    - GET: ดึงรายการTagทั้งหมด (รองรับ ?location_id=...)
+    - POST: สร้างTagใหม่
+    """
+    def get(self, request):
+        Locations = Location.objects.all()
+           
+        serializer = LocationSerializer(Locations, many=True)
+        return Response(serializer.data)
+
+    def post(self, request):
+        serializer = LocationSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+class LocationDetailAPIView(APIView):
+    permission_classes = [ HasAPIKey | IsAuthenticatedOrReadOnly]
+    """
+    รองรับ: GET (ดู), PUT (แก้), DELETE (ลบ) รายตัว
+    """
+    def get_object(self, pk):
+        return get_object_or_404(Location, pk=pk)
+
+    def get(self, request, pk):
+        Locations = self.get_object(pk)
+        serializer = LocationSerializer(Locations)
+        return Response(serializer.data)
+
+    def put(self, request, pk):
+        Locations = self.get_object(pk)
+        serializer = LocationSerializer(Locations, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk):
+        Locations = self.get_object(pk)
+        Locations.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    
+
+# --- 1. ตัวอย่างแบบ CRUD ปกติ (RFIDTag) ---
+
+class RFIDTagListAPIView(APIView):
+    permission_classes = [ HasAPIKey | IsAuthenticatedOrReadOnly | AllowAny]
+    """
+    รองรับ:
+    - GET: ดึงรายการTagทั้งหมด (รองรับ ?location_id=...)
+    - POST: สร้างTagใหม่
+    """
+    def get(self, request):
+        RFIDTags = RFIDTag.objects.all()
+           
+        serializer = RFIDTagSerializer(RFIDTags, many=True)
+        return Response(serializer.data)
+
+    def post(self, request):
+        serializer = RFIDTagSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+class RFIDTagDetailAPIView(APIView):
+    permission_classes = [ HasAPIKey | IsAuthenticatedOrReadOnly]
+    """
+    รองรับ: GET (ดู), PUT (แก้), DELETE (ลบ) รายตัว
+    """
+    def get_object(self, pk):
+        return get_object_or_404(RFIDTag, pk=pk)
+
+    def get(self, request, pk):
+        RFIDTags = self.get_object(pk)
+        serializer = RFIDTagSerializer(RFIDTags)
+        return Response(serializer.data)
+
+    def put(self, request, pk):
+        RFIDTags = self.get_object(pk)
+        serializer = RFIDTagSerializer(RFIDTags, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk):
+        RFIDTags = self.get_object(pk)
+        RFIDTags.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+        
 # --- 1. ตัวอย่างแบบ CRUD ปกติ (Inventory) ---
 
 class InventoryListAPIView(APIView):

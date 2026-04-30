@@ -7,6 +7,9 @@ from rest_framework.routers import DefaultRouter
 from .views import (
     InventoryListAPIView, InventoryDetailAPIView,
     InspectionListAPIView, InspectionDetailAPIView,
+    RFIDTagListAPIView, RFIDTagDetailAPIView,
+    LocationListAPIView, LocationDetailAPIView,    
+    InventoryImageDetailAPIView, InventoryImageListAPIView,
     # อย่าลืม import view ของ RFIDTag และ Location ด้วยถ้าทำเพิ่ม
     RFIDTagViewSet, 
     LocationViewSet, 
@@ -30,6 +33,18 @@ urlpatterns = [
     # หากคุณใช้ SimpleJWT (จาก Error ก่อนหน้า) ต้องมี path สำหรับ Token ด้วย
     # path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
 
+    # InventoryImages URLs
+    path('api/InventoryImages/', InventoryImageListAPIView.as_view(), name='inventoryimage-list'),
+    path('api/InventoryImages/<int:pk>/', InventoryImageDetailAPIView.as_view(), name='inventoryimage-detail'),
+  
+    # Locations URLs
+    path('api/Locations/', LocationListAPIView.as_view(), name='location-list'),
+    path('api/Locations/<int:pk>/', LocationDetailAPIView.as_view(), name='location-detail'),
+    
+    # RFIDTags URLs
+    path('api/RFIDTags/', RFIDTagListAPIView.as_view(), name='rfidtag-list'),
+    path('api/RFIDTags/<int:pk>/', RFIDTagDetailAPIView.as_view(), name='rfidtag-detail'),
+    
     # Inventory URLs
     path('api/inventory/', InventoryListAPIView.as_view(), name='inventory-list'),
     path('api/inventory/<int:pk>/', InventoryDetailAPIView.as_view(), name='inventory-detail'),

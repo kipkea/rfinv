@@ -92,9 +92,9 @@ class RFCounter:
                 #print("Send command : ",cmd_MQ_EPC)
                 #MQ_EPC อ่านหลายแท็กพร้อมกัน
                 ser.write(cmd_MQ_EPC)
-                #time.sleep(0.1)     
+                time.sleep(0.1)     
                 #time.sleep(0.01)
-                self.count_cmd_loop += 1
+                
                 try:
                     # 2. อ่านข้อมูล Response
                     while True:
@@ -102,7 +102,7 @@ class RFCounter:
                             try:
                                 # อ่านข้อมูลจนจบLine (<LF>) [4]
                                 raw_line = ser.read_until(b'\x0A')
-                                print("Raw Line: ", raw_line)
+                                #print("Raw Line: ", raw_line)
                                 line = raw_line.decode('ascii', errors='ignore').strip()
 
                                 # ถ้าเป็น 'U' ตัวเดียว คือจบ Batch รอบนี้
@@ -118,9 +118,10 @@ class RFCounter:
                                     code = x  
 
                                 # เริ่มจับเวลาเมื่อข้อมูลแรกเข้ามา
+                                self.count_cmd_loop += 1
                                 if self.current_count == 0:
                                     self.start_time = time.perf_counter()
-                                    print(f"--> เริ่มจับเวลา! (อ่านครั้งแรก: {code})")
+                                    #print(f"--> เริ่มจับเวลา! (อ่านครั้งแรก: {code})")
                                 
                                 if code not in self.scanned_data and len(code)==8:            
                                     self.current_count += 1
