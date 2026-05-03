@@ -1,0 +1,84 @@
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.label import Label
+from api_client import api
+
+class ImportTagTab(BoxLayout):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.scanned_tags = []
+        self.is_scanning = False
+        
+    def toggle_scanning(self):
+        self.is_scanning = not self.is_scanning
+        if self.is_scanning:
+            self.ids.toggle_scan_btn.text = 'หยุดอ่าน (Stop Scan)'
+            self.ids.toggle_scan_btn.background_color = (1, 0.3, 0.3, 1)
+            self.ids.rfid_scan_input.disabled = False
+            self.ids.rfid_scan_input.focus = True
+        else:
+            self.ids.toggle_scan_btn.text = 'เริ่มอ่าน (Start Scan)'
+            self.ids.toggle_scan_btn.background_color = (0.2, 0.6, 1, 1)
+            self.ids.rfid_scan_input.disabled = True
+            self.ids.rfid_scan_input.focus = False
+
+    def add_scanned_tag(self, text):
+        tag = text.strip()
+        if tag and tag not in self.scanned_tags:
+            self.scanned_tags.append(tag)
+            # Update UI list
+            lbl = Label(text=f"{len(self.scanned_tags)}. {tag}", size_hint_y=None, height=30, halign='left')
+            lbl.bind(size=lbl.setter('text_size'))
+            self.ids.scanned_tags_list.add_widget(lbl)
+            
+            # Update count label
+            self.ids.scan_count_label.text = f'อ่านแล้ว: {len(self.scanned_tags)} รหัส'
+            
+        # Clear input and keep focus for the next scan
+        self.ids.rfid_scan_input.text = ""
+        if self.is_scanning:
+            self.ids.rfid_scan_input.focus = True
+
+    def clear_tags(self):
+        self.scanned_tags.clear()
+        self.ids.scanned_tags_list.clear_widgets()
+        self.ids.scan_count_label.text = 'อ่านแล้ว: 0 รหัส'
+
+    def submit_tags(self):
+        if not self.scanned_tags:
+            return
+            
+        total_scanned = len(self.scanned_tags)
+        success_count = 0
+        duplicate_tags = []
+        
+        for tag in self.scanned_tags:
+            success, res = api.create_rfid_tag(tag, is_location=False)
+            if success:
+                success_count += 1
+            else:
+                # Check if the error is actually about duplication
+                if "already exists" in str(res).lower() or "unique" in str(res).lower():
+                    duplicate_tags.append(tag)
+                else:
+                    # Show the actual error message to the user
+                    duplicate_tags.append(f"{tag} \n({res})")
+                
+        # Clear the original list UI
+        self.clear_tags()
+        
+        # Display Summary
+        summary_text = f"สรุปผล: นำเข้าทั้งหมด {total_scanned} | สำเร็จ {success_count} | ซ้ำ {len(duplicate_tags)}"
+        lbl_summary = Label(text=summary_text, size_hint_y=None, height=40, color=(0.2, 1, 0.2, 1), font_size='18sp')
+        self.ids.scanned_tags_list.add_widget(lbl_summary)
+        
+        if duplicate_tags:
+            lbl_dup_title = Label(text="รายการรหัสที่ซ้ำ (มีอยู่ในระบบแล้ว):", size_hint_y=None, height=30, color=(1, 0.5, 0.5, 1))
+            lbl_dup_title.bind(size=lbl_dup_title.setter('text_size'))
+            lbl_dup_title.halign = 'left'
+            self.ids.scanned_tags_list.add_widget(lbl_dup_title)
+            
+            for tag in duplicate_tags:
+                lbl_dup = Label(text=f" - {tag}", size_hint_y=None, height=30, color=(1, 0.3, 0.3, 1))
+                lbl_dup.bind(size=lbl_dup.setter('text_size'))
+                lbl_dup.halign = 'left'
+                self.ids.scanned_tags_list.add_widget(lbl_dup)

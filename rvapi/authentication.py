@@ -16,4 +16,6 @@ class APIKeyAuthentication(authentication.BaseAuthentication):
             raise exceptions.AuthenticationFailed('Invalid API Key')
 
         return (key_obj.user, None) # คืนค่า User กลับไปให้ระบบ
-    
+
+    def authenticate_header(self, request):
+        return 'ApiKey'

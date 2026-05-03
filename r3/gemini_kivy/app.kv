@@ -1,0 +1,176 @@
+RootWidget:
+    MainScreen:
+
+<MainScreen>:
+    name: "main"
+    BoxLayout:
+        orientation: "vertical"
+        spacing: dp(8)
+        padding: dp(8)
+        BoxLayout:
+            size_hint_y: None
+            height: dp(48)
+            Label:
+                text: "RFID Inventory Manager เวอร์ชั่น 1.0"
+                bold: True
+            Button:
+                text: "Refresh"
+                size_hint_x: None
+                width: dp(100)
+                on_release: root.load_all_options()
+        TabbedPanel:
+            do_default_tab: False
+            tab_height: dp(52)
+            tab_width: self.width / 4
+            tab_pos: 'top_mid'
+            tab_font_size: '16sp'
+            background_color: 0.95, 0.95, 0.95, 1
+            canvas.before:
+                Color:
+                    rgba: 0.95, 0.95, 0.95, 1
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+            TabbedPanelItem:
+                text: "Import RFID"
+                BoxLayout:
+                    orientation: "vertical"
+                    spacing: dp(8)
+                    TextInput:
+                        id: import_input
+                        hint_text: "Paste scanned RFID codes here, one per line or comma separated"
+                        size_hint_y: 0.7
+                    Button:
+                        text: "Import Tags"
+                        size_hint_y: None
+                        height: dp(48)
+                        on_release: root.import_rfid_tags()
+                    Label:
+                        text: root.import_status
+                        size_hint_y: None
+                        height: self.texture_size[1] + dp(8)
+            TabbedPanelItem:
+                text: "Register Inventory"
+                ScrollView:
+                    do_scroll_x: False
+                    BoxLayout:
+                        orientation: "vertical"
+                        size_hint_y: None
+                        height: self.minimum_height
+                        spacing: dp(8)
+                        Spinner:
+                            id: inventory_tag_spinner
+                            text: "Select RFID tag"
+                            values: root.inventory_codes
+                            size_hint_y: None
+                            height: dp(48)
+                        TextInput:
+                            id: inventory_name
+                            hint_text: "Product name"
+                            multiline: False
+                            size_hint_y: None
+                            height: dp(45)
+                        TextInput:
+                            id: inventory_detail
+                            hint_text: "Product detail"
+                            size_hint_y: None
+                            height: dp(80)
+                        BoxLayout:
+                            size_hint_y: None
+                            height: dp(48)
+                            TextInput:
+                                id: inventory_image_path
+                                hint_text: "Image path (optional)"
+                                multiline: False
+                            Button:
+                                text: "Browse"
+                                size_hint_x: None
+                                width: dp(100)
+                                on_release: root.choose_image()
+                        Button:
+                            text: "Register Inventory"
+                            size_hint_y: None
+                            height: dp(48)
+                            on_release: root.register_inventory()
+                        Label:
+                            text: root.inventory_status
+                            size_hint_y: None
+                            height: self.texture_size[1] + dp(8)
+            TabbedPanelItem:
+                text: "Register Location"
+                BoxLayout:
+                    orientation: "vertical"
+                    spacing: dp(8)
+                    Spinner:
+                        id: location_tag_spinner
+                        text: "Select RFID tag"
+                        values: root.location_codes
+                        size_hint_y: None
+                        height: dp(48)
+                    TextInput:
+                        id: location_name
+                        hint_text: "Location name"
+                        multiline: False
+                        size_hint_y: None
+                        height: dp(45)
+                    TextInput:
+                        id: location_description
+                        hint_text: "Location description"
+                        size_hint_y: None
+                        height: dp(90)
+                    Button:
+                        text: "Register Location"
+                        size_hint_y: None
+                        height: dp(48)
+                        on_release: root.register_location()
+                    Label:
+                        text: root.location_status
+                        size_hint_y: None
+                        height: self.texture_size[1] + dp(8)
+            TabbedPanelItem:
+                text: "Inspection"
+                ScrollView:
+                    do_scroll_x: False
+                    BoxLayout:
+                        orientation: "vertical"
+                        size_hint_y: None
+                        height: self.minimum_height
+                        spacing: dp(8)
+                        Spinner:
+                            id: inspection_location_spinner
+                            text: "Select location"
+                            values: root.location_options
+                            size_hint_y: None
+                            height: dp(48)
+                        TextInput:
+                            id: inspection_input
+                            hint_text: "Scan inventory RFID tags here"
+                            size_hint_y: None
+                            height: dp(180)
+                        Button:
+                            text: "Run Inspection"
+                            size_hint_y: None
+                            height: dp(48)
+                            on_release: root.inspect_location()
+                        Label:
+                            text: root.inspection_status
+                            size_hint_y: None
+                            height: self.texture_size[1] + dp(8)
+
+<FileChooserPopup>:
+    title: "Choose image"
+    size_hint: 0.9, 0.9
+    auto_dismiss: False
+    BoxLayout:
+        orientation: "vertical"
+        FileChooserIconView:
+            id: filechooser
+            filters: ["*.png", "*.jpg", "*.jpeg", "*.gif"]
+            on_selection: root.load(filechooser.path, filechooser.selection)
+        BoxLayout:
+            size_hint_y: None
+            height: dp(48)
+            spacing: dp(8)
+            Button:
+                text: "Cancel"
+                on_release: root.cancel()

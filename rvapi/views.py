@@ -4,7 +4,7 @@ from django.shortcuts import render
 from rest_framework.views import APIView  
 from rest_framework.response import Response  
 from rest_framework import status  
-from .models import RFIDTag, Location, Inventory, Inspection, UserAPIKey, InventoryImage
+from .models import RFIDTag, Location, Inventory, Inspection, UserAPIKey, InventoryImage, User
 #from .serializers import RFIDTag_SL, Location_SL, Inventory_SL , Inspection_SL
 from django.shortcuts import get_object_or_404  
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
@@ -22,12 +22,14 @@ from django.http import JsonResponse
 
 from .authentication import APIKeyAuthentication
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication
+from drf_yasg.utils import swagger_auto_schema
 
 
 
 from .serializers import (
     RFIDTagSerializer, LocationSerializer, InventorySerializer, 
-    InspectionSerializer, InspectionCreateSerializer, InventoryImageSerializer
+    InspectionSerializer, InspectionCreateSerializer, InventoryImageSerializer, UserSerializer
 )
 
            
@@ -381,6 +383,23 @@ class InspectionDetailAPIView(APIView):
         return Response(serializer.data)
 
 # (คุณสามารถทำ RFIDTagListAPIView และ LocationListAPIView ในลักษณะเดียวกับ Inventory ได้เลยครับ)
+
+
+class UserMeAPIView(APIView):
+    """
+    API พิเศษสำหรับดึงข้อมูลของ User ปัจจุบันที่กำลังล็อกอินอยู่
+    เรียกใช้งานผ่าน GET /users/me/
+    """
+    authentication_classes = [APIKeyAuthentication, JWTAuthentication, SessionAuthentication, BasicAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(security=[{'ApiKey': []}, {'Basic': []}, {'Bearer': []}])
+    def get(self, request):
+        if request.user.is_authenticated:
+            serializer = UserSerializer(request.user)
+            return Response(serializer.data)
+        else:
+            return Response({"detail": "ไม่ได้เข้าสู่ระบบ"}, status=status.HTTP_401_UNAUTHORIZED)
 
 
 '''

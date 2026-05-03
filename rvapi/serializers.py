@@ -10,6 +10,7 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'username', 'email']
+        ref_name = 'RvApiUser'
 
 class RFIDTagSerializer(serializers.ModelSerializer):
     class Meta:
@@ -103,8 +104,6 @@ class InspectionCreateSerializer(serializers.ModelSerializer):
         # ฝากผลลัพธ์ไว้ที่ instance ชั่วคราวเพื่อส่งกลับไปที่ View
         inspection._temp_results = results 
         return inspection
-
-
 
 
 

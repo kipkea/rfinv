@@ -1,0 +1,397 @@
+#:kivy 2.0.0
+
+# Set default font for all widgets that have text
+<Label>:
+    font_name: 'Kanit'
+<Button>:
+    font_name: 'Kanit'
+<TextInput>:
+    font_name: 'Kanit'
+<SpinnerOption>:
+    font_name: 'Kanit'
+
+<LoginScreen>:
+    name: 'login'
+    BoxLayout:
+        orientation: 'vertical'
+        padding: 50
+        spacing: 20
+        
+        Label:
+            text: 'ระบบจัดการสินค้าคงคลังด้วย RFID'
+            font_size: '32sp'
+            size_hint_y: 0.3
+            
+        BoxLayout:
+            orientation: 'horizontal'
+            size_hint_y: None
+            height: 40
+            spacing: 10
+            
+            ToggleButton:
+                id: btn_mode_password
+                text: 'User/Password'
+                state: 'down'
+                group: 'login_mode'
+                on_release: root.set_login_mode('Password')
+                
+            ToggleButton:
+                id: btn_mode_apikey
+                text: 'API Key'
+                group: 'login_mode'
+                on_release: root.set_login_mode('API Key')
+                
+        BoxLayout:
+            orientation: 'vertical'
+            spacing: 10
+            size_hint_y: 0.5
+            
+            BoxLayout:
+                id: username_container
+                orientation: 'vertical'
+                size_hint_y: 1
+                opacity: 1
+                disabled: False
+                
+                Label:
+                    text: 'ชื่อผู้ใช้ (Username)'
+                    size_hint_y: None
+                    height: 30
+                    text_size: self.size
+                    halign: 'left'
+                    
+                TextInput:
+                    id: username_input
+                    multiline: False
+                    size_hint_y: None
+                    height: 50
+                    font_size: '20sp'
+                    
+            BoxLayout:
+                orientation: 'vertical'
+                size_hint_y: 1
+                
+                Label:
+                    id: credential_label
+                    text: 'รหัสผ่าน (Password)'
+                    size_hint_y: None
+                    height: 30
+                    text_size: self.size
+                    halign: 'left'
+                    
+                TextInput:
+                    id: credential_input
+                    multiline: False
+                    password: True
+                    size_hint_y: None
+                    height: 50
+                    font_size: '20sp'
+                
+        Button:
+            text: 'เข้าสู่ระบบ (Login)'
+            size_hint_y: None
+            height: 60
+            font_size: '24sp'
+            background_color: 0.2, 0.6, 1, 1
+            on_release: root.do_login()
+            
+        Label:
+            id: login_message
+            text: ''
+            color: 1, 0, 0, 1
+            size_hint_y: 0.2
+
+<MainTabScreen>:
+    name: 'main_tabs'
+    BoxLayout:
+        orientation: 'vertical'
+        
+        BoxLayout:
+            size_hint_y: None
+            height: 40
+            padding: [10, 5]
+            canvas.before:
+                Color:
+                    rgba: 0.2, 0.2, 0.2, 1
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+            
+            Label:
+                id: current_user_label
+                text: 'ผู้ใช้งาน: '
+                text_size: self.size
+                halign: 'left'
+                valign: 'middle'
+                font_size: '18sp'
+                
+            Button:
+                text: 'ออกจากระบบ (Logout)'
+                size_hint_x: None
+                width: 150
+                background_color: 1, 0.3, 0.3, 1
+                on_release: root.do_logout()
+                
+        TabbedPanel:
+            do_default_tab: False
+            tab_pos: 'top_mid'
+            tab_width: self.width / 4
+        
+            TabbedPanelItem:
+                text: '1. นำเข้า RFID'
+                ImportTagTab:
+                    id: import_tab
+                    
+            TabbedPanelItem:
+                text: '2. จัดการสินค้า'
+                InventoryTab:
+                    id: inventory_tab
+                    
+            TabbedPanelItem:
+                text: '3. กำหนด Location'
+                LocationTab:
+                    id: location_tab
+                    
+            TabbedPanelItem:
+                text: '4. ตรวจสอบสินค้า'
+                InspectionTab:
+                    id: inspection_tab
+
+<ImportTagTab>:
+    orientation: 'vertical'
+    padding: 20
+    spacing: 10
+    
+    Label:
+        text: 'สแกน RFID Tag เพื่อนำเข้าระบบ'
+        font_size: '24sp'
+        size_hint_y: None
+        height: 40
+        
+    BoxLayout:
+        size_hint_y: None
+        height: 50
+        spacing: 10
+        Button:
+            id: toggle_scan_btn
+            text: 'เริ่มอ่าน (Start Scan)'
+            size_hint_x: 0.3
+            background_color: 0.2, 0.6, 1, 1
+            on_release: app.screens['main_tabs'].ids.import_tab.toggle_scanning()
+        TextInput:
+            id: rfid_scan_input
+            multiline: False
+            hint_text: 'กดเริ่มอ่านเพื่อสแกน...'
+            font_size: '20sp'
+            size_hint_x: 0.7
+            disabled: True
+            on_text_validate: app.screens['main_tabs'].ids.import_tab.add_scanned_tag(self.text)
+            
+    Label:
+        id: scan_count_label
+        text: 'อ่านแล้ว: 0 รหัส'
+        size_hint_y: None
+        height: 30
+        color: 0.2, 0.8, 1, 1
+        text_size: self.size
+        halign: 'left'
+        
+    ScrollView:
+        BoxLayout:
+            id: scanned_tags_list
+            orientation: 'vertical'
+            size_hint_y: None
+            height: self.minimum_height
+            
+    BoxLayout:
+        size_hint_y: None
+        height: 60
+        spacing: 20
+        Button:
+            text: 'ล้างข้อมูล (Clear)'
+            background_color: 1, 0.3, 0.3, 1
+            on_release: app.screens['main_tabs'].ids.import_tab.clear_tags()
+        Button:
+            text: 'บันทึกเข้าระบบ (Import)'
+            background_color: 0.2, 0.8, 0.2, 1
+            on_release: app.screens['main_tabs'].ids.import_tab.submit_tags()
+
+<InventoryTab>:
+    orientation: 'vertical'
+    padding: 20
+    spacing: 10
+    
+    Label:
+        text: 'ลงทะเบียน / จัดการสินค้า'
+        font_size: '24sp'
+        size_hint_y: None
+        height: 40
+        
+    GridLayout:
+        cols: 2
+        spacing: 10
+        row_force_default: True
+        row_default_height: 40
+        
+        Label:
+            text: 'เลือก RFID Code (ที่ยังไม่ใช้งาน):'
+            text_size: self.size
+            halign: 'right'
+            valign: 'middle'
+        Spinner:
+            id: rfid_spinner
+            text: '--- เลือก RFID ---'
+            
+        Label:
+            text: 'ชื่อสินค้า:'
+            text_size: self.size
+            halign: 'right'
+            valign: 'middle'
+        TextInput:
+            id: inv_name_input
+            multiline: False
+            
+        Label:
+            text: 'รายละเอียดสินค้า:'
+            text_size: self.size
+            halign: 'right'
+            valign: 'middle'
+        TextInput:
+            id: inv_detail_input
+            multiline: True
+            
+    Button:
+        text: 'ดึงข้อมูล RFID ใหม่ (Refresh)'
+        size_hint_y: None
+        height: 40
+        on_release: app.screens['main_tabs'].ids.inventory_tab.refresh_rfid_list()
+        
+    Button:
+        text: 'บันทึกข้อมูลสินค้า'
+        size_hint_y: None
+        height: 60
+        background_color: 0.2, 0.6, 1, 1
+        on_release: app.screens['main_tabs'].ids.inventory_tab.submit_inventory()
+
+<LocationTab>:
+    orientation: 'vertical'
+    padding: 20
+    spacing: 10
+    
+    Label:
+        text: 'กำหนดสถานที่ (Location)'
+        font_size: '24sp'
+        size_hint_y: None
+        height: 40
+        
+    GridLayout:
+        cols: 2
+        spacing: 10
+        row_force_default: True
+        row_default_height: 40
+        
+        Label:
+            text: 'เลือก RFID Code (ที่ยังไม่ใช้งาน):'
+            text_size: self.size
+            halign: 'right'
+            valign: 'middle'
+        Spinner:
+            id: loc_rfid_spinner
+            text: '--- เลือก RFID ---'
+            
+        Label:
+            text: 'ชื่อ Location:'
+            text_size: self.size
+            halign: 'right'
+            valign: 'middle'
+        TextInput:
+            id: loc_name_input
+            multiline: False
+            
+        Label:
+            text: 'รายละเอียด:'
+            text_size: self.size
+            halign: 'right'
+            valign: 'middle'
+        TextInput:
+            id: loc_detail_input
+            multiline: True
+            
+    Button:
+        text: 'ดึงข้อมูล RFID ใหม่ (Refresh)'
+        size_hint_y: None
+        height: 40
+        on_release: app.screens['main_tabs'].ids.location_tab.refresh_rfid_list()
+        
+    Button:
+        text: 'บันทึกข้อมูล Location'
+        size_hint_y: None
+        height: 60
+        background_color: 0.2, 0.6, 1, 1
+        on_release: app.screens['main_tabs'].ids.location_tab.submit_location()
+
+<InspectionTab>:
+    orientation: 'vertical'
+    padding: 20
+    spacing: 10
+    
+    Label:
+        text: 'ตรวจสอบสินค้า (Inspection)'
+        font_size: '24sp'
+        size_hint_y: None
+        height: 40
+        
+    BoxLayout:
+        size_hint_y: None
+        height: 50
+        spacing: 10
+        Label:
+            text: 'สแกน Location RFID:'
+            size_hint_x: 0.3
+        TextInput:
+            id: inspect_loc_input
+            multiline: False
+            hint_text: 'สแกนป้ายสถานที่...'
+            on_text_validate: app.screens['main_tabs'].ids.inspection_tab.on_location_scanned(self.text)
+            
+    Label:
+        id: current_location_label
+        text: 'สถานที่ปัจจุบัน: ยังไม่ได้เลือก'
+        color: 0.2, 0.8, 0.2, 1
+        size_hint_y: None
+        height: 30
+        
+    BoxLayout:
+        size_hint_y: None
+        height: 50
+        spacing: 10
+        Label:
+            text: 'สแกนสินค้า RFID:'
+            size_hint_x: 0.3
+        TextInput:
+            id: inspect_inv_input
+            multiline: False
+            hint_text: 'สแกนป้ายสินค้า...'
+            disabled: True # Disable until location is scanned
+            on_text_validate: app.screens['main_tabs'].ids.inspection_tab.on_inventory_scanned(self.text)
+            
+    ScrollView:
+        BoxLayout:
+            id: inspected_items_list
+            orientation: 'vertical'
+            size_hint_y: None
+            height: self.minimum_height
+            
+    Label:
+        id: inspection_result_label
+        text: ''
+        size_hint_y: None
+        height: 40
+        color: 1, 1, 0, 1
+            
+    Button:
+        text: 'ส่งผลการตรวจสอบ'
+        size_hint_y: None
+        height: 60
+        background_color: 0.2, 0.6, 1, 1
+        on_release: app.screens['main_tabs'].ids.inspection_tab.submit_inspection()
