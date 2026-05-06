@@ -8,6 +8,14 @@ class LoginScreen(Screen):
             self.ids.credential_label.text = 'รหัสผ่าน (Password)'
             self.ids.credential_input.password = True
             
+            # ปรับความกว้างกลับเป็นขนาดปกติสำหรับ Password (ตัวอย่าง: ครึ่งหนึ่ง)
+            self.ids.credential_input.size_hint_x = 0.2
+            # self.ids.credential_input.width = 200 # ใช้บรรทัดนี้แทนหากกำหนด size_hint_x: None ในไฟล์ kv
+            
+            # จัดช่องและตัวอักษรให้อยู่กึ่งกลาง
+            self.ids.credential_input.pos_hint = {'center_x': 0.5}
+            self.ids.credential_input.halign = 'center'
+            
             # Show username field
             self.ids.username_container.opacity = 1
             self.ids.username_container.disabled = False
@@ -16,6 +24,14 @@ class LoginScreen(Screen):
         else:
             self.ids.credential_label.text = 'API Key'
             self.ids.credential_input.password = False
+            
+            # ขยายความกว้างให้มากขึ้นสำหรับ API Key (ตัวอย่าง: ขยายเต็ม 100%)
+            self.ids.credential_input.size_hint_x = 0.8
+            # self.ids.credential_input.width = 400 # ใช้บรรทัดนี้แทนหากกำหนด size_hint_x: None ในไฟล์ kv
+            
+            # จัดช่องและตัวอักษรให้อยู่กึ่งกลาง
+            self.ids.credential_input.pos_hint = {'center_x': 0.5}
+            self.ids.credential_input.halign = 'center'
             
             # Hide username field
             self.ids.username_container.opacity = 0

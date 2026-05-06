@@ -74,7 +74,8 @@ def login_api(request):
             return JsonResponse({
                 "status": "success",
                 "message": f"Welcome {user.username}",
-                "user_id": user.id
+                "user_id": user.id,
+                "user_name": user.username
             }, status=200)
         else:
             return JsonResponse({"status": "error", "message": "Invalid Credentials"}, status=401)
@@ -88,21 +89,38 @@ class RFIDTagViewSet(viewsets.ModelViewSet):
     serializer_class = RFIDTagSerializer
 
     def perform_create(self, serializer):
-        serializer.save(registered_by=self.request.user)
+        # เช็คก่อนว่ามี User ล็อกอินใน Request หรือไม่
+        if self.request.user and self.request.user.is_authenticated:
+            serializer.save(registered_by=self.request.user)
+        else:
+            serializer.save()
 
 class LocationViewSet(viewsets.ModelViewSet):
     queryset = Location.objects.all()
     serializer_class = LocationSerializer
 
     def perform_create(self, serializer):
-        serializer.save(created_by=self.request.user)
+        # บันทึกข้อมูลและระบุตัวผู้สร้าง (ป้องกัน Error AnonymousUser)
+        if self.request.user and self.request.user.is_authenticated:
+            location = serializer.save(created_by=self.request.user)
+        else:
+            location = serializer.save()
+            
+        # อัปเดตสถานะของ RFID Tag ว่าถูกนำไปเป็นสถานที่แล้ว
+        if location.rfid_tag:
+            location.rfid_tag.is_location = True
+            location.rfid_tag.save()
 
 class InventoryViewSet(viewsets.ModelViewSet):
     queryset = Inventory.objects.all().prefetch_related('evidence_images')
     serializer_class = InventorySerializer
 
     def perform_create(self, serializer):
-        serializer.save(registered_by=self.request.user)
+        # เช็คก่อนว่ามี User ล็อกอินใน Request หรือไม่
+        if self.request.user and self.request.user.is_authenticated:
+            serializer.save(registered_by=self.request.user)
+        else:
+            serializer.save()
 
 class InspectionViewSet(viewsets.ModelViewSet):
     queryset = Inspection.objects.all()
@@ -113,7 +131,11 @@ class InspectionViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         
         # บันทึกข้อมูลพื้นฐานก่อน
-        inspection = serializer.save(inspected_by=self.request.user)
+        # ป้องกัน Error AnonymousUser เมื่อเชื่อมต่อผ่าน API Key
+        if self.request.user and self.request.user.is_authenticated:
+            inspection = serializer.save(inspected_by=self.request.user)
+        else:
+            inspection = serializer.save()
         
         # เรียก Celery Task ให้ทำงานเบื้องหลัง
         process_inspection_results.delay(inspection.id)
@@ -194,7 +216,16 @@ class LocationListAPIView(APIView):
     def post(self, request):
         serializer = LocationSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            # บันทึกข้อมูลและระบุตัวผู้สร้าง (ป้องกัน Error AnonymousUser)
+            if request.user and request.user.is_authenticated:
+                location = serializer.save(created_by=request.user)
+            else:
+                location = serializer.save()
+                
+            # อัปเดตสถานะของ RFID Tag ให้เป็น Location
+            if location.rfid_tag:
+                location.rfid_tag.is_location = True
+                location.rfid_tag.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

@@ -2,29 +2,31 @@ import requests
 import json
 import os
 
+from dotenv import load_dotenv
+
+#####################################
+# โหลดค่า environment จากไฟล์ .env
+load_dotenv()
+
+APISERVER = os.getenv("APISERVER")
+key = os.getenv("key")
+
+#telegram 
+bot_token = os.getenv("bot_token")
+bot_id = os.getenv("bot_id")
+######################################
+
 class APIClient:
-    def __init__(self, base_url="http://localhost:8000"):
+    def __init__(self, base_url=f"http://{APISERVER}"):
         self.base_url = base_url
         self.session = requests.Session()
         self.session.headers.update({"Accept": "application/json"})
-        self.auth_token = "94QH9mzL.QfDe1xGDKMwIYzjmdzRVUdCU6RCv78wv"
-        self.api_key = "UDytWd-_81VD4HrYwAURwvMAEKpuAOZv59irBJIFJW4"
+        self.auth_token = key
+        self.api_key = key
         self.current_user = None
         self.current_user_id = None
         
-    def _fetch_user_id(self):
-        url = f"{self.base_url}/users/"
-        try:
-            response = self.session.get(url, timeout=5)
-            if response.status_code == 200:
-                users = response.json()
-                for user in users:
-                    if user.get("username") == self.current_user:
-                        self.current_user_id = user.get("id")
-                        break
-        except Exception:
-            pass
-        
+       
     def login(self, username, password):
         url = f"{self.base_url}/api/login/"
         payload = {"username": username, "password": password}
@@ -34,6 +36,10 @@ class APIClient:
             if response.status_code in [200, 201]:
                 data = response.json()
                 self.current_user = username
+                user_data = response.json()
+                print(user_data)
+                self.current_user = user_data.get("user_name")
+                self.current_user_id = user_data.get("user_id")                
                 # Check for token or API Key
                 if "token" in data:
                     self.auth_token = data["token"]
@@ -42,8 +48,8 @@ class APIClient:
                 elif "key" in data:
                     self.api_key = data["key"]
                     self.session.headers.update({"X-API-KEY": self.api_key})
-                    print(f"API Key: {self.api_key}")
-                self._fetch_user_id()
+                    print(f"API Key: {self.api_key}")  
+                print(self.current_user, self.current_user_id)              
                 return True, "Login successful"
             else:
                 return False, f"Login failed: {response.status_code} - {response.text}"
@@ -66,6 +72,7 @@ class APIClient:
             "api_key": api_key  # ส่ง key ไปแทน username/password
         }
 
+        print(payload)
         try:
             response = requests.post(url, json=payload, timeout=5)
 
@@ -77,44 +84,15 @@ class APIClient:
                 
                 print(user_data)
                 if not self.current_user or not self.current_user_id:                    
-                    return False, "API /users/me/ ส่งข้อมูลกลับมาไม่ครบ (ขาด username หรือ id)"
-                    
-                    
+                    return False, "API ส่งข้อมูลกลับมาไม่ครบ (ขาด username หรือ id)"
+
                 return True, "Login successful"
             else:
                 # ถ้าไม่ได้ 200 แสดงว่า API ยังมีปัญหา หรือสิทธิ์ยังไม่ถูกต้อง
                 return False, f"ไม่สามารถดึงข้อมูล User ได้ ({response.status_code}): {response.text}"
         except Exception as e:
-            return False, f"ไม่สามารถเชื่อมต่อกับ /users/me/ ได้: {str(e)}"
-
-
-        # ทดสอบการใช้งาน API Key โดยเรียกดู /api/RFIDTags/ แทน /users/ เพราะ /users/ อาจจะติดสิทธิ์ Admin
-        url = f"{self.base_url}/api/RFIDTags/"
-        try:
-            response = self.session.get(url, timeout=5)
-            if response.status_code != 200:
-                return False, f"Invalid API Key ({response.status_code}): {response.text}"
-        except Exception as e:
-            return False, f"Connection error: {str(e)}"
+            return False, f"ไม่สามารถเชื่อมต่อกับ API ได้: {str(e)}"
             
-        # พยายามดึง user จาก API
-        me_url = f"{self.base_url}/users/me/"
-        try:
-            r = self.session.get(me_url, timeout=5)
-            if r.status_code == 200:
-                user_data = r.json()
-                self.current_user = user_data.get("username")
-                self.current_user_id = user_data.get("id")
-                
-                if not self.current_user or not self.current_user_id:
-                    return False, "API /users/me/ ส่งข้อมูลกลับมาไม่ครบ (ขาด username หรือ id)"
-                    
-                return True, "Login successful"
-            else:
-                # ถ้าไม่ได้ 200 แสดงว่า API ยังมีปัญหา หรือสิทธิ์ยังไม่ถูกต้อง
-                return False, f"ไม่สามารถดึงข้อมูล User ได้ ({r.status_code}): {r.text}"
-        except Exception as e:
-            return False, f"ไม่สามารถเชื่อมต่อกับ /users/me/ ได้: {str(e)}"
             
     def get_rfid_tags(self):
         url = f"{self.base_url}/api/RFIDTags/"
@@ -132,6 +110,7 @@ class APIClient:
         if self.current_user_id:
             payload["registered_by"] = self.current_user_id
             
+        print(payload)
         try:
             response = self.session.post(url, json=payload, timeout=5)
             if response.status_code in [200, 201]:
@@ -140,16 +119,24 @@ class APIClient:
         except Exception as e:
             return False, f"Error: {str(e)}"
 
-    def create_location(self, rfid_tag_id, name, description=""):
+    def create_location(self, rfid_tag_id, rfid_code, name, description=""):
+        # กำหนด Header สำหรับ API Key ตาม Swagger (X-API-KEY)
+        self.session.headers.update({"X-API-KEY": self.api_key})
+        
+        # บางระบบที่ใช้ Django Rest Framework API Key อาจคาดหวัง Authorization Header ด้วย
+        self.session.headers.update({"Authorization": f"Api-Key {self.api_key}"})
+
         url = f"{self.base_url}/api/Locations/"
         payload = {
-            "rfid_tag": rfid_tag_id,
+            "rfid_code": rfid_code,
             "name": name,
-            "description": description
+            "description": description,
+            "rfid_tag": rfid_tag_id,
         }
         if self.current_user_id:
             payload["created_by"] = self.current_user_id
             
+        print(payload)
         try:
             response = self.session.post(url, json=payload, timeout=5)
             if response.status_code in [200, 201]:

@@ -19,7 +19,7 @@ class RFIDTagSerializer(serializers.ModelSerializer):
 
 class LocationSerializer(serializers.ModelSerializer):
     rfid_code = serializers.SlugRelatedField(
-        queryset=RFIDTag.objects.filter(is_location=True),
+        queryset=RFIDTag.objects.all(),
         slug_field='rfid_code',
         source='rfid_tag'
     )
@@ -36,7 +36,7 @@ class InventoryImageSerializer(serializers.ModelSerializer):
 class InventorySerializer(serializers.ModelSerializer):
     # เชื่อมโยง rfid_code แทนการใช้ ID เลขลำดับ
     rfid_code = serializers.SlugRelatedField(
-        queryset=RFIDTag.objects.filter(is_location=False),
+        queryset=RFIDTag.objects.all(),
         slug_field='rfid_code',
         source='rfid_tag'
     )

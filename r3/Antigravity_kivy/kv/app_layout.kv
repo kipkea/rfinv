@@ -10,6 +10,15 @@
 <SpinnerOption>:
     font_name: 'Kanit'
 
+<BoxLayout>:
+    canvas.after:
+        Color:
+            rgba: 1, 0, 0, 1  # สีแดง (Red, Green, Blue, Alpha)
+        Line:
+            rectangle: self.x, self.y, self.width, self.height
+            width: 1          # ความหนาของเส้น
+
+
 <LoginScreen>:
     name: 'login'
     BoxLayout:
@@ -27,6 +36,9 @@
             size_hint_y: None
             height: 40
             spacing: 10
+            size_hint_x: 0.2
+            pos_hint: {'center_x': 0.5}
+
             
             ToggleButton:
                 id: btn_mode_password
@@ -44,21 +56,24 @@
         BoxLayout:
             orientation: 'vertical'
             spacing: 10
-            size_hint_y: 0.5
-            
+            size_hint_y: 0.2           
+            size_hint_x: 0.8
+            pos_hint: {'center_x': 0.5}            
+
             BoxLayout:
                 id: username_container
                 orientation: 'vertical'
-                size_hint_y: 1
+                size_hint_y: None
+                #height: 100
                 opacity: 1
                 disabled: False
                 
                 Label:
                     text: 'ชื่อผู้ใช้ (Username)'
-                    size_hint_y: None
-                    height: 30
+                    size_hint_y: 0.5
+                    #height: 30
                     text_size: self.size
-                    halign: 'left'
+                    halign: 'center'
                     
                 TextInput:
                     id: username_input
@@ -66,10 +81,13 @@
                     size_hint_y: None
                     height: 50
                     font_size: '20sp'
+                    size_hint_x: 0.2
+                    pos_hint: {'center_x': 0.5}
+                    halign: 'center'
                     
             BoxLayout:
                 orientation: 'vertical'
-                size_hint_y: 1
+                size_hint_y: None
                 
                 Label:
                     id: credential_label
@@ -77,8 +95,9 @@
                     size_hint_y: None
                     height: 30
                     text_size: self.size
-                    halign: 'left'
-                    
+                    halign: 'center'
+
+                                        
                 TextInput:
                     id: credential_input
                     multiline: False
@@ -86,7 +105,10 @@
                     size_hint_y: None
                     height: 50
                     font_size: '20sp'
-                
+                    size_hint_x: 0.2
+                    pos_hint: {'center_x': 0.5}
+                    halign: 'center'
+                                    
         Button:
             text: 'เข้าสู่ระบบ (Login)'
             size_hint_y: None
@@ -94,12 +116,15 @@
             font_size: '24sp'
             background_color: 0.2, 0.6, 1, 1
             on_release: root.do_login()
-            
+            size_hint_x: 0.2
+            pos_hint: {'center_x': 0.5}
+
         Label:
             id: login_message
-            text: ''
+            text: '---------------------------------------------------------------'
             color: 1, 0, 0, 1
             size_hint_y: 0.2
+                  
 
 <MainTabScreen>:
     name: 'main_tabs'
@@ -125,12 +150,7 @@
                 valign: 'middle'
                 font_size: '18sp'
                 
-            Button:
-                text: 'ออกจากระบบ (Logout)'
-                size_hint_x: None
-                width: 150
-                background_color: 1, 0.3, 0.3, 1
-                on_release: root.do_logout()
+
                 
         TabbedPanel:
             do_default_tab: False

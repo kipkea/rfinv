@@ -30,9 +30,13 @@ class LocationTab(BoxLayout):
             return
             
         tag_id = self.available_tags[selected_code]
-        success, res = api.create_location(tag_id, name, description)
+        print(selected_code, tag_id, name, description)
+        success, res = api.create_location(tag_id, selected_code, name, description)
         
         if success:
             self.ids.loc_name_input.text = ""
             self.ids.loc_detail_input.text = ""
             self.refresh_rfid_list()
+        else:
+            print("เกิดข้อผิดพลาดในการสร้างสถานที่:", res)
+            # หากมี Label บนหน้าจอ สามารถสั่งให้แสดงข้อผิดพลาดตรงนี้ได้
