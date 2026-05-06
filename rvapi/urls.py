@@ -15,7 +15,6 @@ from .views import (
     LocationViewSet, 
     InventoryViewSet, 
     InspectionViewSet,
-    UserMeAPIView,
     login_api,
 
 )
@@ -56,7 +55,6 @@ urlpatterns = [
     path('api/inspections/', InspectionListAPIView.as_view(), name='inspection-list'),
     path('api/inspections/<int:pk>/', InspectionDetailAPIView.as_view(), name='inspection-detail'),
     
-    path('users/me/', UserMeAPIView.as_view(), name='user-me'),
     #path('', include(router.urls)),
     # ... เพิ่ม path ของ Tags และ Location ตามต้องการ
 ]

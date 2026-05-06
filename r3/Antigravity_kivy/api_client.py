@@ -8,7 +8,7 @@ class APIClient:
         self.session = requests.Session()
         self.session.headers.update({"Accept": "application/json"})
         self.auth_token = "94QH9mzL.QfDe1xGDKMwIYzjmdzRVUdCU6RCv78wv"
-        self.api_key = "V7bp82r4-aHWBrTCALKfOAcDTgeIPeZVXaRk6BsZi6g"
+        self.api_key = "UDytWd-_81VD4HrYwAURwvMAEKpuAOZv59irBJIFJW4"
         self.current_user = None
         self.current_user_id = None
         
@@ -61,6 +61,33 @@ class APIClient:
         # บางระบบที่ใช้ Django Rest Framework API Key อาจคาดหวัง Authorization Header ด้วย
         self.session.headers.update({"Authorization": f"Api-Key {self.api_key}"})
         
+        url = f"{self.base_url}/api/login/" 
+        payload = {
+            "api_key": api_key  # ส่ง key ไปแทน username/password
+        }
+
+        try:
+            response = requests.post(url, json=payload, timeout=5)
+
+            print(response)
+            if response.status_code == 200:
+                user_data = response.json()
+                self.current_user = user_data.get("user_name")
+                self.current_user_id = user_data.get("user_id")
+                
+                print(user_data)
+                if not self.current_user or not self.current_user_id:                    
+                    return False, "API /users/me/ ส่งข้อมูลกลับมาไม่ครบ (ขาด username หรือ id)"
+                    
+                    
+                return True, "Login successful"
+            else:
+                # ถ้าไม่ได้ 200 แสดงว่า API ยังมีปัญหา หรือสิทธิ์ยังไม่ถูกต้อง
+                return False, f"ไม่สามารถดึงข้อมูล User ได้ ({response.status_code}): {response.text}"
+        except Exception as e:
+            return False, f"ไม่สามารถเชื่อมต่อกับ /users/me/ ได้: {str(e)}"
+
+
         # ทดสอบการใช้งาน API Key โดยเรียกดู /api/RFIDTags/ แทน /users/ เพราะ /users/ อาจจะติดสิทธิ์ Admin
         url = f"{self.base_url}/api/RFIDTags/"
         try:

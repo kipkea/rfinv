@@ -60,7 +60,8 @@ def login_api(request):
             return JsonResponse({
                 "status": "success",
                 "message": f"Welcome {user.username} (Authenticated via API Key)",
-                "user_id": user.id
+                "user_id": user.id,
+                "user_name": user.username
             }, status=200)
         except UserAPIKey.DoesNotExist:
             return JsonResponse({"status": "error", "message": "Invalid API Key"}, status=401)
@@ -384,22 +385,6 @@ class InspectionDetailAPIView(APIView):
 
 # (คุณสามารถทำ RFIDTagListAPIView และ LocationListAPIView ในลักษณะเดียวกับ Inventory ได้เลยครับ)
 
-
-class UserMeAPIView(APIView):
-    """
-    API พิเศษสำหรับดึงข้อมูลของ User ปัจจุบันที่กำลังล็อกอินอยู่
-    เรียกใช้งานผ่าน GET /users/me/
-    """
-    authentication_classes = [APIKeyAuthentication, JWTAuthentication, SessionAuthentication, BasicAuthentication]
-    permission_classes = [IsAuthenticated]
-
-    @swagger_auto_schema(security=[{'ApiKey': []}, {'Basic': []}, {'Bearer': []}])
-    def get(self, request):
-        if request.user.is_authenticated:
-            serializer = UserSerializer(request.user)
-            return Response(serializer.data)
-        else:
-            return Response({"detail": "ไม่ได้เข้าสู่ระบบ"}, status=status.HTTP_401_UNAUTHORIZED)
 
 
 '''

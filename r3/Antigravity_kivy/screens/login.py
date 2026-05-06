@@ -28,19 +28,22 @@ class LoginScreen(Screen):
         username = self.ids.username_input.text
         credential = self.ids.credential_input.text
         
+        print(api.api_key)
         if mode == 'Password':
             if not username or not credential:
                 self.ids.login_message.text = "กรุณากรอกข้อมูลให้ครบถ้วน"
                 return
             self.ids.login_message.text = "กำลังเข้าสู่ระบบ..."
             success, message = api.login(username, credential)
+
         else:
             if not credential:
                 self.ids.login_message.text = "กรุณากรอก API Key"
                 return
             self.ids.login_message.text = "กำลังตรวจสอบ API Key..."
             success, message = api.login_api_key(credential)
-        
+
+        print(message)  # Debugging output
         if success:
             self.ids.login_message.text = ""
             self.ids.credential_input.text = ""
@@ -50,3 +53,5 @@ class LoginScreen(Screen):
             self.manager.get_screen('main_tabs').initialize_tabs()
         else:
             self.ids.login_message.text = message
+
+        print(message)  # Debugging output
