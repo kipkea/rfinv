@@ -210,5 +210,42 @@ class APIClient:
         except Exception as e:
             return False, f"Error: {str(e)}"
 
+    def get_tag_info(self, rfid_code):
+        # ดึงข้อมูล Tag
+        success, tags = self.get_rfid_tags()
+        if not success: 
+            return False, "Failed to get tags"
+        
+        tag = next((t for t in tags if t.get('rfid_code') == rfid_code), None)
+        if not tag:
+            return True, {"status": "not_found"}
+            
+        if tag.get('is_location'):
+            # ค้นหาสถานที่
+            success, locs = self.get_locations()
+            loc = next((l for l in locs if l.get('rfid_code') == rfid_code), None)
+            
+            # ค้นหาสินค้าทั้งหมดที่อยู่ในสถานที่นี้
+            success, invs = self.get_inventories()
+            items_in_loc = []
+            if success and loc:
+                items_in_loc = [i for i in invs if i.get('current_location_detail') and i['current_location_detail'].get('id') == loc['id']]
+                
+            return True, {
+                "status": "found_location",
+                "tag": tag,
+                "location": loc,
+                "items": items_in_loc
+            }
+        else:
+            # ค้นหาสินค้า
+            success, invs = self.get_inventories()
+            inv = next((i for i in invs if i.get('rfid_code') == rfid_code), None)
+            return True, {
+                "status": "found_inventory",
+                "tag": tag,
+                "inventory": inv
+            }
+
 # A global instance to be used across the app
 api = APIClient()

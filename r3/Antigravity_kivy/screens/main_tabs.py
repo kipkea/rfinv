@@ -5,6 +5,7 @@ from screens.tab_import import ImportTagTab
 from screens.tab_inventory import InventoryTab
 from screens.tab_location import LocationTab
 from screens.tab_inspection import InspectionTab
+from screens.tab_check import CheckTab
 from api_client import api
 
 class MainTabScreen(Screen):

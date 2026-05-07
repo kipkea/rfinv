@@ -52,20 +52,52 @@ if IS_RPI:
     time.sleep(1)
 
     #เปลี่ยนความเร็วเป็น 230400
-    rfcmd(ser,"NA,7")
-    time.sleep(0.2)
-    ser.close()
+    #rfcmd(ser,"NA,7")
+    #time.sleep(0.2)
+    #ser.close()
 
     #เชื่อมต่อใหม่
-    bouadrate = 230400
-    ser = serial.Serial(port,bouadrate,8)
-    ser.port = port
-    ser.baudrate = bouadrate
-    time.sleep(0.2)
+    #bouadrate = 230400
+    #ser = serial.Serial(port,bouadrate,8)
+    #ser.port = port
+    #ser.baudrate = bouadrate
+    #time.sleep(0.2)
 
     sys_cmd(ser, cmd_Reader_Power_Max)
 else:
     ser = None
+
+def read_single_tag(timeout=1.0):
+    """
+    ฟังก์ชันสำหรับอ่านค่า RFID เพียง 1 รหัส
+    คืนค่า: รหัส RFID (string) หรือ None ถ้าอ่านไม่เจอในเวลาที่กำหนด
+    """
+    if not IS_RPI or ser is None:
+        print("Running on Windows/Mac - Mocking single RFID read.")
+        import random
+        time.sleep(0.1)
+        return "E200" + "".join([random.choice('0123456789ABCDEF') for _ in range(20)])
+        
+    start_time = time.time()
+    while (time.time() - start_time) < timeout:
+        ser.reset_output_buffer()
+        ser.write(cmd_Q_EPC) # ใช้คำสั่งอ่านครั้งเดียว
+        time.sleep(0.1)
+        
+        try:
+            while ser.in_waiting > 0:
+                raw_line = ser.read_until(b'\x0A')
+                line = raw_line.decode('ascii', errors='ignore').strip()
+                
+                idx = line.find('E2')
+                if idx != -1 and len(line) > 28:
+                    return line[idx:] # คืนค่ารหัสที่อ่านได้ทันที
+        except Exception:
+            pass
+            
+        time.sleep(0.1)
+        
+    return None
 
 class RFCounter:
     def __init__(self, target_count=1):
@@ -174,32 +206,42 @@ class RFCounter:
 
     def _scan_thread(self, callback):
         print("--- เริ่มการอ่าน RFID แบบต่อเนื่อง ---")
+        #print(f"scaned_data: {self.scanned_data}")
         while self.is_running:
             ser.reset_output_buffer()
             ser.write(cmd_MQ_EPC)
             time.sleep(0.1)
             try:
-                while self.is_running:
-                    if ser.in_waiting > 0:
-                        raw_line = ser.read_until(b'\x0A')
-                        line = raw_line.decode('ascii', errors='ignore').strip()
-                        if len(line) == 1:
-                            break 
-                        idx = line.find('E2')
-                        if idx != -1 and len(line) > 28:
-                            code = line  
-                            self.count_cmd_loop += 1
-                            if code not in self.scanned_data:            
-                                self.current_count += 1
-                                self.scanned_data.append(code)
-                                print(f"รับข้อมูลใหม่: {code}")
-                                if callback:
-                                    callback(code)
-                    else:
-                        break
+                while True:
+                    try:                       
+                        #print("Read loop... waiting for tags...")
+                        if ser.in_waiting > 0:
+                            raw_line = ser.read_until(b'\x0A')
+                            print("Raw Line: ", raw_line)   
+                            line = raw_line.decode('ascii', errors='ignore').strip()
+                            if len(line) == 1:
+                                break 
+                            idx = line.find('E2')
+                            if idx != -1 and len(line) > 28:
+                                #code = line  
+                                code=line[idx:]
+                                self.count_cmd_loop += 1
+                                if code not in self.scanned_data:            
+                                    self.current_count += 1
+                                    self.scanned_data.append(code)
+                                    print(f"รับข้อมูลใหม่: {code}")
+                                    if callback:
+                                        callback(code)
+                        else:
+                            #print("No tags detected in this cycle.")
+                            break
+                    except UnicodeDecodeError:
+                        print("UnicodeDecodeError encountered, skipping line.")
+                        pass
+
             except Exception:
                 pass
-            time.sleep(0.01)
+            time.sleep(0.1)
 
     def show_summary(self):
         """คำนวณและแสดงผลลัพธ์"""

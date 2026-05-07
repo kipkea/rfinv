@@ -152,7 +152,7 @@
         TabbedPanel:
             do_default_tab: False
             tab_pos: 'top_mid'
-            tab_width: self.width / 4
+            tab_width: self.width / 5
         
             TabbedPanelItem:
                 text: '1. นำเข้า RFID'
@@ -173,6 +173,12 @@
                 text: '4. ตรวจสอบสินค้า'
                 InspectionTab:
                     id: inspection_tab
+
+            TabbedPanelItem:
+                text: '5. ตรวจสอบ'
+                font_name: 'Kanit'
+                CheckTab:
+                    id: check_tab                    
 
 <ImportTagTab>:
     orientation: 'vertical'

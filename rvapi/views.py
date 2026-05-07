@@ -106,11 +106,6 @@ class LocationViewSet(viewsets.ModelViewSet):
         else:
             location = serializer.save()
             
-        # อัปเดตสถานะของ RFID Tag ว่าถูกนำไปเป็นสถานที่แล้ว
-        if location.rfid_tag:
-            location.rfid_tag.is_location = True
-            location.rfid_tag.save()
-
 class InventoryViewSet(viewsets.ModelViewSet):
     queryset = Inventory.objects.all().prefetch_related('evidence_images')
     serializer_class = InventorySerializer
@@ -223,10 +218,6 @@ class LocationListAPIView(APIView):
             else:
                 location = serializer.save()
                 
-            # อัปเดตสถานะของ RFID Tag ให้เป็น Location
-            if location.rfid_tag:
-                location.rfid_tag.is_location = True
-                location.rfid_tag.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

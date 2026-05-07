@@ -55,6 +55,13 @@ class Location(models.Model):
 
     def __str__(self):
         return self.name
+        
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        # อัปเดตสถานะของ RFID Tag ให้เป็น Location อัตโนมัติ (ครอบคลุมการสร้างผ่าน Django Admin ด้วย)
+        if self.rfid_tag and not self.rfid_tag.is_location:
+            self.rfid_tag.is_location = True
+            self.rfid_tag.save(update_fields=['is_location'])
     
 class Inventory(models.Model): #res
     #rfid_tag = models.OneToOneField(RFIDTag, on_delete=models.CASCADE)
