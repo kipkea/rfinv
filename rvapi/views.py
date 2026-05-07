@@ -213,6 +213,7 @@ class LocationListAPIView(APIView):
         serializer = LocationSerializer(Locations, many=True)
         return Response(serializer.data)
 
+
     def post(self, request):
         serializer = LocationSerializer(data=request.data)
         if serializer.is_valid():
@@ -268,9 +269,20 @@ class RFIDTagListAPIView(APIView):
     - POST: สร้างTagใหม่
     """
     def get(self, request):
-        RFIDTags = RFIDTag.objects.all()
+        queryset = RFIDTag.objects.all()
+        
+        # 1. กรองข้อมูลว่าต้องการ Tag ของ Inventory (false) หรือ Location (true)
+        is_location = request.query_params.get('is_location')
+        if is_location is not None:
+            is_loc_bool = str(is_location).lower() in ['true', '1', 't', 'y', 'yes']
+            queryset = queryset.filter(is_location=is_loc_bool)
+            
+        # 2. กรองเฉพาะ RFID Tag ที่ยังไม่ถูกผูกกับสินค้าชิ้นอื่น (is_used=false)
+        is_used = request.query_params.get('is_used')
+        if is_used is not None and str(is_used).lower() in ['false', '0', 'n', 'no']:
+            queryset = queryset.filter(inventory_profile__isnull=True)
            
-        serializer = RFIDTagSerializer(RFIDTags, many=True)
+        serializer = RFIDTagSerializer(queryset, many=True)
         return Response(serializer.data)
 
     def post(self, request):
@@ -466,48 +478,5 @@ class InspectionViewSet(viewsets.ModelViewSet):
     def missing_items(self, request):
         threshold_date = timezone.now() - timezone.timedelta(days=30)
         #print(threshold_date)
-        missing_items = Inventory.objects.filter(
-            Q(rfid_tag__is_location=False) & 
-            ~Q(rfid_tag__inspection__inspected_at__gte=threshold_date)
-        ).distinct()
-        serializer = Inventory_SL(missing_items, many=True)
-        return Response(serializer.data)
-'''   
-     
-         
+        missing_items = I
 '''
-class LocationView(APIView):  
-    permission_classes = [ HasAPIKey | IsAuthenticated ]
-
-    def get(self, request, id):    
-        result = Location.objects.get(Loc_ID=id)        
-        if id:  
-            serializers = rfinv_locSL(result)  
-            return Response({'success': 'success', "items":serializers.data}, status=200)  
-        
-        result = rfinv_loc.objects.all()  
-        serializers = rfinv_locSL(result, many=True)  
-        return Response({'status': 'success', "items":serializers.data}, status=200)  
-  
-    def post(self, request):  
-        serializer = rfinv_locSL(data=request.data)  
-        if serializer.is_valid():  
-            serializer.save()  
-            return Response({"status": "success", "data": serializer.data}, status=status.HTTP_200_OK)  
-        else:  
-            return Response({"status": "error", "data": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)  
-  
-    def patch(self, request, id):  
-        result = rfinv_loc.objects.get(Loc_ID=id)  
-        serializer = rfinv_locSL(result, data = request.data, partial=True)  
-        if serializer.is_valid():  
-            serializer.save()  
-            return Response({"status": "success", "data": serializer.data})  
-        else:  
-            return Response({"status": "error", "data": serializer.errors})  
-  
-    def delete(self, request, Loc_ID=None):  
-        result = get_object_or_404(rfinv_loc, Loc_ID=id)  
-        result.delete()  
-        return Response({"status": "success", "data": "Record Deleted"})
-'''        

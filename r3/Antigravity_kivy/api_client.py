@@ -155,6 +155,7 @@ class APIClient:
         if self.current_user_id:
             data["registered_by"] = self.current_user_id
             
+        print(data)
         try:
             if image_path and os.path.exists(image_path):
                 with open(image_path, 'rb') as f:

@@ -152,11 +152,19 @@ class MainScreen(Screen):
 
     def refresh_tag_lists(self):
         try:
-            tags = App.get_running_app().client.get_tags(params={"is_location": False})
-            if isinstance(tags, dict) and "results" in tags:
-                tags = tags["results"]
-            self.inventory_codes = [tag["rfid_code"] for tag in tags if not tag.get("is_location")]
-            self.location_codes = [tag["rfid_code"] for tag in tags if tag.get("is_location")]
+            client = App.get_running_app().client
+            
+            # 1. โหลด Tag สำหรับนำไปใช้ลงทะเบียน Inventory (ต้องไม่ใช่ Location และต้องยังไม่ถูกใช้)
+            inv_tags = client.get_tags(params={"is_location": "false", "is_used": "false"})
+            if isinstance(inv_tags, dict) and "results" in inv_tags:
+                inv_tags = inv_tags["results"]
+            self.inventory_codes = [tag["rfid_code"] for tag in inv_tags]
+
+            # 2. โหลด Tag สำหรับระบุ Location (ต้องเป็น Location)
+            loc_tags = client.get_tags(params={"is_location": "true"})
+            if isinstance(loc_tags, dict) and "results" in loc_tags:
+                loc_tags = loc_tags["results"]
+            self.location_codes = [tag["rfid_code"] for tag in loc_tags]
         except Exception as exc:
             self.inventory_status = f"Cannot load tags: {exc}"
 
