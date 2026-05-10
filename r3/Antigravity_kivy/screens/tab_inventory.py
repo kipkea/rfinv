@@ -182,7 +182,17 @@ class InventoryTab(BoxLayout):
             return # Should show error
             
         tag_id = self.available_tags[selected_code]
-        success, res = api.create_inventory(tag_id, name, detail, self.selected_image_path)
+        
+        # ตรวจสอบว่าเป็นการอัปเดต หรือ สร้างใหม่
+        if selected_code in self.inventories:
+            # Update (PATCH)
+            inv_id = self.inventories[selected_code].get('id')
+            print(f"Updating Inventory: id={inv_id}, tag_id={tag_id}, name={name}, detail={detail}, image_path={self.selected_image_path}")
+            success, res = api.update_inventory(inv_id, tag_id, selected_code, name, detail, self.selected_image_path)
+        else:
+            # Create (POST)
+            print(f"Submitting Inventory: tag_id={tag_id}, name={name}, detail={detail}, image_path={self.selected_image_path}")
+            success, res = api.create_inventory(tag_id, selected_code, name, detail, self.selected_image_path)
         
         if success:
             self.ids.inv_name_input.text = ""

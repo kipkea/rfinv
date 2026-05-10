@@ -71,11 +71,16 @@ def login_api(request):
         user = authenticate(username=username, password=password)
         if user is not None:
             print(f"User {username} authenticated successfully with username/password.")
+            # ค้นหาหรือสร้าง API Key เพื่อส่งกลับให้แอปพลิเคชันใช้ยืนยันตัวตน
+            api_key_obj = UserAPIKey.objects.filter(user=user).first()
+            if not api_key_obj:
+                api_key_obj = UserAPIKey.objects.create(user=user)
             return JsonResponse({
                 "status": "success",
                 "message": f"Welcome {user.username}",
                 "user_id": user.id,
-                "user_name": user.username
+                "user_name": user.username,
+                "key": api_key_obj.key
             }, status=200)
         else:
             return JsonResponse({"status": "error", "message": "Invalid Credentials"}, status=401)
@@ -146,7 +151,8 @@ class InspectionViewSet(viewsets.ModelViewSet):
 # --- 1. ตัวอย่างแบบ CRUD ปกติ (InventoryImage) ---
 
 class InventoryImageListAPIView(APIView):
-    permission_classes = [ HasAPIKey | IsAuthenticatedOrReadOnly | AllowAny]
+    authentication_classes = [APIKeyAuthentication, SessionAuthentication, BasicAuthentication]
+    permission_classes = [IsAuthenticatedOrReadOnly | AllowAny]
     """
     รองรับ:
     - GET: ดึงรายการTagทั้งหมด (รองรับ ?location_id=...)
@@ -168,7 +174,8 @@ class InventoryImageListAPIView(APIView):
 
 
 class InventoryImageDetailAPIView(APIView):
-    permission_classes = [ HasAPIKey | IsAuthenticatedOrReadOnly]
+    authentication_classes = [APIKeyAuthentication, SessionAuthentication, BasicAuthentication]
+    permission_classes = [IsAuthenticatedOrReadOnly]
     """
     รองรับ: GET (ดู), PUT (แก้), DELETE (ลบ) รายตัว
     """
@@ -196,7 +203,8 @@ class InventoryImageDetailAPIView(APIView):
 # --- 1. ตัวอย่างแบบ CRUD ปกติ (Location) ---
 
 class LocationListAPIView(APIView):
-    permission_classes = [ HasAPIKey | IsAuthenticatedOrReadOnly | AllowAny]
+    authentication_classes = [APIKeyAuthentication, SessionAuthentication, BasicAuthentication]
+    permission_classes = [IsAuthenticatedOrReadOnly | AllowAny]
     """
     รองรับ:
     - GET: ดึงรายการTagทั้งหมด (รองรับ ?location_id=...)
@@ -224,7 +232,8 @@ class LocationListAPIView(APIView):
 
 
 class LocationDetailAPIView(APIView):
-    permission_classes = [ HasAPIKey | IsAuthenticatedOrReadOnly]
+    authentication_classes = [APIKeyAuthentication, SessionAuthentication, BasicAuthentication]
+    permission_classes = [IsAuthenticatedOrReadOnly]
     """
     รองรับ: GET (ดู), PUT (แก้), DELETE (ลบ) รายตัว
     """
@@ -244,6 +253,14 @@ class LocationDetailAPIView(APIView):
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    def patch(self, request, pk):
+        Locations = self.get_object(pk)
+        serializer = LocationSerializer(Locations, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
     def delete(self, request, pk):
         Locations = self.get_object(pk)
         Locations.delete()
@@ -253,7 +270,8 @@ class LocationDetailAPIView(APIView):
 # --- 1. ตัวอย่างแบบ CRUD ปกติ (RFIDTag) ---
 
 class RFIDTagListAPIView(APIView):
-    permission_classes = [ HasAPIKey | IsAuthenticatedOrReadOnly | AllowAny]
+    authentication_classes = [APIKeyAuthentication, SessionAuthentication, BasicAuthentication]
+    permission_classes = [IsAuthenticatedOrReadOnly | AllowAny]
     """
     รองรับ:
     - GET: ดึงรายการTagทั้งหมด (รองรับ ?location_id=...)
@@ -286,7 +304,8 @@ class RFIDTagListAPIView(APIView):
 
 
 class RFIDTagDetailAPIView(APIView):
-    permission_classes = [ HasAPIKey | IsAuthenticatedOrReadOnly]
+    authentication_classes = [APIKeyAuthentication, SessionAuthentication, BasicAuthentication]
+    permission_classes = [IsAuthenticatedOrReadOnly]
     """
     รองรับ: GET (ดู), PUT (แก้), DELETE (ลบ) รายตัว
     """
@@ -306,6 +325,14 @@ class RFIDTagDetailAPIView(APIView):
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    def patch(self, request, pk):
+        RFIDTags = self.get_object(pk)
+        serializer = RFIDTagSerializer(RFIDTags, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
     def delete(self, request, pk):
         RFIDTags = self.get_object(pk)
         RFIDTags.delete()
@@ -314,7 +341,8 @@ class RFIDTagDetailAPIView(APIView):
 # --- 1. ตัวอย่างแบบ CRUD ปกติ (Inventory) ---
 
 class InventoryListAPIView(APIView):
-    permission_classes = [ HasAPIKey | IsAuthenticatedOrReadOnly | AllowAny]
+    authentication_classes = [APIKeyAuthentication, SessionAuthentication, BasicAuthentication]
+    permission_classes = [IsAuthenticatedOrReadOnly | AllowAny]
     """
     รองรับ:
     - GET: ดึงรายการสินค้าทั้งหมด (รองรับ ?location_id=...)
@@ -339,7 +367,8 @@ class InventoryListAPIView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class InventoryDetailAPIView(APIView):
-    permission_classes = [ HasAPIKey | IsAuthenticatedOrReadOnly]
+    authentication_classes = [APIKeyAuthentication, SessionAuthentication, BasicAuthentication]
+    permission_classes = [IsAuthenticatedOrReadOnly]
     """
     รองรับ: GET (ดู), PUT (แก้), DELETE (ลบ) รายตัว
     """
@@ -359,6 +388,14 @@ class InventoryDetailAPIView(APIView):
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    def patch(self, request, pk):
+        inventory = self.get_object(pk)
+        serializer = InventorySerializer(inventory, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
     def delete(self, request, pk):
         inventory = self.get_object(pk)
         inventory.delete()
@@ -368,7 +405,8 @@ class InventoryDetailAPIView(APIView):
 # --- 2. ตัวอย่างแบบ Logic ซับซ้อน (Inspection / ตรวจนับ) ---
 
 class InspectionListAPIView(APIView):
-    permission_classes = [ HasAPIKey | IsAuthenticatedOrReadOnly]
+    authentication_classes = [APIKeyAuthentication, SessionAuthentication, BasicAuthentication]
+    permission_classes = [IsAuthenticatedOrReadOnly]
     def get(self, request):
         """ดูประวัติการตรวจสอบทั้งหมด"""
         inspections = Inspection.objects.all()
@@ -409,7 +447,8 @@ class InspectionListAPIView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class InspectionDetailAPIView(APIView):
-    permission_classes = [ HasAPIKey | IsAuthenticatedOrReadOnly]
+    authentication_classes = [APIKeyAuthentication, SessionAuthentication, BasicAuthentication]
+    permission_classes = [IsAuthenticatedOrReadOnly]
     
     def get(self, request, pk):
         """ดูรายละเอียดการตรวจสอบรายครั้ง"""

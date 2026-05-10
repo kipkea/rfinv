@@ -10,14 +10,15 @@
 <SpinnerOption>:
     font_name: 'Kanit'
 
-<BoxLayout>:
-    canvas.after:
-        Color:
-            rgba: 1, 0, 0, 1  # สีแดง (Red, Green, Blue, Alpha)
-        Line:
-            rectangle: self.x, self.y, self.width, self.height
-            width: 1          # ความหนาของเส้น
-
+# เพิ่มเส้นขอบสีแดงให้กับทุก BoxLayout เพื่อช่วยในการดีบักและดูโครงสร้างของ UI
+#<BoxLayout>:
+#    canvas.after:
+#        Color:
+#            rgba: 1, 0, 0, 1  # สีแดง (Red, Green, Blue, Alpha)
+#        Line:
+#            rectangle: self.x, self.y, self.width, self.height
+#            width: 1          # ความหนาของเส้น
+#    # เพิ่มเส้นขอบสีแดงให้กับทุก GridLayout
 
 <LoginScreen>:
     name: 'login'
@@ -152,7 +153,7 @@
         TabbedPanel:
             do_default_tab: False
             tab_pos: 'top_mid'
-            tab_width: self.width / 5
+            tab_width: self.width / 6
         
             TabbedPanelItem:
                 text: '1. นำเข้า RFID'
@@ -178,7 +179,13 @@
                 text: '5. ตรวจสอบ'
                 font_name: 'Kanit'
                 CheckTab:
-                    id: check_tab                    
+                    id: check_tab               
+
+            TabbedPanelItem:
+                text: '6. Dashboard'
+                font_name: 'Kanit'
+                DashboardTab:
+                    id: dashboard_tab                    
 
 <ImportTagTab>:
     orientation: 'vertical'
@@ -396,6 +403,14 @@
     padding: 20
     spacing: 10
     
+    Button:
+        id: ins_toggle_scan_btn
+        text: 'RFID Scan'
+        size_hint_y: 0.1
+        font_size: self.height * 0.4
+        background_color: 0.2, 0.6, 1, 1
+        on_release: app.screens['main_tabs'].ids.inspection_tab.toggle_scanning()  
+            
     Label:
         text: 'ตรวจสอบสินค้า (Inspection)'
         font_size: self.height * 0.6
@@ -464,3 +479,5 @@
         font_size: self.height * 0.4
         background_color: 0.2, 0.6, 1, 1
         on_release: app.screens['main_tabs'].ids.inspection_tab.submit_inspection()
+
+     

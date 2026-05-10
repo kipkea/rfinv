@@ -48,6 +48,7 @@ class APIClient:
                 elif "key" in data:
                     self.api_key = data["key"]
                     self.session.headers.update({"X-API-KEY": self.api_key})
+                    self.session.headers.update({"Authorization": f"Api-Key {self.api_key}"})
                     print(f"API Key: {self.api_key}")  
                 print(self.current_user, self.current_user_id)              
                 return True, "Login successful"
@@ -145,17 +146,18 @@ class APIClient:
         except Exception as e:
             return False, f"Error: {str(e)}"
 
-    def create_inventory(self, rfid_tag_id, name, detail="", image_path=None):
+    def create_inventory(self, rfid_tag_id, rfid_code, name, detail="", image_path=None):
         url = f"{self.base_url}/api/inventory/"
         data = {
             "rfid_tag": rfid_tag_id,
+            "rfid_code": rfid_code,
             "name": name,
             "detail": detail
         }
         if self.current_user_id:
             data["registered_by"] = self.current_user_id
             
-        print(data)
+        print(f"Creating inventory with data: {data} and image_path: {image_path}")
         try:
             if image_path and os.path.exists(image_path):
                 with open(image_path, 'rb') as f:
@@ -163,6 +165,7 @@ class APIClient:
                     response = self.session.post(url, data=data, files=files, timeout=10)
             else:
                 response = self.session.post(url, json=data, timeout=5)
+                print(f"Response from server: {response.status_code} - {response.text}")
                 
             if response.status_code in [200, 201]:
                 return True, response.json()
@@ -170,7 +173,36 @@ class APIClient:
         except Exception as e:
             return False, f"Error: {str(e)}"
 
-    def submit_inspection(self, location_id, found_inventory_ids):
+    def update_inventory(self, inventory_id, rfid_tag_id, rfid_code, name, detail="", image_path=None, current_location=None):
+        url = f"{self.base_url}/api/inventory/{inventory_id}/"
+        data = {
+            "rfid_tag": rfid_tag_id,
+            "rfid_code": rfid_code,
+            "name": name,
+            "detail": detail
+        }
+        if current_location is not None:
+            data["current_location"] = current_location
+        if self.current_user_id:
+            data["registered_by"] = self.current_user_id
+            
+        print(f"Updating inventory with data: {data} and image_path: {image_path}")
+        try:
+            if image_path and os.path.exists(image_path):
+                with open(image_path, 'rb') as f:
+                    files = {'image': f}
+                    response = self.session.patch(url, data=data, files=files, timeout=10)
+            else:
+                response = self.session.patch(url, json=data, timeout=5)
+                print(f"Response from server: {response.status_code} - {response.text}")
+                
+            if response.status_code in [200, 201]:
+                return True, response.json()
+            return False, f"Failed to update inventory: {response.text}"
+        except Exception as e:
+            return False, f"Error: {str(e)}"
+
+    def submit_inspection(self, location_id, found_inventory_ids, scanned_rfid_codes=None):
         """
         Submits an inspection to /api/inspections/
         """
@@ -179,6 +211,8 @@ class APIClient:
             "location": location_id,
             "found_inventories": found_inventory_ids
         }
+        if scanned_rfid_codes:
+            payload["scanned_rfid_codes"] = scanned_rfid_codes
         if self.current_user_id:
             payload["inspected_by"] = self.current_user_id
             

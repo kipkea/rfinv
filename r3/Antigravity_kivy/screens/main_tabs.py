@@ -6,6 +6,7 @@ from screens.tab_inventory import InventoryTab
 from screens.tab_location import LocationTab
 from screens.tab_inspection import InspectionTab
 from screens.tab_check import CheckTab
+from screens.tab_dashboard import DashboardTab
 from api_client import api
 
 class MainTabScreen(Screen):
@@ -20,6 +21,8 @@ class MainTabScreen(Screen):
             self.ids.location_tab.refresh_rfid_list()
         if 'inspection_tab' in self.ids:
             self.ids.inspection_tab.refresh_data()
+        if 'dashboard_tab' in self.ids:
+            self.ids.dashboard_tab.refresh_data()
             
     def do_logout(self):
         # Clear API context
