@@ -202,7 +202,15 @@ class CheckTab(BoxLayout):
         
         self.ids.result_container.clear_widgets()
         if success:
-            msg = f"ลงทะเบียน Tag สำเร็จ! โปรดไปที่แท็บ '{'สถานที่' if reg_type == 'location' else 'สินค้า'}' เพื่อกรอกข้อมูลต่อ"
+            if reg_type == 'location':
+                tag_id = res.get('id')
+                loc_success, loc_res = api.create_location(tag_id, rfid_code, f"สถานที่ใหม่ {rfid_code}", "สร้างอัตโนมัติจากหน้าจอตรวจสอบ")
+                if loc_success:
+                    msg = f"ลงทะเบียนสถานที่ใหม่สำเร็จ!\n(รหัส: {rfid_code})"
+                else:
+                    msg = f"สร้าง Tag สำเร็จแต่สร้างสถานที่ล้มเหลว: {loc_res}"
+            else:
+                msg = f"ลงทะเบียน Tag สำเร็จ! โปรดไปที่แท็บ 'สินค้า' เพื่อกรอกข้อมูลต่อ"
             self.ids.result_container.add_widget(Label(text=msg, font_name='Kanit', size_hint_y=None, height=40, color=(0, 1, 0, 1)))
         else:
             self.ids.result_container.add_widget(Label(text=f"เกิดข้อผิดพลาดในการลงทะเบียน: {res}", font_name='Kanit', size_hint_y=None, height=40, color=(1, 0, 0, 1)))
