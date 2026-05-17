@@ -61,6 +61,7 @@ INSTALLED_APPS = [
     'drf_yasg',
     'corsheaders',
     #'rest_framework.authtoken',
+    'drf_spectacular',
 ]
 
 MIDDLEWARE = [
@@ -186,6 +187,7 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.AllowAny',     
     ],
     #'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 
 }
 
