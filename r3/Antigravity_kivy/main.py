@@ -19,7 +19,12 @@ key = os.getenv("key")
 #telegram 
 bot_token = os.getenv("bot_token")
 bot_id = os.getenv("bot_id")
-######################################
+
+print("APISERVER:", APISERVER)
+print("key:", key)
+print("bot_token:", bot_token)
+print("bot_id:", bot_id)
+#################################
 
 # Register Thai font
 font_path = os.path.join('fonts', 'Kanit-Regular.ttf')
