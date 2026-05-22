@@ -10,48 +10,33 @@ User = get_user_model()
 # Create your models here.
     
 class RFIDTag(models.Model):
-    #RFID = models.CharField(max_length=100, unique=True)
     rfid_code = models.CharField(max_length=100, unique=True, db_index=True)
     is_location = models.BooleanField(default=False)
 
     # เก็บข้อมูลการลงทะเบียน Tag
-    #recorded_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
-    #recorded_at = models.DateTimeField(auto_now_add=True)
     registered_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='registered_tags')
     registered_at = models.DateTimeField(auto_now_add=True)    
 
-    class Meta:
-        #db_table = "RFIDTag"
-        #ordering = ('RFID',)     
+    class Meta:   
         db_table = "rfid_tag"
         verbose_name = "RFID Tag"
         ordering = ('rfid_code',)  
         
     def __str__(self):
-        #return self.RFID
         return f"{self.rfid_code} ({'Location' if self.is_location else 'Item'})"
 
     
 class Location(models.Model):    
-    #rfid_tag = models.OneToOneField(RFIDTag, on_delete=models.CASCADE)
-    #name = models.CharField(max_length=255, blank = True, null = True)
-    
     rfid_tag = models.OneToOneField(RFIDTag, on_delete=models.CASCADE, related_name='location_profile')
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
-   
-       
-    #recorded_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
-    #recorded_at = models.DateTimeField(auto_now_add=True)
+
     # ใครเป็นคนสร้าง Location นี้ในระบบ
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     
-
     class Meta:
-        #db_table = "Location"
         db_table = "location"
-        #ordering = ('rfid_tag',)        
 
     def __str__(self):
         return self.name
@@ -64,31 +49,22 @@ class Location(models.Model):
             self.rfid_tag.save(update_fields=['is_location'])
     
 class Inventory(models.Model): #res
-    #rfid_tag = models.OneToOneField(RFIDTag, on_delete=models.CASCADE)
-    #name = models.CharField(max_length=255)
     rfid_tag = models.OneToOneField(RFIDTag, on_delete=models.CASCADE, related_name='inventory_profile')
     name = models.CharField(max_length=255)
     detail = models.TextField(blank=True, null=True)    
     
     # รูปภาพหลักของสินค้า (Profile Image) ตามที่โจทย์ระบุว่าตอนลงทะเบียนมีรูปด้วย
     image = models.ImageField(upload_to='inventory_profiles/', blank=True, null=True)
-       
-    #recorded_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
-    #recorded_at = models.DateTimeField(auto_now_add=True)
+
     # ใครเป็นคนลงทะเบียนสินค้านี้
     registered_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     registered_at = models.DateTimeField(auto_now_add=True)
     
     #เอาไว้เก็บสถานที่เก็บสุดท้าย
-    #Inv_Last_Check_Time = models.DateTimeField(auto_now_add=True, blank = True, null = True)
-    #Inv_Last_Loc = models.ForeignKey(Location, on_delete=models.SET_NULL, null=True, blank = True,)
     last_seen_at = models.DateTimeField(auto_now=True, help_text="เวลาล่าสุดที่ระบบพบสินค้านี้")
     current_location = models.ForeignKey(Location, on_delete=models.SET_NULL, null=True, blank=True, related_name='current_items')
 
-
     class Meta:
-        #db_table = ('Inventory',)
-        #ordering = ('rfid_tag',)    
         db_table = 'inventory'
         ordering = ('name',)            
 
@@ -109,15 +85,6 @@ class InventoryImage(models.Model):
     latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
     longitude = models.DecimalField(max_digits=10, decimal_places=6, null=True, blank=True)
 
-    
-    #inventory = models.ForeignKey(Inventory, on_delete=models.CASCADE, related_name='images')
-    #image = models.ImageField(upload_to='inventory_images/%Y/%m/%d/')
-    #location = models.ForeignKey(Location, on_delete=models.SET_NULL, null=True, blank=True)
-    #photographed_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
-    #photographed_at = models.DateTimeField(default=timezone.now)
-    #latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True, help_text="GPS Latitude")
-    #longitude = models.DecimalField(max_digits=10, decimal_places=6, null=True, blank=True, help_text="GPS Longitude")
-
     class Meta:
         ordering = ['-photographed_at']
 
@@ -125,22 +92,11 @@ class InventoryImage(models.Model):
         return f"Image for {self.inventory.name} taken at {self.photographed_at.strftime('%Y-%m-%d')}"
 
 class Inspection(models.Model):
-    """
-    บันทึกการตรวจสอบสินทรัพย์ ณ สถานที่และเวลาที่กำหนด
-    """
     # ระบุสถานที่ที่ทำการตรวจสอบอย่างชัดเจน ป้องกันการลบสถานที่หากมีการอ้างอิงถึง
-    #location = models.ForeignKey(Location, on_delete=models.PROTECT, help_text="สถานที่ที่ทำการตรวจสอบ")
     location = models.ForeignKey(Location, on_delete=models.PROTECT, related_name='inspections')
-    
-    
-    
 
     # รายการสินทรัพย์ทั้งหมดที่พบในการตรวจสอบครั้งนี้
-    #inspected_inventories = models.ManyToManyField(Inventory, related_name='inspections', blank=True)
     inspected_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
-
-    # ผู้ที่ทำการตรวจสอบ
-    #inspected_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     
     # วันที่และเวลาที่ตรวจสอบ (ใช้ default=timezone.now เพื่อให้สามารถแก้ไขย้อนหลังได้)
     inspected_at = models.DateTimeField(default=timezone.now)
@@ -152,14 +108,11 @@ class Inspection(models.Model):
     total_found = models.IntegerField(default=0, help_text="จำนวนที่เจอจริง")
     total_missing = models.IntegerField(default=0, help_text="จำนวนที่หาย")
     
-
     class Meta:
         # เรียงลำดับจากรายการล่าสุดไปเก่าสุด
         ordering = ('-inspected_at',)
 
     def __str__(self):
-        #location_name = self.location.name if self.location else "N/A"
-        #return f"Inspection at {location_name} on {self.inspected_at.strftime('%Y-%m-%d')}"
         return f"Check {self.location.name} at {self.inspected_at.strftime('%Y-%m-%d %H:%M')}"
     
     def calculate_results(self):
