@@ -7,6 +7,7 @@ from rest_framework import routers, serializers, viewsets
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
+from rvapi import web_views
 
 
 # Serializers define the API representation.
@@ -48,6 +49,12 @@ schema_view = get_schema_view(
 
 
 urlpatterns = [
+    # Web MVT Routes
+    path('web/login/', web_views.web_login, name='web_login'),
+    path('web/logout/', web_views.web_logout, name='web_logout'),
+    path('web/', web_views.dashboard, name='web_dashboard'),
+    path('web/inventory/', web_views.inventory_list, name='web_inventory'),
+
     path('', include(router.urls)),
     path('admin/', admin.site.urls),
     path('', include('rvapi.urls', namespace='rvapi')), 

@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RFInv Web Dashboard</title>
+    <!-- Bootstrap 5 CSS สำหรับโครงสร้างและ Responsive -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome สำหรับไอคอนต่างๆ -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts (Kanit) เพื่อให้อ่านภาษาไทยได้สวยงามเหมือนในแอป Kivy -->
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Kanit', sans-serif;
+            background-color: #f4f6f9;
+            overflow-x: hidden;
+        }
+        /* Sidebar Styles (แถบเมนูด้านข้าง) */
+        #sidebar {
+            min-width: 260px;
+            max-width: 260px;
+            min-height: 100vh;
+            transition: all 0.3s ease-in-out;
+            background: #2c3e50;
+            color: #ecf0f1;
+            z-index: 1000;
+        }
+        #sidebar.collapsed {
+            margin-left: -260px;
+        }
+        #sidebar .sidebar-header {
+            padding: 20px;
+            background: #1a252f;
+        }
+        #sidebar ul li a {
+            padding: 15px 20px;
+            font-size: 1.1em;
+            display: block;
+            color: rgba(255,255,255,0.7);
+            text-decoration: none;
+            transition: 0.2s;
+        }
+        #sidebar ul li a:hover, #sidebar ul li.active > a {
+            color: #fff;
+            background: #34495e;
+            border-left: 4px solid #3498db;
+        }
+        
+        /* Main Content */
+        #content {
+            width: 100%;
+            padding: 20px;
+            min-height: 100vh;
+            transition: all 0.3s;
+        }
+        .wrapper {
+            display: flex;
+            width: 100%;
+            align-items: stretch;
+        }
+        
+        /* Custom Cards */
+        .card-custom {
+            border-radius: 12px;
+            border: none;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        
+        /* Auth Page (หน้า Login) */
+        #auth-page {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #74ebd5 0%, #ACB6E5 100%);
+        }
+        .login-card {
+            width: 100%;
+            max-width: 400px;
+            padding: 2rem;
+            background: white;
+        }
+        .hidden { display: none !important; }
+        
+        @media (max-width: 768px) {
+            #sidebar {
+                position: absolute;
+                margin-left: -260px;
+            }
+            #sidebar.mobile-show {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- หน้า Login -->
+<div id="auth-page">
+    <div class="card card-custom login-card shadow-lg">
+        <div class="text-center mb-4">
+            <h2 class="text-primary"><i class="fas fa-boxes"></i></h2>
+            <h4>RFInv Web System</h4>
+            <p class="text-muted">เข้าสู่ระบบเพื่อจัดการคลังสินค้า</p>
+        </div>
+        <div id="login-error" class="alert alert-danger hidden"></div>
+        <form id="login-form">
+            <div class="mb-3">
+                <label class="form-label">Username (หรือ API Key)</label>
+                <input type="text" class="form-control" id="username" placeholder="กรอกชื่อผู้ใช้..." required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Password</label>
+                <input type="password" class="form-control" id="password" placeholder="เว้นว่างไว้หากใช้ API Key">
+            </div>
+            <button type="submit" class="btn btn-primary w-100 py-2 mt-2">
+                <i class="fas fa-sign-in-alt"></i> Login
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- หน้า Main Web App -->
+<div class="wrapper hidden" id="main-app">
+    <!-- Sidebar -->
+    <nav id="sidebar">
+        <div class="sidebar-header d-flex justify-content-between align-items-center">
+            <h4 class="mb-0"><i class="fas fa-boxes me-2"></i> RFInv</h4>
+            <button type="button" id="sidebarCloseBtn" class="btn btn-sm btn-outline-light d-md-none">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="p-4 text-center border-bottom border-secondary">
+            <i class="fas fa-user-circle fa-3x mb-2 text-info"></i>
+            <h5 id="current-user-name" class="mt-2">User</h5>
+        </div>
+        <ul class="list-unstyled mt-3">
+            <li class="active"><a href="#" onclick="showPage('dashboard', this)"><i class="fas fa-tachometer-alt me-3"></i> Dashboard</a></li>
+            <li><a href="#" onclick="showPage('inventory', this)"><i class="fas fa-box-open me-3"></i> สินค้า (Inventory)</a></li>
+            <li><a href="#" onclick="showPage('location', this)"><i class="fas fa-map-marked-alt me-3"></i> สถานที่ (Location)</a></li>
+            <li><a href="#" onclick="showPage('inspection', this)"><i class="fas fa-clipboard-check me-3"></i> ตรวจนับ (Inspection)</a></li>
+            <li class="mt-4"><a href="#" onclick="logout()"><i class="fas fa-power-off me-3 text-danger"></i> ออกจากระบบ</a></li>
+        </ul>
+    </nav>
+
+    <!-- Page Content -->
+    <div id="content">
+        <!-- Navbar ด้านบน -->
+        <nav class="navbar navbar-expand-lg navbar-light bg-white rounded-3 shadow-sm mb-4 p-3">
+            <div class="d-flex align-items-center w-100">
+                <button type="button" id="sidebarCollapse" class="btn btn-outline-primary me-3">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h4 class="mb-0 text-dark" id="page-title">Dashboard</h4>
+            </div>
+        </nav>
+
+        <!-- หน้า Dashboard -->
+        <div id="page-dashboard" class="page-content">
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <div class="card text-white bg-primary card-custom h-100">
+                        <div class="card-body d-flex flex-column justify-content-center align-items-center text-center">
+                            <i class="fas fa-boxes fa-3x mb-3 opacity-75"></i>
+                            <h5 class="card-title">จำนวนสินค้าทั้งหมด</h5>
+                            <h1 id="dash-inv-count" class="display-4 fw-bold">0</h1>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="card text-white bg-success card-custom h-100">
+                        <div class="card-body d-flex flex-column justify-content-center align-items-center text-center">
+                            <i class="fas fa-map-marker-alt fa-3x mb-3 opacity-75"></i>
+                            <h5 class="card-title">จำนวนสถานที่ลงทะเบียน</h5>
+                            <h1 id="dash-loc-count" class="display-4 fw-bold">0</h1>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="card text-dark bg-warning card-custom h-100">
+                        <div class="card-body d-flex flex-column justify-content-center align-items-center text-center">
+                            <i class="fas fa-history fa-3x mb-3 opacity-75"></i>
+                            <h5 class="card-title">การตรวจสอบล่าสุด</h5>
+                            <p>สามารถดูประวัติการตรวจสอบได้ที่เมนู Inspection</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- หน้า Inventory -->
+        <div id="page-inventory" class="page-content hidden">
+            <div class="card card-custom">
+                <div class="card-header bg-white p-3 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">รายการสินค้า (Inventory)</h5>
+                    <button class="btn btn-primary"><i class="fas fa-plus"></i> เพิ่มสินค้า</button>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-4">ID</th>
+                                    <th>ชื่อสินค้า</th>
+                                    <th>RFID Code</th>
+                                    <th>สถานที่ปัจจุบัน</th>
+                                    <th class="text-center">จัดการ</th>
+                                </tr>
+                            </thead>
+                            <tbody id="inv-table-body">
+                                <!-- ข้อมูลจะถูกดึงมาใส่ด้วย JavaScript -->
+                                <tr><td colspan="5" class="text-center py-4">กำลังโหลดข้อมูล...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- หน้า Location -->
+        <div id="page-location" class="page-content hidden">
+            <div class="card card-custom p-4 text-center text-muted">
+                <i class="fas fa-tools fa-4x mb-3"></i>
+                <h4>ส่วนจัดการ Location</h4>
+                <p>คุณสามารถเพิ่มโครงสร้างตารางได้คล้ายกับส่วนของหน้า Inventory</p>
+            </div>
+        </div>
+
+        <!-- หน้า Inspection -->
+        <div id="page-inspection" class="page-content hidden">
+            <div class="card card-custom p-4 text-center text-muted">
+                <i class="fas fa-clipboard-list fa-4x mb-3"></i>
+                <h4>ส่วนตรวจนับสินค้า</h4>
+                <p>บนเว็บสามารถออกแบบฟอร์มให้เชื่อมต่อกับเครื่องยิงบาร์โค้ด หรือพิมพ์รหัส RFID เข้าไปได้เลย</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap Bundle with Popper -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // --- กำหนดค่าเชื่อมต่อ API (ต้องตรงกับ Django Server ของคุณ) ---
+    const API_BASE_URL = "http://localhost:8000"; 
+    
+    let token = localStorage.getItem('api_key') || null;
+
+    // --- UI Interactions ---
+    const sidebar = document.getElementById('sidebar');
+    document.getElementById('sidebarCollapse').addEventListener('click', () => {
+        if(window.innerWidth <= 768) sidebar.classList.toggle('mobile-show');
+        else sidebar.classList.toggle('collapsed');
+    });
+    document.getElementById('sidebarCloseBtn').addEventListener('click', () => sidebar.classList.remove('mobile-show'));
+
+    // --- Authentication Logic ---
+    function checkAuth() {
+        if (token) {
+            document.getElementById('auth-page').classList.add('hidden');
+            document.getElementById('main-app').classList.remove('hidden');
+            document.getElementById('current-user-name').innerText = localStorage.getItem('user_name') || 'Administrator';
+            loadDashboard();
+        } else {
+            document.getElementById('auth-page').classList.remove('hidden');
+            document.getElementById('main-app').classList.add('hidden');
+        }
+    }
+
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        const errorDiv = document.getElementById('login-error');
+        
+        let payload = password ? { username, password } : { api_key: username };
+
+        try {
+            const res = await fetch(`${API_BASE_URL}/api/login/`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+            
+            if (res.ok && data.status === 'success') {
+                token = data.key || payload.api_key;
+                localStorage.setItem('api_key', token);
+                localStorage.setItem('user_name', data.user_name);
+                checkAuth();
+            } else {
+                errorDiv.innerText = data.message || "Username หรือ Password ไม่ถูกต้อง";
+                errorDiv.classList.remove('hidden');
+            }
+        } catch (err) {
+            errorDiv.innerText = "ไม่สามารถเชื่อมต่อกับ Server ได้ ตรวจสอบ API_BASE_URL";
+            errorDiv.classList.remove('hidden');
+        }
+    });
+
+    function logout() {
+        token = null;
+        localStorage.removeItem('api_key');
+        localStorage.removeItem('user_name');
+        checkAuth();
+    }
+
+    // --- Page Navigation & API Calls ---
+    function showPage(pageId, linkElement) {
+        // ซ่อนหน้าทั้งหมด
+        document.querySelectorAll('.page-content').forEach(p => p.classList.add('hidden'));
+        // แสดงหน้าที่เลือก
+        document.getElementById(`page-${pageId}`).classList.remove('hidden');
+        
+        // เปลี่ยนสถานะเมนู (Active)
+        if(linkElement) {
+            document.querySelectorAll('#sidebar ul li').forEach(li => li.classList.remove('active'));
+            linkElement.parentElement.classList.add('active');
+        }
+        
+        // เปลี่ยนหัวข้อ
+        const titles = { 'dashboard': 'Dashboard', 'inventory': 'จัดการสินค้า', 'location': 'สถานที่ต่างๆ', 'inspection': 'ตรวจนับ (Inspection)' };
+        document.getElementById('page-title').innerText = titles[pageId];
+
+        // เรียกโหลดข้อมูลเมื่อเปิดหน้านั้นๆ
+        if (pageId === 'dashboard') loadDashboard();
+        if (pageId === 'inventory') loadInventory();
+        
+        if(window.innerWidth <= 768) sidebar.classList.remove('mobile-show'); // ปิดเมนูบนมือถือเมื่อคลิกเลือก
+    }
+
+    // ฟังก์ชันช่วยเหลือสำหรับเรียก API
+    async function fetchAPI(endpoint, method = 'GET') {
+        try {
+            const res = await fetch(`${API_BASE_URL}${endpoint}`, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-API-KEY': token // ส่ง API Key ไปยัง Django Server
+                }
+            });
+            if (res.status === 401 || res.status === 403) {
+                alert("เซสชั่นหมดอายุ กรุณาเข้าสู่ระบบใหม่");
+                logout();
+                return null;
+            }
+            return res.ok ? await res.json() : null;
+        } catch (err) {
+            console.error("API Error:", err);
+            return null;
+        }
+    }
+
+    async function loadDashboard() {
+        const invData = await fetchAPI('/api/inventory/');
+        const locData = await fetchAPI('/api/Locations/');
+        
+        if (invData) {
+            const count = Array.isArray(invData) ? invData.length : (invData.results ? invData.results.length : 0);
+            document.getElementById('dash-inv-count').innerText = count;
+        }
+        if (locData) {
+            const count = Array.isArray(locData) ? locData.length : (locData.results ? locData.results.length : 0);
+            document.getElementById('dash-loc-count').innerText = count;
+        }
+    }
+
+    async function loadInventory() {
+        const data = await fetchAPI('/api/inventory/');
+        const tbody = document.getElementById('inv-table-body');
+        tbody.innerHTML = '';
+        
+        if (!data) {
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center text-danger">ไม่สามารถดึงข้อมูลได้</td></tr>';
+            return;
+        }
+        
+        const items = Array.isArray(data) ? data : (data.results || []);
+        if(items.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center">ไม่พบรายการสินค้า</td></tr>';
+            return;
+        }
+
+        items.forEach(item => {
+            // ตรวจสอบข้อมูลว่าสถานที่ถูกระบุมาเป็น Object หรือแค่ ID
+            const locName = item.current_location ? 
+                (item.current_location.name ? item.current_location.name : `Location ID: ${item.current_location}`) 
+                : 'ไม่มีสถานที่';
+                
+            tbody.innerHTML += `
+                <tr>
+                    <td class="ps-4 fw-bold text-secondary">#${item.id}</td>
+                    <td>${item.name}</td>
+                    <td><span class="badge bg-light text-dark border"><i class="fas fa-tag me-1"></i>${item.rfid_tag || '-'}</span></td>
+                    <td><span class="badge bg-info text-dark">${locName}</span></td>
+                    <td class="text-center">
+                        <button class="btn btn-sm btn-outline-primary"><i class="fas fa-edit"></i></button>
+                        <button class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>
+            `;
+        });
+    }
+
+    // เริ่มต้นระบบ
+    checkAuth();
+</script>
+</body>
+</html>

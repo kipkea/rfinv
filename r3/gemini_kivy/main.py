@@ -6,6 +6,11 @@ from kivy.lang import Builder
 from kivy.properties import BooleanProperty, ListProperty, ObjectProperty, StringProperty
 from kivy.uix.popup import Popup
 from kivy.uix.screenmanager import Screen, ScreenManager
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.scrollview import ScrollView
+from kivy.uix.gridlayout import GridLayout
+from kivy.uix.label import Label
+from kivy.uix.button import Button
 
 API_BASE_URL = "http://localhost:8000"
 
@@ -91,6 +96,9 @@ class APIClient:
             return self._request("POST", path, headers=headers, data=json, files=files)
         return self._request("POST", path, json=json)
 
+    def patch(self, path, json=None):
+        return self._request("PATCH", path, json=json)
+
     def get_tags(self, params=None):
         return self.get("/api/RFIDTags/", params=params)
 
@@ -136,6 +144,47 @@ class APIClient:
 class FileChooserPopup(Popup):
     load = ObjectProperty(None)
     cancel = ObjectProperty(None)
+
+class MissingItemsPopup(Popup):
+    def __init__(self, missing_items, api_client, **kwargs):
+        super().__init__(**kwargs)
+        self.title = "Missing Items (รายการสินค้าที่ไม่พบ)"
+        self.size_hint = (0.9, 0.9)
+        self.api_client = api_client
+        self.missing_items = missing_items
+
+        layout = BoxLayout(orientation='vertical', spacing=10, padding=10)
+
+        scroll = ScrollView()
+        grid = GridLayout(cols=1, spacing=10, size_hint_y=None)
+        grid.bind(minimum_height=grid.setter('height'))
+
+        for item in missing_items:
+            item_box = BoxLayout(orientation='horizontal', size_hint_y=None, height=40, spacing=10)
+            lbl = Label(text=f"{item.get('name', 'Unknown')} (ID: {item.get('id')})")
+            btn = Button(text="Remove (จำหน่าย)", size_hint_x=None, width=150)
+            btn.bind(on_release=lambda b, inv_id=item['id'], box=item_box: self.remove_item(inv_id, box))
+
+            item_box.add_widget(lbl)
+            item_box.add_widget(btn)
+            grid.add_widget(item_box)
+
+        scroll.add_widget(grid)
+        layout.add_widget(scroll)
+
+        close_btn = Button(text="Close", size_hint_y=None, height=50)
+        close_btn.bind(on_release=self.dismiss)
+        layout.add_widget(close_btn)
+
+        self.content = layout
+
+    def remove_item(self, inv_id, box):
+        try:
+            self.api_client.patch(f"/api/inventory/{inv_id}/", json={"current_location": None})
+            if box.parent:
+                box.parent.remove_widget(box)
+        except Exception as e:
+            print(f"Failed to remove location for inventory {inv_id}: {e}")
 
 class MainScreen(Screen):
     import_status = StringProperty("")
@@ -290,6 +339,17 @@ class MainScreen(Screen):
             if not chosen:
                 self.inspection_status = "Selected location is not available."
                 return
+
+            all_inventories = client.get_inventories()
+            if isinstance(all_inventories, dict) and "results" in all_inventories:
+                all_inventories = all_inventories["results"]
+                
+            def get_loc_id(inv):
+                loc = inv.get("current_location")
+                return loc.get("id") if isinstance(loc, dict) else loc
+                
+            expected_items = [inv for inv in all_inventories if get_loc_id(inv) == chosen["id"]]
+
             inventory_ids = []
             missing = []
             for code in codes:
@@ -310,6 +370,13 @@ class MainScreen(Screen):
             found = len(inventory_ids)
             self.inspection_status = f"Inspection logged. Found {found} inventories. Missing or invalid codes: {', '.join(missing[:5])}."
             self.ids.inspection_input.text = ""
+
+            found_set = set(inventory_ids)
+            actual_missing_items = [item for item in expected_items if item["id"] not in found_set]
+            if actual_missing_items:
+                popup = MissingItemsPopup(actual_missing_items, client)
+                popup.open()
+
         except Exception as exc:
             self.inspection_status = f"Inspection failed: {exc}"
 

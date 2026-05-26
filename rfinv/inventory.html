@@ -1,0 +1,43 @@
+{% extends 'rvapi/base.html' %}
+
+{% block title %}Inventory - RFInv{% endblock %}
+{% block page_title %}จัดการสินค้า (Inventory){% endblock %}
+
+{% block content %}
+<div class="card card-custom">
+    <div class="card-header bg-white p-3 d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">รายการสินค้า</h5>
+        <button class="btn btn-primary"><i class="fas fa-plus"></i> เพิ่มสินค้า</button>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">ID</th>
+                        <th>ชื่อสินค้า</th>
+                        <th>RFID Code</th>
+                        <th>สถานที่ปัจจุบัน</th>
+                        <th class="text-center">จัดการ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in items %}
+                    <tr>
+                        <td class="ps-4 fw-bold text-secondary">#{{ item.id }}</td>
+                        <td>{{ item.name }}</td>
+                        <td><span class="badge bg-light text-dark border"><i class="fas fa-tag me-1"></i>{{ item.rfid_tag.rfid_code|default:"-" }}</span></td>
+                        <td><span class="badge bg-info text-dark">{{ item.current_location.name|default:"ไม่มีสถานที่" }}</span></td>
+                        <td class="text-center">
+                            <button class="btn btn-sm btn-outline-primary"><i class="fas fa-edit"></i></button>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="5" class="text-center py-4">ไม่พบรายการสินค้า</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
