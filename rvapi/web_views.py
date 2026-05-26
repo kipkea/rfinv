@@ -15,7 +15,7 @@ def web_login(request):
         else:
             error_msg = "Username หรือ Password ไม่ถูกต้อง"
             
-    return render(request, 'rvapi/login.html', {'error': error_msg})
+    return render(request, 'login.html', {'error': error_msg})
 
 def web_logout(request):
     logout(request)
@@ -27,7 +27,7 @@ def dashboard(request):
     inv_count = Inventory.objects.count()
     loc_count = Location.objects.count()
     
-    return render(request, 'rvapi/dashboard.html', {
+    return render(request, 'dashboard.html', {
         'inv_count': inv_count,
         'loc_count': loc_count,
     })
@@ -35,4 +35,4 @@ def dashboard(request):
 @login_required(login_url='web_login')
 def inventory_list(request):
     items = Inventory.objects.select_related('rfid_tag', 'current_location').all()
-    return render(request, 'rvapi/inventory.html', {'items': items})
+    return render(request, 'inventory.html', {'items': items})
