@@ -7,29 +7,101 @@
 <div class="card card-custom">
     <div class="card-header bg-white p-3 d-flex justify-content-between align-items-center">
         <h5 class="mb-0">รายการสินค้า</h5>
-        <button class="btn btn-primary"><i class="fas fa-plus"></i> เพิ่มสินค้า</button>
+        <div class="d-flex align-items-center">
+            <!-- ช่องค้นหาแบบ Real-time -->
+            <div class="input-group me-2" style="max-width: 250px;">
+                <span class="input-group-text bg-light"><i class="fas fa-search text-muted"></i></span>
+                <input type="text" id="searchInput" class="form-control" placeholder="ค้นหาชื่อ, RFID..." onkeyup="filterTable()">
+            </div>
+            <!-- ปุ่มสำหรับเปิด Modal (แนวทางที่ 2) -->
+            <button class="btn btn-primary text-nowrap" data-bs-toggle="modal" data-bs-target="#addInventoryModal">
+                <i class="fas fa-plus"></i> กำหนดข้อมูล RFID
+            </button>
+        </div>
     </div>
     <div class="card-body p-0">
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
                 <thead class="table-light">
                     <tr>
-                        <th class="ps-4">ID</th>
-                        <th>ชื่อสินค้า</th>
-                        <th>RFID Code</th>
-                        <th>สถานที่ปัจจุบัน</th>
+                        <th class="ps-4">
+                            <a href="?sort=id&dir={% if current_sort == 'id' and current_dir == 'asc' %}desc{% else %}asc{% endif %}" class="text-dark text-decoration-none d-block">
+                                ID
+                                {% if current_sort == 'id' %}
+                                    <i class="fas fa-sort-{% if current_dir == 'asc' %}up{% else %}down{% endif %} ms-1"></i>
+                                {% else %}
+                                    <i class="fas fa-sort text-muted opacity-50 ms-1"></i>
+                                {% endif %}
+                            </a>
+                        </th>
+                        <th>
+                            <a href="?sort=name&dir={% if current_sort == 'name' and current_dir == 'asc' %}desc{% else %}asc{% endif %}" class="text-dark text-decoration-none d-block">
+                                ชื่อสินค้า
+                                {% if current_sort == 'name' %}
+                                    <i class="fas fa-sort-{% if current_dir == 'asc' %}up{% else %}down{% endif %} ms-1"></i>
+                                {% else %}
+                                    <i class="fas fa-sort text-muted opacity-50 ms-1"></i>
+                                {% endif %}
+                            </a>
+                        </th>
+                        <th>รูปภาพ</th>
+                        <th>
+                            <a href="?sort=rfid&dir={% if current_sort == 'rfid' and current_dir == 'asc' %}desc{% else %}asc{% endif %}" class="text-dark text-decoration-none d-block">
+                                RFID Code
+                                {% if current_sort == 'rfid' %}
+                                    <i class="fas fa-sort-{% if current_dir == 'asc' %}up{% else %}down{% endif %} ms-1"></i>
+                                {% else %}
+                                    <i class="fas fa-sort text-muted opacity-50 ms-1"></i>
+                                {% endif %}
+                            </a>
+                        </th>
+                        <th>
+                            <a href="?sort=location&dir={% if current_sort == 'location' and current_dir == 'asc' %}desc{% else %}asc{% endif %}" class="text-dark text-decoration-none d-block">
+                                สถานที่ปัจจุบัน
+                                {% if current_sort == 'location' %}
+                                    <i class="fas fa-sort-{% if current_dir == 'asc' %}up{% else %}down{% endif %} ms-1"></i>
+                                {% else %}
+                                    <i class="fas fa-sort text-muted opacity-50 ms-1"></i>
+                                {% endif %}
+                            </a>
+                        </th>
                         <th class="text-center">จัดการ</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for item in items %}
+                    {% for item in page_obj %}
                     <tr>
                         <td class="ps-4 fw-bold text-secondary">#{{ item.id }}</td>
                         <td>{{ item.name }}</td>
+                        <td>
+                            {% if item.image %}
+                                <img src="{{ item.image.url }}" alt="{{ item.name }}" width="50" height="50" 
+                                    style="cursor: pointer; object-fit: cover; border-radius: 4px;" 
+                                    onclick="showImagePopup('{{ item.image.url }}')">
+                            {% else %}
+                                <span class="text-muted">ไม่มีรูปภาพ</span>
+                            {% endif %}
+                        </td>
                         <td><span class="badge bg-light text-dark border"><i class="fas fa-tag me-1"></i>{{ item.rfid_tag.rfid_code|default:"-" }}</span></td>
                         <td><span class="badge bg-info text-dark">{{ item.current_location.name|default:"ไม่มีสถานที่" }}</span></td>
                         <td class="text-center">
-                            <button class="btn btn-sm btn-outline-primary"><i class="fas fa-edit"></i></button>
+                            <!-- ปุ่มแก้ไข (ดึงข้อมูลเก่ามาแสดง) -->
+                            <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editInventoryModal"
+                                data-id="{{ item.id }}"
+                                data-name="{{ item.name }}"
+                                data-rfid="{{ item.rfid_tag.rfid_code|default:'-' }}"
+                                data-location="{{ item.current_location.name|default:'ไม่มีสถานที่' }}"
+                                data-image-url="{% if item.image %}{{ item.image.url }}{% endif %}"
+                                onclick="populateEditModal(this)">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <!-- ปุ่มลบ (ดึงข้อมูลเพื่อยืนยัน) -->
+                            <button class="btn btn-sm btn-outline-danger ms-1" data-bs-toggle="modal" data-bs-target="#deleteInventoryModal"
+                                data-id="{{ item.id }}"
+                                data-name="{{ item.name }}"
+                                onclick="populateDeleteModal(this)">
+                                <i class="fas fa-trash"></i>
+                            </button>
                         </td>
                     </tr>
                     {% empty %}
@@ -38,6 +110,308 @@
                 </tbody>
             </table>
         </div>
+        
+        <!-- ส่วนประกอบ HTML สำหรับ Paginator -->
+        <div class="card-footer bg-white d-flex justify-content-between align-items-center">
+            <span class="text-muted" style="font-size: 0.85rem;">
+                แสดง {{ page_obj.start_index }} ถึง {{ page_obj.end_index }} จากทั้งหมด {{ page_obj.paginator.count }} รายการ
+            </span>
+            <nav aria-label="Page navigation">
+                <ul class="pagination pagination-sm mb-0">
+                    {% if page_obj.has_previous %}
+                    <li class="page-item"><a class="page-link" href="?page=1&sort={{ current_sort }}&dir={{ current_dir }}">« หน้าแรก</a></li>
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}&sort={{ current_sort }}&dir={{ current_dir }}">‹ ก่อนหน้า</a></li>
+                    {% else %}
+                    <li class="page-item disabled"><span class="page-link">« หน้าแรก</span></li>
+                    <li class="page-item disabled"><span class="page-link">‹ ก่อนหน้า</span></li>
+                    {% endif %}
+                    
+                    <!-- วนลูปสร้างตัวเลขหน้า โดยแสดงเฉพาะ +/- 2 หน้าจากหน้าปัจจุบัน ไม่ให้ยาวเกินไป -->
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                        <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                        <li class="page-item"><a class="page-link" href="?page={{ num }}&sort={{ current_sort }}&dir={{ current_dir }}">{{ num }}</a></li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if page_obj.has_next %}
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}&sort={{ current_sort }}&dir={{ current_dir }}">ถัดไป ›</a></li>
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.paginator.num_pages }}&sort={{ current_sort }}&dir={{ current_dir }}">สุดท้าย »</a></li>
+                    {% else %}
+                    <li class="page-item disabled"><span class="page-link">ถัดไป ›</span></li>
+                    <li class="page-item disabled"><span class="page-link">สุดท้าย »</span></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
     </div>
 </div>
+
+<!-- ส่วนประกอบ HTML สำหรับ Popup -->
+<div id="imageModal" class="custom-modal" onclick="closeImagePopup()">
+  <span class="custom-close">&times;</span>
+  <img class="custom-modal-content" id="popupImage">
+</div>
+
+<!-- สไตล์ CSS สำหรับ Popup -->
+<style>
+
+@media only screen and (max-width: 768px) {
+  .custom-modal-content {
+    max-width: 95%; /* ขยายรูปให้เต็มจอมากขึ้นเมื่อเปิดบนมือถือ */
+  }
+  
+  .custom-close {
+    top: 10px;
+    right: 15px; /* ขยับปุ่มกากบาทเข้ามาด้านในหน้าจอเพื่อไม่ให้ล้นตกขอบ */
+    font-size: 35px; /* ลดขนาดปุ่มลงเล็กน้อย */
+  }
+}
+
+
+.custom-modal {
+  display: none; /* ซ่อนไว้เป็นค่าเริ่มต้น */
+  position: fixed;
+  z-index: 9999;
+  padding-top: 60px;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0, 0, 0, 0.8); /* พื้นหลังสีดำโปร่งแสง */
+}
+
+.custom-modal-content {
+  margin: auto;
+  display: block;
+  max-width: 80%;
+  max-height: 80vh;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+  animation: zoomIn 0.3s; /* เพิ่มเอฟเฟกต์ซูมเข้า */
+}
+
+@keyframes zoomIn {
+  from {transform: scale(0)} 
+  to {transform: scale(1)}
+}
+
+.custom-close {
+  position: absolute;
+  top: 20px;
+  right: 40px;
+  color: #f1f1f1;
+  font-size: 40px;
+  font-weight: bold;
+  transition: 0.3s;
+  cursor: pointer;
+}
+
+.custom-close:hover,
+.custom-close:focus {
+  color: #bbb;
+  text-decoration: none;
+  cursor: pointer;
+}
+</style>
+
+
+
+<!-- สคริปต์ JavaScript ไว้สำหรับควบคุมการเปิด-ปิด -->
+<script>
+function showImagePopup(imageUrl) {
+    var modal = document.getElementById("imageModal");
+    var modalImg = document.getElementById("popupImage");
+    modal.style.display = "block";
+    modalImg.src = imageUrl;
+}
+
+function closeImagePopup() {
+    var modal = document.getElementById("imageModal");
+    modal.style.display = "none";
+}
+</script>
+
+
+<!-- Modal สำหรับเพิ่มสินค้า (แนวทางที่ 2) -->
+<div class="modal fade" id="addInventoryModal" tabindex="-1" aria-labelledby="addInventoryModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addInventoryModalLabel">กำหนดข้อมูล RFID</h5>
+        <!-- ปุ่มกากบาทสำหรับปิด Modal แบบฉบับ Bootstrap 5 -->
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <!-- Form สำหรับบันทึกข้อมูล (action ว่างไว้เพื่อให้ Post กลับมาที่ URL ปัจจุบัน) -->
+      <form method="POST" action="" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="modal-body">
+            <div class="mb-3">
+                <label for="id_item_type" class="form-label">ประเภทข้อมูล</label>
+                <select class="form-select" id="id_item_type" name="item_type" onchange="toggleItemType()">
+                    <option value="inventory">สินค้า (Inventory)</option>
+                    <option value="location">สถานที่เก็บ (Location)</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="id_name" class="form-label" id="label_name">ชื่อสินค้า</label>
+                <input type="text" class="form-control" id="id_name" name="name" required>
+            </div>
+            <div class="mb-3">
+                <label for="id_rfid" class="form-label">RFID Code</label>
+                <!-- ใช้ select เพื่อทำเป็น Dropdown Combobox -->
+                <select class="form-select" id="id_rfid" name="rfid_tag" required>
+                    <option value="">-- ไม่ระบุ --</option>
+                    {% for tag in available_rfid_tags %}
+                        <option value="{{ tag.rfid_code }}">{{ tag.rfid_code }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="mb-3" id="container_image">
+                <label for="id_image" class="form-label">รูปภาพสินค้า</label>
+                <!-- enctype="multipart/form-data" ใน form จำเป็นมากสำหรับการอัปโหลดรูป -->
+                <input type="file" class="form-control" id="id_image" name="image" accept="image/*">
+            </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ยกเลิก</button>
+          <button type="submit" class="btn btn-primary">บันทึกข้อมูล</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+  </div>
+</div>
+
+<!-- Modal สำหรับแก้ไขสินค้า -->
+<div class="modal fade" id="editInventoryModal" tabindex="-1" aria-labelledby="editInventoryModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editInventoryModalLabel">แก้ไขสินค้า</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <!-- ส่ง POST ไปที่เดิม แต่จะแยกแยะการเพิ่ม/แก้ด้วย action -->
+      <form method="POST" action="" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="edit">
+        <input type="hidden" name="item_id" id="edit_item_id">
+        <div class="modal-body">
+            <div class="mb-3">
+                <label for="edit_id_name" class="form-label">ชื่อสินค้า</label>
+                <input type="text" class="form-control" id="edit_id_name" name="name" required>
+            </div>
+            <div class="mb-3">
+                <label for="edit_id_image" class="form-label">รูปภาพสินค้า (อัปโหลดใหม่หากต้องการเปลี่ยน)</label>
+                <!-- เพิ่มส่วนแสดงรูปภาพเดิม -->
+                <div id="edit_image_preview_container" class="mb-2" style="display: none;">
+                    <img id="edit_image_preview" src="" alt="Current Image" style="max-height: 120px; border-radius: 4px; object-fit: cover;">
+                    <div class="form-text text-muted">รูปภาพปัจจุบัน</div>
+                </div>
+                <input type="file" class="form-control" id="edit_id_image" name="image" accept="image/*">
+            </div>
+            <div class="mb-3">
+                <label class="form-label">RFID Code</label>
+                <!-- ใส่ disabled เพื่อไม่ให้แก้ไข และไม่ถูกส่งไปกับฟอร์ม -->
+                <input type="text" class="form-control" id="edit_id_rfid" disabled>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">สถานที่ปัจจุบัน</label>
+                <input type="text" class="form-control" id="edit_id_location" disabled>
+            </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ยกเลิก</button>
+          <button type="submit" class="btn btn-primary">บันทึกการแก้ไข</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Modal สำหรับลบสินค้า -->
+<div class="modal fade" id="deleteInventoryModal" tabindex="-1" aria-labelledby="deleteInventoryModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteInventoryModalLabel">ยืนยันการลบสินค้า</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form method="POST" action="">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="delete">
+        <input type="hidden" name="item_id" id="delete_item_id">
+        <div class="modal-body">
+            <p>คุณต้องการลบสินค้า <strong id="delete_item_name" class="text-danger"></strong> ใช่หรือไม่?</p>
+            <p class="text-muted mb-0" style="font-size: 0.9em;">* หมายเหตุ: รหัส RFID จะถูกปลดออกและสามารถนำไปเชื่อมโยงกับสินค้าอื่นได้ใหม่</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ยกเลิก</button>
+          <button type="submit" class="btn btn-danger">ยืนยันการลบ</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+function populateEditModal(btn) {
+    document.getElementById('edit_item_id').value = btn.getAttribute('data-id');
+    document.getElementById('edit_id_name').value = btn.getAttribute('data-name');
+    document.getElementById('edit_id_rfid').value = btn.getAttribute('data-rfid');
+    document.getElementById('edit_id_location').value = btn.getAttribute('data-location');
+    
+    // จัดการแสดงผลรูปภาพเดิม
+    var imageUrl = btn.getAttribute('data-image-url');
+    var previewContainer = document.getElementById('edit_image_preview_container');
+    var previewImg = document.getElementById('edit_image_preview');
+    if (imageUrl) {
+        previewImg.src = imageUrl;
+        previewContainer.style.display = 'block';
+    } else {
+        previewContainer.style.display = 'none';
+    }
+}
+
+function populateDeleteModal(btn) {
+    document.getElementById('delete_item_id').value = btn.getAttribute('data-id');
+    document.getElementById('delete_item_name').innerText = btn.getAttribute('data-name');
+}
+
+function filterTable() {
+    var input = document.getElementById("searchInput");
+    var filter = input.value.toUpperCase();
+    var table = document.querySelector(".table");
+    var tr = table.getElementsByTagName("tr");
+
+    for (var i = 1; i < tr.length; i++) {
+        // ข้ามแถวที่บอกว่า "ไม่พบรายการสินค้า" (ถ้ามี)
+        if (tr[i].getElementsByTagName("td").length === 1) continue;
+
+        var tdName = tr[i].getElementsByTagName("td")[1]; // คอลัมน์ที่ 2: ชื่อสินค้า
+        var tdRfid = tr[i].getElementsByTagName("td")[3]; // คอลัมน์ที่ 4: RFID Code
+
+        if (tdName || tdRfid) {
+            var txtValueName = tdName.textContent || tdName.innerText;
+            var txtValueRfid = tdRfid.textContent || tdRfid.innerText;
+            
+            // ถ้าระบุคำค้นหาแล้วตรงกับชื่อ หรือ RFID ก็ให้แสดงผล
+            if (txtValueName.toUpperCase().indexOf(filter) > -1 || txtValueRfid.toUpperCase().indexOf(filter) > -1) {
+                tr[i].style.display = "";
+            } else {
+                tr[i].style.display = "none";
+            }
+        }       
+    }
+}
+</script>
+
+
+
+
 {% endblock %}
