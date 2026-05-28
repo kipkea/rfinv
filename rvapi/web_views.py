@@ -68,6 +68,7 @@ def inventory_list(request):
     # --- ส่วนการทำงานปกติเมื่อโหลดหน้าเว็บ (GET Request) ---
     sort_by = request.GET.get('sort', 'id')  # ค่าเริ่มต้นให้เรียงตาม id
     sort_dir = request.GET.get('dir', 'desc') # ค่าเริ่มต้นให้เรียงจากมากไปน้อย
+    location_filter = request.GET.get('location') # ตัวแปรรับค่าค้นหาสถานที่
     
     # จับคู่พารามิเตอร์กับฟิลด์ใน Database
     valid_sort_fields = {
@@ -80,7 +81,16 @@ def inventory_list(request):
     if sort_dir == 'desc':
         db_sort_field = f'-{db_sort_field}'
 
-    items = Inventory.objects.select_related('rfid_tag', 'current_location').all().order_by(db_sort_field)
+    items = Inventory.objects.select_related('rfid_tag', 'current_location').all()
+    
+    # ตรวจสอบและกรองข้อมูลตามสถานที่
+    if location_filter:
+        if location_filter == 'none':
+            items = items.filter(current_location__isnull=True)
+        else:
+            items = items.filter(current_location__name=location_filter)
+            
+    items = items.order_by(db_sort_field)
     
     # --- ส่วนการแบ่งหน้า (Pagination) ---
     paginator = Paginator(items, 100)  # แสดงผล 10 รายการต่อ 1 หน้า
@@ -98,7 +108,8 @@ def inventory_list(request):
         'page_obj': page_obj, 
         'available_rfid_tags': available_rfid_tags,
         'current_sort': sort_by,
-        'current_dir': sort_dir
+        'current_dir': sort_dir,
+        'current_location': location_filter
     })
 
 def web_login(request):

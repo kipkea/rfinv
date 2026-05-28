@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block title %}Reports - RFInv{% endblock %}
+{% block page_title %}ออกรายงาน (Reports){% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- ฟอร์มรายงานตำแหน่ง -->
+    <div class="col-md-6 mb-4">
+        <div class="card card-custom h-100">
+            <div class="card-header bg-white p-3">
+                <h5 class="mb-0"><i class="fas fa-map-marker-alt text-primary me-2"></i>รายงานสินค้าตามตำแหน่ง</h5>
+            </div>
+            <div class="card-body">
+                <form action="{% url 'rvapi:generate_location_report' %}" method="GET" target="_blank">
+                    <div class="mb-3">
+                        <label for="location_id" class="form-label">เลือกตำแหน่งที่ต้องการ:</label>
+                        <select name="location_id" id="location_id" class="form-select select2-enable" required>
+                            <option value="ALL">เลือกทั้งหมด (All Locations)</option>
+                            {% for loc in locations %}
+                                <option value="{{ loc.id }}">{{ loc.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="text-end mt-4">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-print me-1"></i> พิมพ์รายงาน PDF
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ฟอร์มรายงานสินค้า -->
+    <div class="col-md-6 mb-4">
+        <div class="card card-custom h-100">
+            <div class="card-header bg-white p-3">
+                <h5 class="mb-0"><i class="fas fa-box-open text-success me-2"></i>รายงานประวัติการตรวจสอบสินค้า</h5>
+            </div>
+            <div class="card-body">
+                <form action="{% url 'rvapi:generate_product_report' %}" method="GET" target="_blank">
+                    <div class="mb-3">
+                        <label for="product_id" class="form-label">เลือกสินค้าที่ต้องการ:</label>
+                        <select name="product_id" id="product_id" class="form-select select2-enable" required>
+                            <option value="ALL">เลือกทั้งหมด (All Products)</option>
+                            {% for prod in products %}
+                                <option value="{{ prod.id }}">{{ prod.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="text-end mt-4">
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-print me-1"></i> พิมพ์รายงาน PDF
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- โหลด jQuery (หากใน base.html ยังไม่ได้โหลด) และ Select2 CSS/JS (ดึงจาก CDN เพื่อความรวดเร็ว) -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<script>
+$(document).ready(function() {
+    // กำหนดให้ Select2 ทำงานใน Dropdown พร้อมเปิดใช้งานการค้นหา
+    $('.select2-enable').select2({
+        width: '100%',
+        placeholder: "ค้นหาและเลือกข้อมูล..."
+    });
+});
+</script>
+{% endblock %}

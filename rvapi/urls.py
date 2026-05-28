@@ -2,7 +2,7 @@ app_name = "rvapi"
 
 from django.urls import path, include
 #from rest_framework.routers import DefaultRouter
-
+from .views_report import report_dashboard, generate_location_report, generate_product_report
 
 from .views import (
     InventoryListAPIView, InventoryDetailAPIView,
@@ -39,6 +39,9 @@ urlpatterns = [
     path('api/inspections/', InspectionListAPIView.as_view(), name='inspection-list'),
     path('api/inspections/<int:pk>/', InspectionDetailAPIView.as_view(), name='inspection-detail'),
     
+    path('reports/', report_dashboard, name='report_dashboard'),
+    path('reports/location/pdf/', generate_location_report, name='generate_location_report'),
+    path('reports/product/pdf/', generate_product_report, name='generate_product_report'),    
 
 ]
 

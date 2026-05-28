@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title>รายงานสินค้าตามตำแหน่ง</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        @page {
+            size: A4;
+            margin: 1.5cm;
+            @bottom-right {
+                content: "หน้า " counter(page) " / " counter(pages);
+                font-family: 'Sarabun', sans-serif;
+                font-size: 11pt;
+            }
+        }
+        body {
+            font-family: 'Sarabun', sans-serif;
+            font-size: 13pt;
+            color: #222;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .meta-info {
+            font-size: 12pt;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #ccc;
+            padding-bottom: 10px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f1f1f1;
+        }
+        .item-image {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h2>{{ system_name }}</h2>
+        <h3>{{ report_name }}</h3>
+    </div>
+    
+    <div class="meta-info">
+        <p style="margin: 5px 0;"><strong>ผู้พิมพ์:</strong> {{ printed_by }} &nbsp;&nbsp;&nbsp;&nbsp; <strong>เวลาพิมพ์:</strong> {{ printed_time|date:"d/m/Y H:i" }}</p>
+    </div>
+
+    {% for location in locations %}
+    <div class="location-section">
+        <h4 style="color: #0d6efd;">ตำแหน่ง: {{ location.name }}</h4>
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 15%; text-align: center;">รูปภาพ</th>
+                    <th style="width: 45%;">ชื่อสินค้า</th>
+                    <th style="width: 40%;">RFID Code</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in location.items %}
+                <tr>
+                    <td style="text-align: center;">
+                        {% if item.image %}
+                            <img src="{{ request.scheme }}://{{ request.get_host }}{{ item.image.url }}" class="item-image">
+                        {% else %}
+                            ไม่มีรูป
+                        {% endif %}
+                    </td>
+                    <td>{{ item.name }}</td>
+                    <td>{{ item.rfid_tag.rfid_code|default:"ไม่มี RFID" }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3" style="text-align: center;">ไม่พบรายการสินค้าในตำแหน่งนี้</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endfor %}
+</body>
+</html>

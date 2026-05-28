@@ -13,6 +13,9 @@
                 <span class="input-group-text bg-light"><i class="fas fa-search text-muted"></i></span>
                 <input type="text" id="searchInput" class="form-control" placeholder="ค้นหาชื่อ, RFID..." onkeyup="filterTable()">
             </div>
+            {% if current_location %}
+            <a href="?" class="btn btn-outline-secondary me-2 text-nowrap"><i class="fas fa-times"></i> ยกเลิกกรองสถานที่</a>
+            {% endif %}
             <!-- ปุ่มสำหรับเปิด Modal (แนวทางที่ 2) -->
             <button class="btn btn-primary text-nowrap" data-bs-toggle="modal" data-bs-target="#addInventoryModal">
                 <i class="fas fa-plus"></i> กำหนดข้อมูล RFID
@@ -25,7 +28,7 @@
                 <thead class="table-light">
                     <tr>
                         <th class="ps-4">
-                            <a href="?sort=id&dir={% if current_sort == 'id' and current_dir == 'asc' %}desc{% else %}asc{% endif %}" class="text-dark text-decoration-none d-block">
+                            <a href="?sort=id&dir={% if current_sort == 'id' and current_dir == 'asc' %}desc{% else %}asc{% endif %}{% if current_location %}&location={{ current_location|urlencode }}{% endif %}" class="text-dark text-decoration-none d-block">
                                 ID
                                 {% if current_sort == 'id' %}
                                     <i class="fas fa-sort-{% if current_dir == 'asc' %}up{% else %}down{% endif %} ms-1"></i>
@@ -35,7 +38,7 @@
                             </a>
                         </th>
                         <th>
-                            <a href="?sort=name&dir={% if current_sort == 'name' and current_dir == 'asc' %}desc{% else %}asc{% endif %}" class="text-dark text-decoration-none d-block">
+                            <a href="?sort=name&dir={% if current_sort == 'name' and current_dir == 'asc' %}desc{% else %}asc{% endif %}{% if current_location %}&location={{ current_location|urlencode }}{% endif %}" class="text-dark text-decoration-none d-block">
                                 ชื่อสินค้า
                                 {% if current_sort == 'name' %}
                                     <i class="fas fa-sort-{% if current_dir == 'asc' %}up{% else %}down{% endif %} ms-1"></i>
@@ -46,7 +49,7 @@
                         </th>
                         <th>รูปภาพ</th>
                         <th>
-                            <a href="?sort=rfid&dir={% if current_sort == 'rfid' and current_dir == 'asc' %}desc{% else %}asc{% endif %}" class="text-dark text-decoration-none d-block">
+                            <a href="?sort=rfid&dir={% if current_sort == 'rfid' and current_dir == 'asc' %}desc{% else %}asc{% endif %}{% if current_location %}&location={{ current_location|urlencode }}{% endif %}" class="text-dark text-decoration-none d-block">
                                 RFID Code
                                 {% if current_sort == 'rfid' %}
                                     <i class="fas fa-sort-{% if current_dir == 'asc' %}up{% else %}down{% endif %} ms-1"></i>
@@ -56,7 +59,7 @@
                             </a>
                         </th>
                         <th>
-                            <a href="?sort=location&dir={% if current_sort == 'location' and current_dir == 'asc' %}desc{% else %}asc{% endif %}" class="text-dark text-decoration-none d-block">
+                            <a href="?sort=location&dir={% if current_sort == 'location' and current_dir == 'asc' %}desc{% else %}asc{% endif %}{% if current_location %}&location={{ current_location|urlencode }}{% endif %}" class="text-dark text-decoration-none d-block">
                                 สถานที่ปัจจุบัน
                                 {% if current_sort == 'location' %}
                                     <i class="fas fa-sort-{% if current_dir == 'asc' %}up{% else %}down{% endif %} ms-1"></i>
@@ -83,7 +86,11 @@
                             {% endif %}
                         </td>
                         <td><span class="badge bg-light text-dark border"><i class="fas fa-tag me-1"></i>{{ item.rfid_tag.rfid_code|default:"-" }}</span></td>
-                        <td><span class="badge bg-info text-dark">{{ item.current_location.name|default:"ไม่มีสถานที่" }}</span></td>
+                        <td>
+                            <a href="?location={% if item.current_location %}{{ item.current_location.name|urlencode }}{% else %}none{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}{% if current_dir %}&dir={{ current_dir }}{% endif %}" class="badge bg-info text-dark text-decoration-none shadow-sm" title="คลิกเพื่อกรองเฉพาะสถานที่นี้">
+                                {{ item.current_location.name|default:"ไม่มีสถานที่" }}
+                            </a>
+                        </td>
                         <td class="text-center">
                             <!-- ปุ่มแก้ไข (ดึงข้อมูลเก่ามาแสดง) -->
                             <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editInventoryModal"
@@ -119,8 +126,8 @@
             <nav aria-label="Page navigation">
                 <ul class="pagination pagination-sm mb-0">
                     {% if page_obj.has_previous %}
-                    <li class="page-item"><a class="page-link" href="?page=1&sort={{ current_sort }}&dir={{ current_dir }}">« หน้าแรก</a></li>
-                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}&sort={{ current_sort }}&dir={{ current_dir }}">‹ ก่อนหน้า</a></li>
+                    <li class="page-item"><a class="page-link" href="?page=1&sort={{ current_sort }}&dir={{ current_dir }}{% if current_location %}&location={{ current_location|urlencode }}{% endif %}">« หน้าแรก</a></li>
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}&sort={{ current_sort }}&dir={{ current_dir }}{% if current_location %}&location={{ current_location|urlencode }}{% endif %}">‹ ก่อนหน้า</a></li>
                     {% else %}
                     <li class="page-item disabled"><span class="page-link">« หน้าแรก</span></li>
                     <li class="page-item disabled"><span class="page-link">‹ ก่อนหน้า</span></li>
@@ -131,13 +138,13 @@
                         {% if page_obj.number == num %}
                         <li class="page-item active"><span class="page-link">{{ num }}</span></li>
                         {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-                        <li class="page-item"><a class="page-link" href="?page={{ num }}&sort={{ current_sort }}&dir={{ current_dir }}">{{ num }}</a></li>
+                        <li class="page-item"><a class="page-link" href="?page={{ num }}&sort={{ current_sort }}&dir={{ current_dir }}{% if current_location %}&location={{ current_location|urlencode }}{% endif %}">{{ num }}</a></li>
                         {% endif %}
                     {% endfor %}
                     
                     {% if page_obj.has_next %}
-                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}&sort={{ current_sort }}&dir={{ current_dir }}">ถัดไป ›</a></li>
-                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.paginator.num_pages }}&sort={{ current_sort }}&dir={{ current_dir }}">สุดท้าย »</a></li>
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}&sort={{ current_sort }}&dir={{ current_dir }}{% if current_location %}&location={{ current_location|urlencode }}{% endif %}">ถัดไป ›</a></li>
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.paginator.num_pages }}&sort={{ current_sort }}&dir={{ current_dir }}{% if current_location %}&location={{ current_location|urlencode }}{% endif %}">สุดท้าย »</a></li>
                     {% else %}
                     <li class="page-item disabled"><span class="page-link">ถัดไป ›</span></li>
                     <li class="page-item disabled"><span class="page-link">สุดท้าย »</span></li>
@@ -395,13 +402,17 @@ function filterTable() {
 
         var tdName = tr[i].getElementsByTagName("td")[1]; // คอลัมน์ที่ 2: ชื่อสินค้า
         var tdRfid = tr[i].getElementsByTagName("td")[3]; // คอลัมน์ที่ 4: RFID Code
+        var tdLocation = tr[i].getElementsByTagName("td")[4]; // คอลัมน์ที่ 5: สถานที่
 
-        if (tdName || tdRfid) {
-            var txtValueName = tdName.textContent || tdName.innerText;
-            var txtValueRfid = tdRfid.textContent || tdRfid.innerText;
+        if (tdName || tdRfid || tdLocation) {
+            var txtValueName = tdName ? (tdName.textContent || tdName.innerText) : "";
+            var txtValueRfid = tdRfid ? (tdRfid.textContent || tdRfid.innerText) : "";
+            var txtValueLocation = tdLocation ? (tdLocation.textContent || tdLocation.innerText) : "";
             
-            // ถ้าระบุคำค้นหาแล้วตรงกับชื่อ หรือ RFID ก็ให้แสดงผล
-            if (txtValueName.toUpperCase().indexOf(filter) > -1 || txtValueRfid.toUpperCase().indexOf(filter) > -1) {
+            // ถ้าระบุคำค้นหาแล้วตรงกับชื่อ หรือ RFID หรือ สถานที่ ก็ให้แสดงผล
+            if (txtValueName.toUpperCase().indexOf(filter) > -1 || 
+                txtValueRfid.toUpperCase().indexOf(filter) > -1 ||
+                txtValueLocation.toUpperCase().indexOf(filter) > -1) {
                 tr[i].style.display = "";
             } else {
                 tr[i].style.display = "none";
