@@ -16,6 +16,8 @@
             {% if current_location %}
             <a href="?" class="btn btn-outline-secondary me-2 text-nowrap"><i class="fas fa-times"></i> ยกเลิกกรองสถานที่</a>
             {% endif %}
+            <a href="?{% if request.GET.urlencode %}{{ request.GET.urlencode }}&{% endif %}export=excel" class="btn btn-success">
+                <i class="fas fa-file-excel"></i> Export Excel &nbsp;&nbsp </a>
             <!-- ปุ่มสำหรับเปิด Modal (แนวทางที่ 2) -->
             <button class="btn btn-primary text-nowrap" data-bs-toggle="modal" data-bs-target="#addInventoryModal">
                 <i class="fas fa-plus"></i> กำหนดข้อมูล RFID

@@ -92,6 +92,32 @@ def inventory_list(request):
             
     items = items.order_by(db_sort_field)
     
+    # --- ส่วน Export Excel (CSV) ---
+    if request.GET.get('export') == 'excel':
+        import csv
+        from django.http import HttpResponse
+        from django.utils import timezone
+        
+        # ใช้ utf-8-sig เพื่อให้ Excel เปิดภาษาไทยได้โดยไม่เพี้ยน
+        response = HttpResponse(content_type='text/csv; charset=utf-8-sig')
+        filename = f"inventory_export_{timezone.localtime().strftime('%Y%m%d_%H%M')}.csv"
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        
+        writer = csv.writer(response)
+        writer.writerow(['ID', 'ชื่อสินค้า', 'รายละเอียด', 'RFID Code', 'สถานที่ปัจจุบัน', 'พบล่าสุด', 'ผู้ลงทะเบียน', 'วันที่ลงทะเบียน'])
+        
+        for item in items:
+            rfid = item.rfid_tag.rfid_code if item.rfid_tag else ''
+            loc = item.current_location.name if item.current_location else 'ไม่มีระบุ'
+            
+            last_seen = timezone.localtime(item.last_seen_at).strftime('%d/%m/%Y %H:%M') if item.last_seen_at else ''
+            reg_by = item.registered_by.username if item.registered_by else ''
+            reg_at = timezone.localtime(item.registered_at).strftime('%d/%m/%Y %H:%M') if item.registered_at else ''
+            
+            writer.writerow([item.id, item.name, item.detail, rfid, loc, last_seen, reg_by, reg_at])
+            
+        return response
+
     # --- ส่วนการแบ่งหน้า (Pagination) ---
     paginator = Paginator(items, 100)  # แสดงผล 10 รายการต่อ 1 หน้า
     page_number = request.GET.get('page')
