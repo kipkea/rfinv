@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Dashboard - RFInv{% endblock %}
+{% block title %}Dashboard - ระบบบริหารสินค้าคงคลัง{% endblock %}
 {% block page_title %}Dashboard{% endblock %}
 
 {% block content %}
@@ -27,14 +27,14 @@
     <div class="col-md-3">
         <div class="card text-white bg-warning mb-3 shadow-sm border-0">
             <div class="card-body">
-                <h5 class="card-title text-dark"><i class="fas fa-tag me-2"></i>รหัส RFID ว่าง</h5>
+                <h5 class="card-title text-dark"><i class="fas fa-tag me-2"></i>รหัส RFID ที่ยังไม่ได้ใช้</h5>
                 <p class="card-text display-5 text-dark mb-0">{{ unassigned_rfid_count }}</p>
             </div>
         </div>
     </div>
     <!-- จำนวนสินค้าที่จำหน่ายออก -->
     <div class="col-md-3">
-        <div class="card text-white bg-secondary mb-3 shadow-sm border-0">
+        <div class="card text-white bg-danger mb-3 shadow-sm border-0">
             <div class="card-body">
                 <h5 class="card-title text-white"><i class="fas fa-ban me-2"></i>จำหน่ายออกแล้ว</h5>
                 <p class="card-text display-5 text-white mb-0">{{ disposed_count }}</p>
@@ -62,7 +62,7 @@
                         <th width="80" class="text-center ps-3">รูปภาพ</th>
                         <th>ชื่อสินค้า</th>
                         <th>เวลาตรวจสอบล่าสุด</th>
-                        <th>ตรวจสอบโดย</th>
+                        <th>ผู้ตรวจ</th>
                     </tr>
                 </thead>
                 <tbody>

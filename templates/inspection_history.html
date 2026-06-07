@@ -20,7 +20,6 @@
                         <th class="text-center">ควรมี</th>
                         <th class="text-center">พบจริง</th>
                         <th class="text-center">หาย</th>
-                        <th class="text-center">พบใหม่ (เกิน)</th>
                         <th class="text-center">พิมพ์รายงาน</th>
                     </tr>
                 </thead>
@@ -30,11 +29,10 @@
                         <td class="ps-4 fw-bold text-secondary">#{{ ins.id }}</td>
                         <td><span class="badge bg-info text-dark">{{ ins.location.name|default:"-" }}</span></td>
                         <td>{{ ins.inspected_by.username|default:"-" }}</td>
-                        <td>{{ ins.inspected_at|date:"d/m/Y H:i" }}</td>
+                        <td>{{ ins.inspected_at|date:"d/m/Y H:i"|default:"-" }}</td>
                         <td class="text-center">{{ ins.total_expected }}</td>
                         <td class="text-center text-success fw-bold">{{ ins.total_found }}</td>
                         <td class="text-center {% if ins.total_missing > 0 %}text-danger fw-bold{% endif %}">{{ ins.total_missing }}</td>
-                        <td class="text-center {% if ins.total_extra > 0 %}text-warning fw-bold{% endif %}">{{ ins.total_extra }}</td>
                         <td class="text-center">
                             <a href="{% url 'rvapi:generate_inspection_pdf' ins.id %}" target="_blank" class="btn btn-sm btn-outline-danger">
                                 <i class="fas fa-file-pdf"></i> PDF

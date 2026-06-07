@@ -3,6 +3,7 @@ from django.conf import settings
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse
 from django.utils import timezone
+from django.db.models import Q
 
 # ReportLab imports
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image, PageBreak
@@ -13,33 +14,56 @@ from reportlab.lib.units import cm
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.pdfmetrics import registerFontFamily
 from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.pdfgen import canvas
 
 from .models import Inventory, Location, Inspection
 
-# ฟังก์ชันสำหรับเพิ่มเลขหน้าลงในเอกสาร ReportLab
-def add_page_number(canvas, doc):
-    canvas.saveState()
-    
-    # 1. วาดลายน้ำ (Watermark)
-    # แนะนำให้นำไฟล์รูปโลโก้ (ควรเป็น PNG ที่ปรับความโปร่งใส/ทำสีจางมาแล้ว) ไปวางไว้ในโฟลเดอร์ assets
-    watermark_path = os.path.join(settings.BASE_DIR, 'assets', 'watermark0.png')
-    if os.path.exists(watermark_path):
-        img_width = 12 * cm
-        img_height = 12 * cm
-        # คำนวณพิกัดให้รูปภาพอยู่กึ่งกลางหน้ากระดาษ A4
-        x = (A4[0] - img_width) / 2
-        y = (A4[1] - img_height) / 2
-        canvas.drawImage(watermark_path, x, y, width=img_width, height=img_height, mask='auto')
 
-    # 2. วาดเลขหน้า
-    page_num = canvas.getPageNumber()
-    text = f"หน้า {page_num}"
-    try:
-        canvas.setFont('THSarabun', 11)
-    except Exception:
-        canvas.setFont('Helvetica', 11)
-    canvas.drawRightString(A4[0] - 1.5*cm, 1.5*cm, text)
-    canvas.restoreState()
+# คลาส Canvas สำหรับทำเลขหน้าแบบ หน้าปัจจุบัน/หน้าทั้งหมด และลายน้ำ
+class PageNumCanvas(canvas.Canvas):
+    def __init__(self, *args, **kwargs):
+        canvas.Canvas.__init__(self, *args, **kwargs)
+        self.pages = []
+        self.draw_watermark()
+
+    def showPage(self):
+        # เก็บสถานะของแต่ละหน้าไว้ก่อนจะขึ้นหน้าใหม่
+        self.pages.append(dict(self.__dict__))
+        self._startPage()
+        self.draw_watermark()
+
+    def save(self):
+        # วาดเลขหน้าลงทุกหน้าก่อนจะเซฟไฟล์
+        page_count = len(self.pages)
+        for page in self.pages:
+            self.__dict__.update(page)
+            self.draw_page_number(page_count)
+            canvas.Canvas.showPage(self)
+        canvas.Canvas.save(self)
+
+    def draw_watermark(self):
+        self.saveState()
+        watermark_path = os.path.join(settings.BASE_DIR, 'assets', 'watermark0.png')
+        if os.path.exists(watermark_path):
+            img_width = 12 * cm
+            img_height = 12 * cm
+            x = (A4[0] - img_width) / 2
+            y = (A4[1] - img_height) / 2
+            self.drawImage(watermark_path, x, y, width=img_width, height=img_height, mask='auto')
+        self.restoreState()
+
+    def draw_page_number(self, page_count):
+        self.saveState()
+
+        page_num = self._pageNumber
+        text = f"หน้า {page_num}/{page_count}"
+        try:
+            self.setFont('THSarabun', 11)
+        except Exception:
+            self.setFont('Helvetica', 11)
+        self.drawRightString(A4[0] - 1.5*cm, 1.5*cm, text)
+        
+        self.restoreState()
 
 # ฟังก์ชันสำหรับลงทะเบียนฟอนต์ภาษาไทยเพื่อใช้งานใน ReportLab
 def register_thai_font():
@@ -105,7 +129,8 @@ def generate_location_report(request):
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = 'inline; filename="location_report.pdf"'
     
-    doc = SimpleDocTemplate(response, pagesize=A4, rightMargin=1.5*cm, leftMargin=1.5*cm, topMargin=1.5*cm, bottomMargin=1.5*cm)
+    doc = SimpleDocTemplate(response, pagesize=A4, rightMargin=1.5*cm, leftMargin=1.5*cm, topMargin=1.5*cm, bottomMargin=1.5*cm,
+                            title="รายงานสินค้าแบ่งตามตำแหน่ง", author="ระบบจัดการคลังสินค้า (RFInv)")
     font_name, font_bold = register_thai_font()
     styles = getSampleStyleSheet()
     
@@ -130,7 +155,8 @@ def generate_location_report(request):
         elements.append(Spacer(1, 5))
         
         data = [['รูปภาพ', 'ชื่อสินค้า', 'RFID Code']]
-        items = loc.current_items.all().order_by('name')
+        # กรองเอาเฉพาะสินค้าที่สถานะปกติ (ACTIVE)
+        items = loc.current_items.filter(status='ACTIVE').order_by('name')
         if not items:
             data.append(['', 'ไม่พบรายการสินค้าในตำแหน่งนี้', ''])
         
@@ -163,7 +189,7 @@ def generate_location_report(request):
         elements.append(t)
         elements.append(Spacer(1, 20))
         
-    doc.build(elements, onFirstPage=add_page_number, onLaterPages=add_page_number)
+    doc.build(elements, canvasmaker=PageNumCanvas)
     return response
 
 def generate_inspection_pdf(request, pk):
@@ -172,7 +198,8 @@ def generate_inspection_pdf(request, pk):
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = f'inline; filename="inspection_{pk}.pdf"'
     
-    doc = SimpleDocTemplate(response, pagesize=A4, rightMargin=1.5*cm, leftMargin=1.5*cm, topMargin=1.5*cm, bottomMargin=1.5*cm)
+    doc = SimpleDocTemplate(response, pagesize=A4, rightMargin=1.5*cm, leftMargin=1.5*cm, topMargin=1.5*cm, bottomMargin=1.5*cm,
+                            title=f"รายงานสรุปผลการตรวจสอบสินค้า ครั้งที่ {pk}", author="ระบบจัดการคลังสินค้า (RFInv)")
     font_name, font_bold = register_thai_font()
     styles = getSampleStyleSheet()
     style_normal = ParagraphStyle('Normal_Thai', parent=styles['Normal'], fontName=font_name, fontSize=13)
@@ -187,12 +214,16 @@ def generate_inspection_pdf(request, pk):
     info = f"<b>สถานที่ตรวจสอบ:</b> {inspection.location.name}<br/>"
     info += f"<b>วันที่ตรวจสอบ:</b> {timezone.localtime(inspection.inspected_at).strftime('%d/%m/%Y %H:%M')}<br/>"
     info += f"<b>ผู้ตรวจสอบ:</b> {inspection.inspected_by.get_full_name() or inspection.inspected_by.username}<br/><br/>"
-    info += f"<b>สรุปยอด:</b> ควรมี {inspection.total_expected} รายการ, พบจริง {inspection.total_found} รายการ, หาย {inspection.total_missing} รายการ, พบใหม่ (เกิน) {inspection.total_extra} รายการ"
+    info += f"<b>สรุปยอด:</b> ควรมี {inspection.total_expected} รายการ, พบจริง {inspection.total_found} รายการ, หาย {inspection.total_missing} รายการ"
     elements.append(Paragraph(info, style_normal))
     elements.append(Spacer(1, 20))
     
     # คำนวณของหาย เกิน พบ
-    expected_items = Inventory.objects.filter(current_location=inspection.location, status='ACTIVE')
+    # ดึงรายการสินค้าที่ควรจะมีในขณะนั้น (รวมสินค้าที่ถูกจำหน่ายออกไปแล้ว "หลังจาก" การตรวจสอบนี้ด้วย)
+    expected_items = Inventory.objects.filter(
+        Q(status='ACTIVE') | Q(status='DISPOSED', disposed_at__gte=inspection.inspected_at) | Q(status='DISPOSED', disposed_at__isnull=True),
+        current_location=inspection.location
+    )
     found_items = inspection.found_inventories.all()
     expected_ids = set(expected_items.values_list('id', flat=True))
     found_ids = set(found_items.values_list('id', flat=True))
@@ -206,7 +237,8 @@ def generate_inspection_pdf(request, pk):
     found_matched_items = Inventory.objects.filter(id__in=actual_found_ids).order_by('name')
     
     def build_table(items, empty_msg):
-        data = [['รูปภาพ', 'ID', 'ชื่อสินค้า', 'RFID Code']]
+        #data = [['รูปภาพ', 'ID', 'ชื่อสินค้า', 'RFID Code']]
+        data = [['รูปภาพ', 'ชื่อสินค้า', 'RFID Code']]
         if not items:
             data.append([empty_msg, '', '', ''])
             
@@ -217,9 +249,18 @@ def generate_inspection_pdf(request, pk):
                 if os.path.exists(img_path):
                     img = Image(img_path, width=40, height=40)
             rfid = item.rfid_tag.rfid_code if item.rfid_tag else '-'
-            data.append([img, str(item.id), Paragraph(item.name, style_normal), rfid])
             
-        t = Table(data, colWidths=[2.5*cm, 1.5*cm, 9*cm, 5*cm])
+            name_text = item.name
+            if item.status == 'DISPOSED':
+                dt = timezone.localtime(item.disposed_at).strftime('%d/%m/%Y %H:%M') if item.disposed_at else '-'
+                usr = (item.disposed_by.get_full_name() or item.disposed_by.username) if item.disposed_by else '-'
+                name_text += f"<br/><font color='red'><b>[จำหน่ายออกแล้ว]</b><br/>วันที่: {dt}<br/>โดย: {usr}</font>"
+                
+            #data.append([img, str(item.id), Paragraph(name_text, style_normal), rfid])
+            data.append([img, Paragraph(name_text, style_normal), rfid])
+            
+        #t = Table(data, colWidths=[2.5*cm, 1.5*cm, 9*cm, 5*cm])
+        t = Table(data, colWidths=[2.5*cm, 10*cm, 4*cm])
         ts = [
             ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#f1f1f1')),
             ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
@@ -236,21 +277,26 @@ def generate_inspection_pdf(request, pk):
         t.setStyle(TableStyle(ts))
         return t
 
-    elements.append(Paragraph('<font color="red">รายการสินค้าที่หาย (ไม่พบ)</font>', style_h3))
-    elements.append(Spacer(1, 5))
-    elements.append(build_table(missing_items, 'ไม่มีสินค้าที่หาย'))
-    elements.append(Spacer(1, 15))
-    
+
+
+    '''
     elements.append(Paragraph('<font color="#fd7e14">รายการสินค้าที่พบใหม่ (เกิน)</font>', style_h3))
     elements.append(Spacer(1, 5))
     elements.append(build_table(extra_items, 'ไม่มีสินค้าที่พบใหม่'))
     elements.append(Spacer(1, 15))
-    
+    '''
+
     elements.append(Paragraph('<font color="#198754">รายการสินค้าที่พบถูกต้อง</font>', style_h3))
     elements.append(Spacer(1, 5))
     elements.append(build_table(found_matched_items, 'ไม่มีสินค้าที่พบถูกต้อง'))
     
-    doc.build(elements, onFirstPage=add_page_number, onLaterPages=add_page_number)
+    elements.append(Paragraph('<font color="red">รายการสินค้าที่หาย (ไม่พบ)</font>', style_h3))
+    elements.append(Spacer(1, 5))
+    elements.append(build_table(missing_items, 'ไม่มีสินค้าที่หาย'))
+    elements.append(Spacer(1, 15))
+
+    #doc.build(elements, onFirstPage=add_page_number, onLaterPages=add_page_number)
+    doc.build(elements, canvasmaker=PageNumCanvas)
     return response
 
 def generate_disposed_report(request):
@@ -261,7 +307,8 @@ def generate_disposed_report(request):
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = 'inline; filename="disposed_report.pdf"'
     
-    doc = SimpleDocTemplate(response, pagesize=A4, rightMargin=1.5*cm, leftMargin=1.5*cm, topMargin=1.5*cm, bottomMargin=1.5*cm)
+    doc = SimpleDocTemplate(response, pagesize=A4, rightMargin=1.5*cm, leftMargin=1.5*cm, topMargin=1.5*cm, bottomMargin=1.5*cm,
+                            title="รายงานสินค้าจำหน่ายออก (สูญหาย/ชำรุด)", author="ระบบจัดการคลังสินค้า (RFInv)")
     font_name, font_bold = register_thai_font()
     styles = getSampleStyleSheet()
     style_normal = ParagraphStyle('Normal_Thai', parent=styles['Normal'], fontName=font_name, fontSize=13)
@@ -322,7 +369,8 @@ def generate_disposed_report(request):
     t.setStyle(TableStyle(table_style))
     elements.append(t)
     
-    doc.build(elements, onFirstPage=add_page_number, onLaterPages=add_page_number)
+    #doc.build(elements, onFirstPage=add_page_number, onLaterPages=add_page_number)
+    doc.build(elements, canvasmaker=PageNumCanvas)
     return response
 
 def generate_product_report(request):
@@ -337,7 +385,8 @@ def generate_product_report(request):
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = 'inline; filename="product_report.pdf"'
     
-    doc = SimpleDocTemplate(response, pagesize=A4, rightMargin=1.5*cm, leftMargin=1.5*cm, topMargin=1.5*cm, bottomMargin=1.5*cm)
+    doc = SimpleDocTemplate(response, pagesize=A4, rightMargin=1.5*cm, leftMargin=1.5*cm, topMargin=1.5*cm, bottomMargin=1.5*cm,
+                            title="รายงานประวัติการตรวจสอบสินค้า", author="ระบบจัดการคลังสินค้า (RFInv)")
     font_name, font_bold = register_thai_font()
     styles = getSampleStyleSheet()
     
@@ -348,7 +397,7 @@ def generate_product_report(request):
 
     elements = []
     elements.append(Paragraph('ระบบจัดการคลังสินค้า (RFInv)', style_h2))
-    elements.append(Paragraph('รายงานประวัติการตรวจสอบและพิกัดสินค้า', style_h3))
+    elements.append(Paragraph('รายงานประวัติการตรวจสอบสินค้า', style_h3))
     
     printed_by = request.user.get_full_name() or request.user.username
     printed_time = timezone.localtime(timezone.now()).strftime("%d/%m/%Y %H:%M")
@@ -370,6 +419,10 @@ def generate_product_report(request):
         rfid = prod.rfid_tag.rfid_code if prod.rfid_tag else "-"
         loc = prod.current_location.name if prod.current_location else "-"
         info_text = f"<b>RFID Code:</b> {rfid}<br/><b>สถานที่ปัจจุบัน:</b> {loc}"
+        if prod.status == 'DISPOSED':
+            dt = timezone.localtime(prod.disposed_at).strftime('%d/%m/%Y %H:%M') if prod.disposed_at else '-'
+            usr = (prod.disposed_by.get_full_name() or prod.disposed_by.username) if prod.disposed_by else '-'
+            info_text += f"<br/><br/><font color='red'><b>[จำหน่ายออกแล้ว]</b></font><br/><b>วันที่จำหน่าย:</b> {dt}<br/><b>ผู้จำหน่าย:</b> {usr}"        
         info_cell = [Paragraph(prod.name, style_h4), Spacer(1, 5), Paragraph(info_text, style_normal)]
         
         info_table = Table([[img, info_cell]], colWidths=[3*cm, 13*cm])
@@ -421,5 +474,5 @@ def generate_product_report(request):
         elements.append(t)
         elements.append(Spacer(1, 20))
         
-    doc.build(elements, onFirstPage=add_page_number, onLaterPages=add_page_number)
+    doc.build(elements, canvasmaker=PageNumCanvas)
     return response

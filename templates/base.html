@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -41,13 +43,13 @@
                 <a href="{% url 'web_dashboard' %}"><i class="fas fa-tachometer-alt me-3"></i> Dashboard</a>
             </li>
             <li class="{% if request.resolver_match.url_name == 'web_inventory' %}active{% endif %}">
-                <a href="{% url 'web_inventory' %}"><i class="fas fa-box-open me-3"></i> สินค้า (Inventory)</a>
+                <a href="{% url 'web_inventory' %}"><i class="fas fa-box-open me-3"></i> รายการสินค้า</a>
             </li>
             <li class="{% if request.resolver_match.url_name == 'web_inspection_history' %}active{% endif %}">
                 <a href="{% url 'web_inspection_history' %}"><i class="fas fa-clipboard-check me-3"></i> ประวัติการตรวจสอบ</a>
             </li>
             <li class="{% if request.resolver_match.url_name == 'report_dashboard' %}active{% endif %}">
-                <a href="{% url 'rvapi:report_dashboard' %}"><i class="fas fa-print me-3"></i> ออกรายงาน (Reports)</a>
+                <a href="{% url 'rvapi:report_dashboard' %}"><i class="fas fa-print me-3"></i> พิมพ์รายงาน</a>
             </li>
             <li class="mt-4">
                 <a href="{% url 'web_logout' %}"><i class="fas fa-power-off me-3 text-danger"></i> ออกจากระบบ</a>
