@@ -97,8 +97,11 @@ class InspectionCreateSerializer(serializers.ModelSerializer):
         # คำนวณผลลัพธ์ (ตาม Logic ใน Model ที่เราเขียนไว้)
         results = inspection.calculate_results()
         
+        # หาสินค้ารหัสใหม่ที่ไม่มีในระบบ
+        found_rfids = set(found_inventories.values_list('rfid_tag__rfid_code', flat=True))
+        unknown_rfids = set(scanned_codes) - found_rfids
+        results['unknown_rfids'] = list(unknown_rfids)
+        
         # ฝากผลลัพธ์ไว้ที่ instance ชั่วคราวเพื่อส่งกลับไปที่ View
         inspection._temp_results = results 
         return inspection
-
-

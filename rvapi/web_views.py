@@ -1,9 +1,12 @@
+import csv
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db.models import OuterRef, Subquery
-from .models import Inventory, Location, RFIDTag
+from django.http import HttpResponse
+from .models import Inventory, Location, RFIDTag, Inspection
+from django.utils import timezone
 
 @login_required(login_url='web_login')
 def inventory_list(request):
@@ -29,6 +32,15 @@ def inventory_list(request):
             item_id = request.POST.get('item_id')
             item = get_object_or_404(Inventory, id=item_id)
             item.delete()
+            
+        elif action == 'dispose':
+            # --- กรณีจำหน่ายสินค้า (สูญหาย/ชำรุด) ---
+            item_id = request.POST.get('item_id')
+            item = get_object_or_404(Inventory, id=item_id)
+            item.status = 'DISPOSED'
+            item.disposed_at = timezone.now()
+            item.disposed_by = request.user
+            item.save()
             
         else:
             # --- กรณีเพิ่มข้อมูลใหม่ (สินค้า หรือ สถานที่เก็บ) ---
@@ -81,7 +93,8 @@ def inventory_list(request):
     if sort_dir == 'desc':
         db_sort_field = f'-{db_sort_field}'
 
-    items = Inventory.objects.select_related('rfid_tag', 'current_location').all()
+    # ดึงเฉพาะสินค้าที่ยังไม่ได้ถูกจำหน่าย (ACTIVE)
+    items = Inventory.objects.select_related('rfid_tag', 'current_location').filter(status='ACTIVE')
     
     # ตรวจสอบและกรองข้อมูลตามสถานที่
     if location_filter:
@@ -94,9 +107,6 @@ def inventory_list(request):
     
     # --- ส่วน Export Excel (CSV) ---
     if request.GET.get('export') == 'excel':
-        import csv
-        from django.http import HttpResponse
-        from django.utils import timezone
         
         # ใช้ utf-8-sig เพื่อให้ Excel เปิดภาษาไทยได้โดยไม่เพี้ยน
         response = HttpResponse(content_type='text/csv; charset=utf-8-sig')
@@ -159,8 +169,10 @@ def web_logout(request):
 @login_required(login_url='web_login')
 def dashboard(request):
     # ดึงข้อมูลจาก Model โดยตรง
-    inv_count = Inventory.objects.count()
+    inv_count = Inventory.objects.filter(status='ACTIVE').count()
     loc_count = Location.objects.count()
+    disposed_items = Inventory.objects.filter(status='DISPOSED').select_related('disposed_by').order_by('-disposed_at')
+    disposed_count = disposed_items.count()
     
     # 1. จำนวนรหัสที่ยังไม่ได้กำหนดข้อมูล (ไม่มีทั้งใน Inventory และ Location)
     unassigned_rfid_count = RFIDTag.objects.filter(
@@ -174,7 +186,7 @@ def dashboard(request):
         found_inventories=OuterRef('pk')
     ).order_by('-inspected_at')
 
-    inventories = Inventory.objects.select_related('current_location').annotate(
+    inventories = Inventory.objects.filter(status='ACTIVE').select_related('current_location').annotate(
         inspected_by_name=Subquery(latest_inspection.values('inspected_by__username')[:1])
     ).order_by('current_location__name', 'name')
 
@@ -197,4 +209,20 @@ def dashboard(request):
         'unassigned_rfid_count': unassigned_rfid_count,
         'grouped_items': grouped_items,
         'no_location_items': no_location_items,
+        'disposed_count': disposed_count,
+        'disposed_items': disposed_items,
+    })
+
+@login_required(login_url='web_login')
+def inspection_history(request):
+    """ หน้าดูประวัติการตรวจสอบทั้งหมด """
+    # ดึงประวัติการตรวจสอบทั้งหมด (Model ตั้งค่า ordering = ('-inspected_at',) ไว้แล้ว จึงได้ข้อมูลล่าสุดก่อนอัตโนมัติ)
+    inspections = Inspection.objects.select_related('location', 'inspected_by').all()
+    
+    paginator = Paginator(inspections, 20)  # แสดงหน้าละ 20 รายการ
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    return render(request, 'inspection_history.html', {
+        'page_obj': page_obj
     })

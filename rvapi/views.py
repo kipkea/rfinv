@@ -430,6 +430,7 @@ class InspectionListAPIView(APIView):
             # เตรียมข้อมูลตอบกลับ (Custom Response)
             missing_serialized = InventorySerializer(results.get('missing_items', []), many=True).data
             extra_serialized = InventorySerializer(results.get('extra_items', []), many=True).data
+            unknown_rfids = results.get('unknown_rfids', [])
 
             response_data = {
                 "inspection_id": inspection.id,
@@ -437,10 +438,12 @@ class InspectionListAPIView(APIView):
                 "summary": {
                     "total_expected": inspection.total_expected,
                     "total_found": inspection.total_found,
-                    "total_missing": inspection.total_missing
+                    "total_missing": inspection.total_missing,
+                    "total_unknown": len(unknown_rfids)
                 },
                 "missing_items": missing_serialized,
-                "extra_items": extra_serialized
+                "extra_items": extra_serialized,
+                "unknown_rfids": unknown_rfids
             }
             return Response(response_data, status=status.HTTP_201_CREATED)
         
@@ -454,8 +457,38 @@ class InspectionDetailAPIView(APIView):
         """ดูรายละเอียดการตรวจสอบรายครั้ง"""
         inspection = get_object_or_404(Inspection, pk=pk)
         serializer = InspectionSerializer(inspection)
-        return Response(serializer.data)
+        
+        data = serializer.data
+        
+        # คำนวณรายละเอียดรายการ หาย และ พบ
+        expected_items = Inventory.objects.filter(current_location=inspection.location, status='ACTIVE')
+        found_items = inspection.found_inventories.all()
+        
+        expected_ids = set(expected_items.values_list('id', flat=True))
+        found_ids = set(found_items.values_list('id', flat=True))
+        
+        missing_ids = expected_ids - found_ids
+        extra_ids = found_ids - expected_ids
+        
+        missing_items = Inventory.objects.filter(id__in=missing_ids)
+        extra_items = Inventory.objects.filter(id__in=extra_ids)
+        
+        data['missing_items_detail'] = InventorySerializer(missing_items, many=True).data
+        data['extra_items_detail'] = InventorySerializer(extra_items, many=True).data
+        data['found_items_detail'] = InventorySerializer(found_items, many=True).data
+        
+        return Response(data)
 
+@api_view(['POST'])
+@authentication_classes([APIKeyAuthentication, SessionAuthentication, BasicAuthentication])
+@permission_classes([IsAuthenticated])
+def dispose_inventory_api(request, pk):
+    item = get_object_or_404(Inventory, pk=pk)
+    item.status = 'DISPOSED'
+    item.disposed_at = timezone.now()
+    item.disposed_by = request.user
+    item.save()
+    return Response({"status": "success", "message": f"จำหน่ายสินค้า {item.name} สำเร็จ (รหัส RFID ถูกระงับ)"})
 # (คุณสามารถทำ RFIDTagListAPIView และ LocationListAPIView ในลักษณะเดียวกับ Inventory ได้เลยครับ)
 
 

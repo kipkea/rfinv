@@ -60,6 +60,31 @@
     </div>
 </div>
 
+<div class="card card-custom mb-4">
+    <div class="card-body">
+        <h5><i class="fas fa-file-pdf text-danger"></i> พิมพ์รายงานสินค้าจำหน่ายออก (สูญหาย/ชำรุด)</h5>
+        <form class="row g-3 align-items-center" target="_blank" action="{% url 'rvapi:generate_disposed_report' %}" method="GET">
+            <div class="col-auto">
+                <label class="col-form-label">ตั้งแต่วันที่</label>
+            </div>
+            <div class="col-auto">
+                <input type="date" class="form-control" name="start_date" required>
+            </div>
+            <div class="col-auto">
+                <label class="col-form-label">ถึงวันที่</label>
+            </div>
+            <div class="col-auto">
+                <input type="date" class="form-control" name="end_date" required>
+            </div>
+            <div class="col-auto">
+                <button type="submit" class="btn btn-danger"><i class="fas fa-print"></i> พิมพ์รายงาน</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+
 <!-- โหลด jQuery (หากใน base.html ยังไม่ได้โหลด) และ Select2 CSS/JS (ดึงจาก CDN เพื่อความรวดเร็ว) -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />

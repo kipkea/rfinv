@@ -6,7 +6,7 @@
 {% block content %}
 <div class="row mb-4">
     <!-- จำนวนสินค้า -->
-    <div class="col-md-4">
+    <div class="col-md-3">
         <div class="card text-white bg-primary mb-3 shadow-sm border-0">
             <div class="card-body">
                 <h5 class="card-title"><i class="fas fa-box me-2"></i>จำนวนสินค้าทั้งหมด</h5>
@@ -15,7 +15,7 @@
         </div>
     </div>
     <!-- จำนวนสถานที่ -->
-    <div class="col-md-4">
+    <div class="col-md-3">
         <div class="card text-white bg-success mb-3 shadow-sm border-0">
             <div class="card-body">
                 <h5 class="card-title"><i class="fas fa-map-marker-alt me-2"></i>จำนวนสถานที่เก็บ</h5>
@@ -24,11 +24,20 @@
         </div>
     </div>
     <!-- จำนวนรหัสที่ว่าง -->
-    <div class="col-md-4">
+    <div class="col-md-3">
         <div class="card text-white bg-warning mb-3 shadow-sm border-0">
             <div class="card-body">
                 <h5 class="card-title text-dark"><i class="fas fa-tag me-2"></i>รหัส RFID ว่าง</h5>
                 <p class="card-text display-5 text-dark mb-0">{{ unassigned_rfid_count }}</p>
+            </div>
+        </div>
+    </div>
+    <!-- จำนวนสินค้าที่จำหน่ายออก -->
+    <div class="col-md-3">
+        <div class="card text-white bg-secondary mb-3 shadow-sm border-0">
+            <div class="card-body">
+                <h5 class="card-title text-white"><i class="fas fa-ban me-2"></i>จำหน่ายออกแล้ว</h5>
+                <p class="card-text display-5 text-white mb-0">{{ disposed_count }}</p>
             </div>
         </div>
     </div>
@@ -127,6 +136,56 @@
                                 <span class="badge bg-info text-dark"><i class="fas fa-user me-1"></i>{{ item.inspected_by_name }}</span>
                             {% else %}
                                 <span class="badge bg-light text-muted border">ยังไม่เคยตรวจสอบ</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- สินค้าที่จำหน่ายออก -->
+{% if disposed_items %}
+<div class="card mb-4 shadow-sm border-secondary">
+    <div class="card-header bg-secondary text-white fw-bold d-flex justify-content-between align-items-center py-3">
+        <span>
+            <i class="fas fa-ban me-2"></i> สินค้าที่จำหน่ายออก (สูญหาย/ชำรุด)
+        </span>
+        <span class="badge bg-light text-secondary rounded-pill px-3">{{ disposed_items|length }} รายการ</span>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th width="80" class="text-center ps-3">รูปภาพ</th>
+                        <th>ชื่อสินค้า</th>
+                        <th>วันที่จำหน่าย</th>
+                        <th>ผู้จำหน่าย</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in disposed_items %}
+                    <tr>
+                        <td class="text-center ps-3">
+                            {% if item.image %}
+                                <img src="{{ item.image.url }}" alt="{{ item.name }}" width="45" height="45" style="object-fit: cover; border-radius: 4px; border: 1px solid #ddd;">
+                            {% else %}
+                                <div class="bg-light d-inline-flex justify-content-center align-items-center" style="width:45px; height:45px; border-radius:4px; border: 1px solid #ddd;">
+                                    <i class="fas fa-image text-muted"></i>
+                                </div>
+                            {% endif %}
+                        </td>
+                        <td class="fw-bold text-secondary">{{ item.name }}</td>
+                        <td>{{ item.disposed_at|date:"d/m/Y H:i"|default:"-" }}</td>
+                        <td>
+                            {% if item.disposed_by %}
+                                <span class="badge bg-dark"><i class="fas fa-user-times me-1"></i>{{ item.disposed_by.username }}</span>
+                            {% else %}
+                                <span class="text-muted">-</span>
                             {% endif %}
                         </td>
                     </tr>

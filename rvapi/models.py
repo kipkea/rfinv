@@ -49,6 +49,11 @@ class Location(models.Model):
             self.rfid_tag.save(update_fields=['is_location'])
     
 class Inventory(models.Model): #res
+    STATUS_CHOICES = (
+        ('ACTIVE', 'ปกติ'),
+        ('DISPOSED', 'จำหน่ายออก(หาย)'),
+    )
+    
     rfid_tag = models.OneToOneField(RFIDTag, on_delete=models.CASCADE, related_name='inventory_profile')
     name = models.CharField(max_length=255)
     detail = models.TextField(blank=True, null=True)    
@@ -59,6 +64,11 @@ class Inventory(models.Model): #res
     # ใครเป็นคนลงทะเบียนสินค้านี้
     registered_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     registered_at = models.DateTimeField(auto_now_add=True)
+    
+    # สถานะสินค้า (ปกติ หรือ จำหน่ายออก)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='ACTIVE')
+    disposed_at = models.DateTimeField(null=True, blank=True)
+    disposed_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='disposed_items_history')
     
     #เอาไว้เก็บสถานที่เก็บสุดท้าย
     last_seen_at = models.DateTimeField(auto_now=True, help_text="เวลาล่าสุดที่ระบบพบสินค้านี้")
@@ -108,6 +118,11 @@ class Inspection(models.Model):
     total_found = models.IntegerField(default=0, help_text="จำนวนที่เจอจริง")
     total_missing = models.IntegerField(default=0, help_text="จำนวนที่หาย")
     
+    @property
+    def total_extra(self):
+        """ คำนวณจำนวนสินค้าที่พบใหม่ (เกินมาจากที่ระบบบันทึกไว้) """
+        return self.total_found - self.total_expected + self.total_missing
+
     class Meta:
         # เรียงลำดับจากรายการล่าสุดไปเก่าสุด
         ordering = ('-inspected_at',)
@@ -120,9 +135,9 @@ class Inspection(models.Model):
         ฟังก์ชันสำหรับคำนวณยอด ของหาย (Missing) และ ของเกิน (Extra)
         ควรเรียกใช้หลังจาก add found_inventories เสร็จแล้ว
         """
-        # 1. หาสินค้าที่ 'ควรจะอยู่' ที่นี่ (System Expected)
+        # 1. หาสินค้าที่ 'ควรจะอยู่' ที่นี่ (System Expected) และยังสถานะ 'ACTIVE'
         # คือสินค้าที่ current_location ล่าสุดเป็น Location นี้
-        expected_items = Inventory.objects.filter(current_location=self.location)
+        expected_items = Inventory.objects.filter(current_location=self.location, status='ACTIVE')
         
         # 2. สินค้าที่ 'เจอจริง' (Scanned / Found)
         found_items = self.found_inventories.all()

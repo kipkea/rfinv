@@ -5,7 +5,11 @@ from .models import RFIDTag, Location, Inventory, InventoryImage, Inspection, Us
 
 @admin.register(RFIDTag)
 class RFIDTagAdmin(admin.ModelAdmin):
-    list_display = ('rfid_code', 'is_location', 'registered_by', 'registered_at')
+    #list_display = ('rfid_code', 'is_location', 'registered_by', 'registered_at')    
+    list_display = [
+        field.name for field in RFIDTag._meta.get_fields() 
+        if not field.many_to_many and not field.one_to_many
+    ]
     search_fields = ('rfid_code',)
     list_filter = ('is_location',)    
 
@@ -17,13 +21,10 @@ class LocationAdmin(admin.ModelAdmin):
         
 @admin.register(Inventory)    
 class InventoryAdmin(admin.ModelAdmin):
-    list_display = (
-        'name', 
-        'rfid_tag', 
-        'current_location', 
-        'last_seen_at', 
-        'registered_by'
-    )
+    list_display = [
+        field.name for field in Inventory._meta.get_fields() 
+        if not field.many_to_many and not field.one_to_many
+    ]    
     search_fields = ('name', 'rfid_tag__rfid_code')
     list_filter = ('current_location',)
     
@@ -33,14 +34,10 @@ class InventoryImageAdmin(admin.ModelAdmin):
 
 @admin.register(Inspection)
 class InspectionAdmin(admin.ModelAdmin):
-    list_display = (
-        'location', 
-        'inspected_at', 
-        'inspected_by', 
-        'total_expected', 
-        'total_found', 
-        'total_missing'
-    )
+    list_display = [
+        field.name for field in Inspection._meta.get_fields() 
+        if not field.many_to_many and not field.one_to_many
+    ] 
     list_filter = ('location', 'inspected_at')     
 
 @admin.register(UserAPIKey)

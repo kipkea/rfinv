@@ -230,10 +230,105 @@
 
         <!-- หน้า Inspection -->
         <div id="page-inspection" class="page-content hidden">
-            <div class="card card-custom p-4 text-center text-muted">
-                <i class="fas fa-clipboard-list fa-4x mb-3"></i>
-                <h4>ส่วนตรวจนับสินค้า</h4>
-                <p>บนเว็บสามารถออกแบบฟอร์มให้เชื่อมต่อกับเครื่องยิงบาร์โค้ด หรือพิมพ์รหัส RFID เข้าไปได้เลย</p>
+            <!-- แถบรายงานจำหน่าย -->
+            <div class="card card-custom mb-4">
+                <div class="card-body">
+                    <h5><i class="fas fa-file-pdf text-danger"></i> พิมพ์รายงานสินค้าจำหน่ายออก (สูญหาย/ชำรุด)</h5>
+                    <form class="row g-3 align-items-center" id="disposed-report-form" target="_blank" action="/reports/disposed/pdf/" method="GET">
+                        <div class="col-auto">
+                            <label class="col-form-label">ตั้งแต่วันที่</label>
+                        </div>
+                        <div class="col-auto">
+                            <input type="date" class="form-control" name="start_date" required>
+                        </div>
+                        <div class="col-auto">
+                            <label class="col-form-label">ถึงวันที่</label>
+                        </div>
+                        <div class="col-auto">
+                            <input type="date" class="form-control" name="end_date" required>
+                        </div>
+                        <div class="col-auto">
+                            <button type="submit" class="btn btn-danger"><i class="fas fa-print"></i> พิมพ์รายงาน</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- รายการตรวจสอบ -->
+            <div id="inspection-list-view">
+                <div class="card card-custom">
+                    <div class="card-header bg-white p-3 d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">ประวัติการตรวจสอบ</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="ps-4">ID</th>
+                                        <th>สถานที่</th>
+                                        <th>ผู้ตรวจสอบ</th>
+                                        <th>วันที่ตรวจสอบ</th>
+                                        <th>ควรมี</th>
+                                        <th>พบจริง</th>
+                                        <th>หาย</th>
+                                        <th class="text-center">จัดการ</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="ins-table-body">
+                                    <tr><td colspan="8" class="text-center py-4">กำลังโหลดข้อมูล...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- รายละเอียดการตรวจสอบ -->
+            <div id="inspection-detail-view" class="hidden">
+                <button class="btn btn-secondary mb-3" onclick="showInspectionList()"><i class="fas fa-arrow-left"></i> กลับไปหน้ารายการ</button>
+                <a id="print-inspection-btn" class="btn btn-danger mb-3 float-end" target="_blank" href="#"><i class="fas fa-print"></i> พิมพ์รายงานสรุปยอด</a>
+                
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="card bg-primary text-white mb-3 card-custom"><div class="card-body text-center"><h5 class="opacity-75">ควรมี</h5><h2 id="ins-det-expected">0</h2></div></div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-success text-white mb-3 card-custom"><div class="card-body text-center"><h5 class="opacity-75">พบจริง</h5><h2 id="ins-det-found">0</h2></div></div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-danger text-white mb-3 card-custom"><div class="card-body text-center"><h5 class="opacity-75">หาย</h5><h2 id="ins-det-missing">0</h2></div></div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-warning text-dark mb-3 card-custom"><div class="card-body text-center"><h5 class="opacity-75">สินค้าใหม่ (เกิน)</h5><h2 id="ins-det-extra">0</h2></div></div>
+                    </div>
+                </div>
+
+                <div class="card card-custom">
+                    <div class="card-header bg-white pb-0">
+                        <ul class="nav nav-tabs card-header-tabs" id="inspectionTabs">
+                            <li class="nav-item"><a class="nav-link active text-danger" href="#" onclick="switchInsTab('missing')">รายการที่หาย</a></li>
+                            <li class="nav-item"><a class="nav-link text-success" href="#" onclick="switchInsTab('found')">รายการที่พบ</a></li>
+                            <li class="nav-item"><a class="nav-link text-warning" href="#" onclick="switchInsTab('extra')">รายการใหม่ (เกิน)</a></li>
+                        </ul>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="ps-4">ID</th>
+                                        <th>ชื่อสินค้า</th>
+                                        <th>RFID Code</th>
+                                        <th class="text-center" id="th-action">จัดการ</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="ins-detail-table-body">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -326,8 +421,146 @@
         // เรียกโหลดข้อมูลเมื่อเปิดหน้านั้นๆ
         if (pageId === 'dashboard') loadDashboard();
         if (pageId === 'inventory') loadInventory();
+        if (pageId === 'inspection') showInspectionList();
         
         if(window.innerWidth <= 768) sidebar.classList.remove('mobile-show'); // ปิดเมนูบนมือถือเมื่อคลิกเลือก
+    }
+
+    // --- Inspection UI Logic ---
+    let currentMissingItems = [];
+    let currentFoundItems = [];
+    let currentExtraItems = [];
+
+    async function loadInspections() {
+        const data = await fetchAPI('/api/inspections/');
+        const tbody = document.getElementById('ins-table-body');
+        tbody.innerHTML = '';
+        
+        if(!data || data.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4">ไม่พบข้อมูลการตรวจสอบ</td></tr>';
+            return;
+        }
+        
+        const items = Array.isArray(data) ? data : (data.results || []);
+        items.forEach(ins => {
+            const date = new Date(ins.inspected_at).toLocaleString('th-TH');
+            tbody.innerHTML += `
+                <tr>
+                    <td class="ps-4 fw-bold">#${ins.id}</td>
+                    <td>${ins.location_name}</td>
+                    <td>${ins.inspected_by_name}</td>
+                    <td>${date}</td>
+                    <td>${ins.total_expected}</td>
+                    <td>${ins.total_found}</td>
+                    <td><span class="${ins.total_missing > 0 ? 'text-danger fw-bold' : ''}">${ins.total_missing}</span></td>
+                    <td class="text-center">
+                        <button class="btn btn-sm btn-info text-white" onclick="viewInspection(${ins.id})"><i class="fas fa-eye"></i> ดูรายละเอียด</button>
+                    </td>
+                </tr>
+            `;
+        });
+    }
+
+    async function viewInspection(id) {
+        document.getElementById('inspection-list-view').classList.add('hidden');
+        document.getElementById('inspection-detail-view').classList.remove('hidden');
+        document.getElementById('ins-detail-table-body').innerHTML = '<tr><td colspan="4" class="text-center py-4">กำลังโหลด...</td></tr>';
+        
+        // แนบ URL สำหรับพิมพ์รายงาน
+        document.getElementById('print-inspection-btn').href = `${API_BASE_URL}/reports/inspection/${id}/pdf/`;
+        // อัปเดต Action สำหรับฟอร์มจำหน่ายให้ตรงกับ Base URL
+        document.getElementById('disposed-report-form').action = `${API_BASE_URL}/reports/disposed/pdf/`;
+
+        const data = await fetchAPI(`/api/inspections/${id}/`);
+        if(data) {
+            document.getElementById('ins-det-expected').innerText = data.total_expected;
+            document.getElementById('ins-det-found').innerText = data.total_found;
+            document.getElementById('ins-det-missing').innerText = data.total_missing;
+            document.getElementById('ins-det-extra').innerText = data.extra_items_detail ? data.extra_items_detail.length : 0;
+            
+            currentMissingItems = data.missing_items_detail || [];
+            currentFoundItems = data.found_items_detail || [];
+            currentExtraItems = data.extra_items_detail || [];
+            
+            switchInsTab('missing');
+        }
+    }
+
+    function switchInsTab(tab) {
+        // จัดการ UI แถบเมนูย่อย
+        document.querySelectorAll('#inspectionTabs .nav-link').forEach(el => el.classList.remove('active'));
+        event.currentTarget.classList.add('active');
+        
+        let items = [];
+        let showAction = false;
+        
+        if(tab === 'missing') {
+            items = currentMissingItems;
+            showAction = true;
+        } else if(tab === 'found') {
+            items = currentFoundItems;
+        } else {
+            items = currentExtraItems;
+        }
+        
+        document.getElementById('th-action').style.display = showAction ? '' : 'none';
+        
+        const tbody = document.getElementById('ins-detail-table-body');
+        tbody.innerHTML = '';
+        if(items.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="${showAction?4:3}" class="text-center py-4 text-muted">ไม่มีรายการในหมวดหมู่นี้</td></tr>`;
+            return;
+        }
+        
+        items.forEach(item => {
+            let actionBtn = '';
+            if(showAction) {
+                if(item.status === 'DISPOSED') {
+                    actionBtn = `<span class="badge bg-secondary">จำหน่ายแล้ว</span>`;
+                } else {
+                    actionBtn = `<button class="btn btn-sm btn-danger" onclick="disposeItem(${item.id})"><i class="fas fa-times-circle"></i> จำหน่ายออก</button>`;
+                }
+            }
+            
+            tbody.innerHTML += `
+                <tr>
+                    <td class="ps-4">#${item.id}</td>
+                    <td>${item.name}</td>
+                    <td><span class="badge bg-light text-dark border">${item.rfid_tag || '-'}</span></td>
+                    ${showAction ? `<td class="text-center">${actionBtn}</td>` : ''}
+                </tr>
+            `;
+        });
+    }
+
+    async function disposeItem(id) {
+        if(confirm('ยืนยันการจำหน่ายสินค้านี้ออก (สูญหาย/ชำรุด) ?\\nเมื่อจำหน่ายแล้ว รหัส RFID นี้จะไม่สามารถนำกลับมาใช้ได้อีก')) {
+            try {
+                const res = await fetch(`${API_BASE_URL}/api/inventory/${id}/dispose/`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-API-KEY': token }
+                });
+                const data = await res.json();
+                if(res.ok) {
+                    alert(data.message);
+                    let item = currentMissingItems.find(i => i.id === id);
+                    if(item) item.status = 'DISPOSED';
+                    // รีเฟรชเฉพาะตารางที่ Active อยู่
+                    const activeTab = document.querySelector('#inspectionTabs .active');
+                    if(activeTab.innerText.includes('หาย')) switchInsTab('missing');
+                } else {
+                    alert(data.message || 'เกิดข้อผิดพลาด');
+                }
+            } catch(e) {
+                alert('เกิดข้อผิดพลาดในการเชื่อมต่อ: ' + e);
+            }
+        }
+    }
+
+    function showInspectionList() {
+        document.getElementById('inspection-detail-view').classList.add('hidden');
+        document.getElementById('inspection-list-view').classList.remove('hidden');
+        loadInspections();
     }
 
     // ฟังก์ชันช่วยเหลือสำหรับเรียก API

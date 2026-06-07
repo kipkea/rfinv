@@ -54,6 +54,7 @@ urlpatterns = [
     path('web/logout/', web_views.web_logout, name='web_logout'),
     path('web/', web_views.dashboard, name='web_dashboard'),
     path('web/inventory/', web_views.inventory_list, name='web_inventory'),
+    path('web/inspections/', web_views.inspection_history, name='web_inspection_history'),
 
     path('', include(router.urls)),
     path('admin/', admin.site.urls),

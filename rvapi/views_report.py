@@ -1,6 +1,6 @@
 import os
 from django.conf import settings
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse
 from django.utils import timezone
 
@@ -163,6 +163,165 @@ def generate_location_report(request):
         elements.append(t)
         elements.append(Spacer(1, 20))
         
+    doc.build(elements, onFirstPage=add_page_number, onLaterPages=add_page_number)
+    return response
+
+def generate_inspection_pdf(request, pk):
+    """ สร้างรายงานสรุปผลการตรวจสอบรายครั้ง """
+    inspection = get_object_or_404(Inspection, pk=pk)
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'inline; filename="inspection_{pk}.pdf"'
+    
+    doc = SimpleDocTemplate(response, pagesize=A4, rightMargin=1.5*cm, leftMargin=1.5*cm, topMargin=1.5*cm, bottomMargin=1.5*cm)
+    font_name, font_bold = register_thai_font()
+    styles = getSampleStyleSheet()
+    style_normal = ParagraphStyle('Normal_Thai', parent=styles['Normal'], fontName=font_name, fontSize=13)
+    style_h2 = ParagraphStyle('H2_Thai', parent=styles['Heading2'], fontName=font_bold, fontSize=18, alignment=1)
+    style_h3 = ParagraphStyle('H3_Thai', parent=styles['Heading3'], fontName=font_bold, fontSize=16, alignment=0)
+    
+    elements = []
+    elements.append(Paragraph('รายงานสรุปผลการตรวจสอบสินค้า', style_h2))
+    elements.append(Spacer(1, 10))
+    
+    # ข้อมูลการตรวจ
+    info = f"<b>สถานที่ตรวจสอบ:</b> {inspection.location.name}<br/>"
+    info += f"<b>วันที่ตรวจสอบ:</b> {timezone.localtime(inspection.inspected_at).strftime('%d/%m/%Y %H:%M')}<br/>"
+    info += f"<b>ผู้ตรวจสอบ:</b> {inspection.inspected_by.get_full_name() or inspection.inspected_by.username}<br/><br/>"
+    info += f"<b>สรุปยอด:</b> ควรมี {inspection.total_expected} รายการ, พบจริง {inspection.total_found} รายการ, หาย {inspection.total_missing} รายการ, พบใหม่ (เกิน) {inspection.total_extra} รายการ"
+    elements.append(Paragraph(info, style_normal))
+    elements.append(Spacer(1, 20))
+    
+    # คำนวณของหาย เกิน พบ
+    expected_items = Inventory.objects.filter(current_location=inspection.location, status='ACTIVE')
+    found_items = inspection.found_inventories.all()
+    expected_ids = set(expected_items.values_list('id', flat=True))
+    found_ids = set(found_items.values_list('id', flat=True))
+    
+    missing_ids = expected_ids - found_ids
+    extra_ids = found_ids - expected_ids
+    actual_found_ids = expected_ids & found_ids
+    
+    missing_items = Inventory.objects.filter(id__in=missing_ids).order_by('name')
+    extra_items = Inventory.objects.filter(id__in=extra_ids).order_by('name')
+    found_matched_items = Inventory.objects.filter(id__in=actual_found_ids).order_by('name')
+    
+    def build_table(items, empty_msg):
+        data = [['รูปภาพ', 'ID', 'ชื่อสินค้า', 'RFID Code']]
+        if not items:
+            data.append([empty_msg, '', '', ''])
+            
+        for item in items:
+            img = Paragraph('<font color="#999999">ไม่มีรูป</font>', style_normal)
+            if item.image and item.image.name:
+                img_path = os.path.join(settings.MEDIA_ROOT, item.image.name)
+                if os.path.exists(img_path):
+                    img = Image(img_path, width=40, height=40)
+            rfid = item.rfid_tag.rfid_code if item.rfid_tag else '-'
+            data.append([img, str(item.id), Paragraph(item.name, style_normal), rfid])
+            
+        t = Table(data, colWidths=[2.5*cm, 1.5*cm, 9*cm, 5*cm])
+        ts = [
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#f1f1f1')),
+            ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
+            ('ALIGN', (0, 1), (1, -1), 'CENTER'),
+            ('ALIGN', (3, 1), (3, -1), 'CENTER'),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+            ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#cccccc')),
+            ('FONTNAME', (0, 0), (-1, -1), font_name),
+            ('FONTNAME', (0, 0), (-1, 0), font_bold),
+        ]
+        if not items:
+            ts.extend([('SPAN', (0, 1), (-1, 1)), ('ALIGN', (0, 1), (0, 1), 'CENTER')])
+            
+        t.setStyle(TableStyle(ts))
+        return t
+
+    elements.append(Paragraph('<font color="red">รายการสินค้าที่หาย (ไม่พบ)</font>', style_h3))
+    elements.append(Spacer(1, 5))
+    elements.append(build_table(missing_items, 'ไม่มีสินค้าที่หาย'))
+    elements.append(Spacer(1, 15))
+    
+    elements.append(Paragraph('<font color="#fd7e14">รายการสินค้าที่พบใหม่ (เกิน)</font>', style_h3))
+    elements.append(Spacer(1, 5))
+    elements.append(build_table(extra_items, 'ไม่มีสินค้าที่พบใหม่'))
+    elements.append(Spacer(1, 15))
+    
+    elements.append(Paragraph('<font color="#198754">รายการสินค้าที่พบถูกต้อง</font>', style_h3))
+    elements.append(Spacer(1, 5))
+    elements.append(build_table(found_matched_items, 'ไม่มีสินค้าที่พบถูกต้อง'))
+    
+    doc.build(elements, onFirstPage=add_page_number, onLaterPages=add_page_number)
+    return response
+
+def generate_disposed_report(request):
+    """ สร้างรายงานประวัติการจำหน่ายสินค้า """
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+    
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'inline; filename="disposed_report.pdf"'
+    
+    doc = SimpleDocTemplate(response, pagesize=A4, rightMargin=1.5*cm, leftMargin=1.5*cm, topMargin=1.5*cm, bottomMargin=1.5*cm)
+    font_name, font_bold = register_thai_font()
+    styles = getSampleStyleSheet()
+    style_normal = ParagraphStyle('Normal_Thai', parent=styles['Normal'], fontName=font_name, fontSize=13)
+    style_h2 = ParagraphStyle('H2_Thai', parent=styles['Heading2'], fontName=font_bold, fontSize=18, alignment=1)
+    
+    elements = []
+    elements.append(Paragraph('รายงานสินค้าจำหน่ายออก (สูญหาย/ชำรุด)', style_h2))
+    
+    printed_by = request.user.get_full_name() or request.user.username
+    printed_time = timezone.localtime(timezone.now()).strftime("%d/%m/%Y %H:%M")
+    meta_info = f"<b>ผู้พิมพ์:</b> {printed_by} &nbsp;&nbsp;&nbsp;&nbsp; <b>เวลาพิมพ์:</b> {printed_time}"
+    elements.append(Spacer(1, 5))
+    elements.append(Paragraph(meta_info, style_normal))
+    
+    query = Inventory.objects.filter(status='DISPOSED')
+    if start_date and end_date:
+        try:
+            from datetime import datetime
+            sd = datetime.strptime(start_date, '%Y-%m-%d')
+            ed = datetime.strptime(end_date, '%Y-%m-%d')
+            query = query.filter(disposed_at__range=(sd, ed.replace(hour=23, minute=59, second=59)))
+            elements.append(Spacer(1, 5))
+            elements.append(Paragraph(f"<b>ช่วงวันที่จำหน่าย:</b> {start_date} ถึง {end_date}", style_normal))
+        except ValueError:
+            pass
+            
+    elements.append(Spacer(1, 10))
+    
+    data = [['รูปภาพ', 'ID', 'ชื่อสินค้า', 'วันที่จำหน่าย', 'ผู้จำหน่าย']]
+    for item in query.order_by('-disposed_at'):
+        dt = timezone.localtime(item.disposed_at).strftime('%d/%m/%Y %H:%M') if item.disposed_at else '-'
+        usr = item.disposed_by.username if item.disposed_by else '-'
+        
+        img = Paragraph('<font color="#999999">ไม่มีรูป</font>', style_normal)
+        if item.image and item.image.name:
+            img_path = os.path.join(settings.MEDIA_ROOT, item.image.name)
+            if os.path.exists(img_path):
+                img = Image(img_path, width=40, height=40)
+                
+        data.append([img, str(item.id), Paragraph(item.name, style_normal), dt, usr])
+        
+    if query.count() == 0:
+        data.append(['', '', 'ไม่พบข้อมูลในช่วงเวลานี้', '', ''])
+        
+    t = Table(data, colWidths=[2.5*cm, 1.5*cm, 6.5*cm, 3.5*cm, 4.0*cm])
+    table_style = [
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#f1f1f1')),
+        ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#cccccc')),
+        ('FONTNAME', (0, 0), (-1, -1), font_name),
+        ('FONTNAME', (0, 0), (-1, 0), font_bold),
+        ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
+        ('ALIGN', (0, 1), (1, -1), 'CENTER'),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+    ]
+    if query.count() == 0:
+        table_style.extend([('SPAN', (2, 1), (-1, 1)), ('ALIGN', (2, 1), (2, 1), 'CENTER')])
+        
+    t.setStyle(TableStyle(table_style))
+    elements.append(t)
+    
     doc.build(elements, onFirstPage=add_page_number, onLaterPages=add_page_number)
     return response
 

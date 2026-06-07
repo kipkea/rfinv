@@ -108,8 +108,15 @@
                             <button class="btn btn-sm btn-outline-danger ms-1" data-bs-toggle="modal" data-bs-target="#deleteInventoryModal"
                                 data-id="{{ item.id }}"
                                 data-name="{{ item.name }}"
-                                onclick="populateDeleteModal(this)">
+                                onclick="populateDeleteModal(this)" title="ลบสินค้า เก็บ Tag ไว้">
                                 <i class="fas fa-trash"></i>
+                            </button>
+                            <!-- ปุ่มจำหน่าย (ดึงข้อมูลเพื่อยืนยัน) -->
+                            <button class="btn btn-sm btn-outline-warning ms-1" data-bs-toggle="modal" data-bs-target="#disposeInventoryModal"
+                                data-id="{{ item.id }}"
+                                data-name="{{ item.name }}"
+                                onclick="populateDisposeModal(this)" title="จำหน่ายออก (สูญหาย/ชำรุด)">
+                                <i class="fas fa-ban"></i>
                             </button>
                         </td>
                     </tr>
@@ -368,6 +375,31 @@ function closeImagePopup() {
   </div>
 </div>
 
+<!-- Modal สำหรับจำหน่ายสินค้า -->
+<div class="modal fade" id="disposeInventoryModal" tabindex="-1" aria-labelledby="disposeInventoryModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="disposeInventoryModalLabel">ยืนยันการจำหน่ายสินค้า</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form method="POST" action="">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="dispose">
+        <input type="hidden" name="item_id" id="dispose_item_id">
+        <div class="modal-body">
+            <p>คุณต้องการจำหน่ายสินค้า <strong id="dispose_item_name" class="text-warning"></strong> ออกจากระบบ (สูญหาย/ชำรุด) ใช่หรือไม่?</p>
+            <p class="text-muted mb-0" style="font-size: 0.9em;">* หมายเหตุ: สินค้าที่ถูกจำหน่ายออกจะไม่แสดงในรายการปกติ และรหัส RFID นี้จะถูกระงับการใช้งาน</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ยกเลิก</button>
+          <button type="submit" class="btn btn-warning">ยืนยันการจำหน่าย</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
 <script>
 function populateEditModal(btn) {
     document.getElementById('edit_item_id').value = btn.getAttribute('data-id');
@@ -390,6 +422,11 @@ function populateEditModal(btn) {
 function populateDeleteModal(btn) {
     document.getElementById('delete_item_id').value = btn.getAttribute('data-id');
     document.getElementById('delete_item_name').innerText = btn.getAttribute('data-name');
+}
+
+function populateDisposeModal(btn) {
+    document.getElementById('dispose_item_id').value = btn.getAttribute('data-id');
+    document.getElementById('dispose_item_name').innerText = btn.getAttribute('data-name');
 }
 
 function filterTable() {

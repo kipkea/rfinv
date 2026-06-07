@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block title %}Inspection History - RFInv{% endblock %}
+{% block page_title %}ประวัติการตรวจสอบ{% endblock %}
+
+{% block content %}
+<div class="card card-custom shadow-sm border-0">
+    <div class="card-header bg-white p-3 d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">ประวัติการตรวจสอบทั้งหมด</h5>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">ID</th>
+                        <th>สถานที่</th>
+                        <th>ผู้ตรวจสอบ</th>
+                        <th>วันที่ตรวจสอบ</th>
+                        <th class="text-center">ควรมี</th>
+                        <th class="text-center">พบจริง</th>
+                        <th class="text-center">หาย</th>
+                        <th class="text-center">พบใหม่ (เกิน)</th>
+                        <th class="text-center">พิมพ์รายงาน</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ins in page_obj %}
+                    <tr>
+                        <td class="ps-4 fw-bold text-secondary">#{{ ins.id }}</td>
+                        <td><span class="badge bg-info text-dark">{{ ins.location.name|default:"-" }}</span></td>
+                        <td>{{ ins.inspected_by.username|default:"-" }}</td>
+                        <td>{{ ins.inspected_at|date:"d/m/Y H:i" }}</td>
+                        <td class="text-center">{{ ins.total_expected }}</td>
+                        <td class="text-center text-success fw-bold">{{ ins.total_found }}</td>
+                        <td class="text-center {% if ins.total_missing > 0 %}text-danger fw-bold{% endif %}">{{ ins.total_missing }}</td>
+                        <td class="text-center {% if ins.total_extra > 0 %}text-warning fw-bold{% endif %}">{{ ins.total_extra }}</td>
+                        <td class="text-center">
+                            <a href="{% url 'rvapi:generate_inspection_pdf' ins.id %}" target="_blank" class="btn btn-sm btn-outline-danger">
+                                <i class="fas fa-file-pdf"></i> PDF
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="9" class="text-center py-4">ไม่พบประวัติการตรวจสอบ</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Pagination -->
+        <div class="card-footer bg-white d-flex justify-content-between align-items-center">
+            <span class="text-muted" style="font-size: 0.85rem;">
+                แสดง {{ page_obj.start_index|default:0 }} ถึง {{ page_obj.end_index|default:0 }} จากทั้งหมด {{ page_obj.paginator.count }} รายการ
+            </span>
+            <nav>
+                <ul class="pagination pagination-sm mb-0">
+                    {% if page_obj.has_previous %}
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">‹ ก่อนหน้า</a></li>
+                    {% endif %}
+                    <li class="page-item disabled"><span class="page-link">หน้า {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span></li>
+                    {% if page_obj.has_next %}
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">ถัดไป ›</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+{% endblock %}

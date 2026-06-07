@@ -43,6 +43,9 @@
             <li class="{% if request.resolver_match.url_name == 'web_inventory' %}active{% endif %}">
                 <a href="{% url 'web_inventory' %}"><i class="fas fa-box-open me-3"></i> สินค้า (Inventory)</a>
             </li>
+            <li class="{% if request.resolver_match.url_name == 'web_inspection_history' %}active{% endif %}">
+                <a href="{% url 'web_inspection_history' %}"><i class="fas fa-clipboard-check me-3"></i> ประวัติการตรวจสอบ</a>
+            </li>
             <li class="{% if request.resolver_match.url_name == 'report_dashboard' %}active{% endif %}">
                 <a href="{% url 'rvapi:report_dashboard' %}"><i class="fas fa-print me-3"></i> ออกรายงาน (Reports)</a>
             </li>

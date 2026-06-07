@@ -206,6 +206,19 @@ class APIClient:
         """
         Submits an inspection to /api/inspections/
         """
+        if scanned_rfid_codes:
+            # ตรวจสอบและลงทะเบียนรหัสใหม่ที่เพิ่งเจอแบบกลุ่มให้เป็น Inventory ทันที
+            success, tags = self.get_rfid_tags()
+            if success:
+                existing_rfids = {t.get('rfid_code') for t in tags}
+                new_rfids = set(scanned_rfid_codes) - existing_rfids
+                for rfid in new_rfids:
+                    s_tag, tag_data = self.create_rfid_tag(rfid, is_location=False)
+                    if s_tag:
+                        s_inv, inv_data = self.create_inventory(tag_data['id'], rfid, "สินค้าใหม่ (สแกนพบ)", "เพิ่มอัตโนมัติจากการสแกนตรวจนับ")
+                        if s_inv and inv_data['id'] not in found_inventory_ids:
+                            found_inventory_ids.append(inv_data['id'])
+                            
         url = f"{self.base_url}/api/inspections/"
         payload = {
             "location": location_id,
@@ -252,7 +265,25 @@ class APIClient:
         
         tag = next((t for t in tags if t.get('rfid_code') == rfid_code), None)
         if not tag:
-            return True, {"status": "not_found"}
+            # สร้าง RFID Tag และ Inventory ใหม่ในระบบแบบอัตโนมัติ เพื่อให้แอปและฐานข้อมูลรู้จักทันที
+            print(f"Auto-registering unknown RFID: {rfid_code}")
+            success_tag, tag_data = self.create_rfid_tag(rfid_code, is_location=False)
+            
+            if success_tag:
+                success_inv, inv_data = self.create_inventory(tag_data['id'], rfid_code, "สินค้าใหม่ (สแกนพบ)", "เพิ่มอัตโนมัติจากการสแกนตรวจนับ")
+                if success_inv:
+                    # คืนค่ากลับไปเหมือนค้นเจอสินค้าปกติ แอป Kivy จะได้แสดงขึ้นจอได้เลย
+                    return True, {
+                        "status": "found_inventory",
+                        "tag": tag_data,
+                        "inventory": inv_data,
+                        "rfid_code": rfid_code
+                    }
+            return True, {
+                "status": "not_found", 
+                "rfid_code": rfid_code,
+                "message": "รหัสนี้ยังไม่ถูกลงทะเบียนในระบบ"
+            }
             
         if tag.get('is_location'):
             # ค้นหาสถานที่
@@ -278,7 +309,8 @@ class APIClient:
             return True, {
                 "status": "found_inventory",
                 "tag": tag,
-                "inventory": inv
+                "inventory": inv,
+                "rfid_code": rfid_code
             }
 
 # A global instance to be used across the app
